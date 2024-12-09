@@ -1,0 +1,1 @@
+["^ ","~:members",["^ ","get",["~#set",[["^ ","~:flags",["^1",["~:method","~:static"]]]]],"getSourceNode",["^1",[["^ ","^2",["^1",["^3","~:public"]]]]],"mayBeFromExterns",["^1",[["^ ","^2",["^1",["^3","^6"]]]]],"mayHaveNonEmptyReturns",["^1",[["^ ","^2",["^1",["^3","^6"]]]]],"mayHaveSingleThrow",["^1",[["^ ","^2",["^1",["^3","^6"]]]]]]]
