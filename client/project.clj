@@ -12,7 +12,8 @@
                  [reagent "1.1.0"]
                  [cljsjs/react "17.0.2-0"]
                  [cljsjs/react-dom "17.0.2-0"]
-                 [quil "4.3.1563"]]
+                 [quil "4.3.1563"]
+                 [stylefruits/gniazdo "1.2.2"]]
 
   :plugins [[lein-figwheel "0.5.20"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
