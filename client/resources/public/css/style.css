@@ -1,2 +1,6 @@
 /* some style */
 
+#game-canvas{
+    display: flex;
+    justify-content: center;
+}
