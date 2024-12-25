@@ -10,7 +10,9 @@
 
 (defn connect_socket []
   (let [ws (js/WebSocket. "ws://localhost:8080/ws")]
-    (.addEventListener ws "open" (fn [_] (println "WebSocket connected")))
+    (.addEventListener ws "open" (fn [_]
+                                   (println "WebSocket connected")
+                                   (.send ws {:id (rand-int 1000)})))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
                                          ;(println data)
@@ -23,10 +25,9 @@
                                 "ArrowUp" (.send ws {:direction :up})
                                 "ArrowDown" (.send ws {:direction :down})
                                 "ArrowLeft" (.send ws {:direction :left})
-                                "ArrowRight" (.send ws {:direction :right}))))]
-      (.addEventListener js/document "keydown" handle-keypress)
-      ) 
-))
+                                "ArrowRight" (.send ws {:direction :right}))
+                              (Thread/sleep 80)))]
+      (.addEventListener js/document "keydown" handle-keypress))))
 
 (defn setup []
   (q/frame-rate 25)

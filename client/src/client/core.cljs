@@ -1,7 +1,8 @@
 (ns client.core
     (:require
      [client.game :refer [connect_socket start_game]]
-     [reagent.dom :as rdom]))
+     [reagent.dom :as rdom]
+     [reagent.core :as r]))
 
 (enable-console-print!)
 

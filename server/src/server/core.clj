@@ -33,9 +33,9 @@
 (defn handle-message [message]
   (let [data (edn/read-string message)
         dir (:direction data)]
-    (println dir)
-    (change-direction :snake1 dir)
-    ))
+    (if (int? (:id data))
+              (println (:id data))
+              (change-direction :snake1 dir))))
 
 (def stop-flag (atom false))
 
@@ -43,7 +43,7 @@
   (future
     (reset! stop-flag false)
     (while (not @stop-flag)
-      (Thread/sleep 100)
+      (Thread/sleep 90)
       (swap! game-state update :snake1 move-snake (:snake1 @snake-direction))
       (ws/send socket (pr-str @game-state)))))
 
@@ -53,7 +53,6 @@
   {::ws/listener
    {:on-open
     (fn [socket]
-      ;(ws/send socket "I will echo your messages")
       (reset! game-state {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
                           :snake2 [[300 120] [300 140] [300 160] [300 180] [300 200]]})
       (broadcast-game-state socket)
