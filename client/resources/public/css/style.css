@@ -1,5 +1,17 @@
 /* some style */
 
+#app{
+    height: 92vh;
+}
+
+.game{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
 #game-canvas{
     display: flex;
     justify-content: center;

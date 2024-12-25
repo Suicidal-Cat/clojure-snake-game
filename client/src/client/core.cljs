@@ -7,7 +7,7 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom {:text "Hello world!"}))
+(defonce app-state (r/atom {:text "Hello world!"}))
 
 
 (defn on-js-reload []
@@ -21,10 +21,10 @@
 (defn app []
   [:div {:class "game"}
    [:p "Snake game"]
+   [:button {:class "start-game-btn"
+             :on-click
+             (fn [] (connect_socket) (start_game))}
+    "Start Game"]
    [canvas]])
 
-
-
 (rdom/render [app] (.getElementById js/document "app"))
-(connect_socket)
-(start_game)

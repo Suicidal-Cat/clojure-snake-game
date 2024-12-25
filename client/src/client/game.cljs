@@ -25,8 +25,7 @@
                                 "ArrowUp" (.send ws {:direction :up})
                                 "ArrowDown" (.send ws {:direction :down})
                                 "ArrowLeft" (.send ws {:direction :left})
-                                "ArrowRight" (.send ws {:direction :right}))
-                              (Thread/sleep 80)))]
+                                "ArrowRight" (.send ws {:direction :right}))))]
       (.addEventListener js/document "keydown" handle-keypress))))
 
 (defn setup []
