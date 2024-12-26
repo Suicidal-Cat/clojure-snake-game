@@ -8,7 +8,7 @@
 ;hash-map - :playerid :direction
 (def snakes-direction (atom {:snake1 :right
                             :snake2 :left}))
-;update snake by direction
+;update snake position
 (defn move-snake [snake direction]
   (let [[x y] (first snake)]
     (case direction
@@ -17,7 +17,7 @@
       :left  (cons [(- x 20) y] (butlast snake))
       :right (cons [(+ x 20) y] (butlast snake)))))
 
-;update direction
+;update snake direction
 (defn change-direction [player dir]
   (let [past-dir (player @snakes-direction)]
     (if (not= past-dir dir)
@@ -37,7 +37,7 @@
     (reset! game-state {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
                         :snake2 [[300 120] [300 140] [300 160] [300 180] [300 200]]})
     (while (not @stop-flag)
-      (Thread/sleep 90)
+      (Thread/sleep 100)
       (swap! game-state update :snake1 move-snake (:snake1 @snakes-direction))
       (ws/send socket (pr-str @game-state)))))
 

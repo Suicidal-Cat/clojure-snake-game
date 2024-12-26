@@ -84,3 +84,80 @@ clj꞉client.core꞉> 
 ; nREPL connection failed: Error: read ECONNRESET
 ; Failed connecting.
 ; nREPL Connection was closed
+; Connecting using "Generic" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/Users/darek/Desktop/snake-game/.nrepl-port ...
+; No nrepl port file found.
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+"Please see https://calva.io/output/#about-stdout-in-the-repl-window
+about why stdout printed to this file is prepended with `;` to be line comments."
+clj꞉user꞉> 
+#'server.core/online-players
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+; Execution error (IndexOutOfBoundsException) at server.core/find-game$fn (REPL:14).
+; null
+clj꞉server.core꞉> 
+#'server.core/online-players
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+[{:id 5, :socket 5, :in-game false}]
+clj꞉server.core꞉> 
+[{:id 5, :socket 5, :in-game false}]
+clj꞉server.core꞉> 
+; Execution error (ClassCastException) at server.core/find-game$fn (REPL:16).
+; class java.lang.Boolean cannot be cast to class clojure.lang.IFn (java.lang.Boolean is in module java.base of loader 'bootstrap'; clojure.lang.IFn is in unnamed module of loader 'app')
+clj꞉server.core꞉> 
+[{:id 5, :socket 5, :in-game false}]
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+; Execution error (ClassCastException) at server.core/find-game$fn (REPL:16).
+; class java.lang.Boolean cannot be cast to class clojure.lang.IFn (java.lang.Boolean is in module java.base of loader 'bootstrap'; clojure.lang.IFn is in unnamed module of loader 'app')
+clj꞉server.core꞉> 
+{:id 5, :socket 5, :in-game false}
+clj꞉server.core꞉> 
+; Execution error (IndexOutOfBoundsException) at server.core/eval1561 (REPL:23).
+; null
+clj꞉server.core꞉> 
+; Execution error (IndexOutOfBoundsException) at server.core/eval1563 (REPL:23).
+; null
+clj꞉server.core꞉> 
+true
+clj꞉server.core꞉> 
+{:id 5, :socket 5, :in-game false}
+clj꞉server.core꞉> 
+#'server.core/online-players
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+[{:id 6, :socket 5, :in-game false}]
+clj꞉server.core꞉> 
+[{:id 6, :socket 5, :in-game false}]
+clj꞉server.core꞉> 
+; {:id 6, :socket 5, :in-game false}
+nil
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+{:id 6, :socket 5, :in-game false}
+clj꞉server.core꞉> 
+#'server.core/find-game
+clj꞉server.core꞉> 
+({:id 6, :socket 5, :in-game false} {:id 7, :socket 5, :in-game false})
+clj꞉server.core꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
