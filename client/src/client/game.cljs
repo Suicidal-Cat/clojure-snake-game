@@ -6,6 +6,7 @@
 
 (def snake-body1 (r/atom [[100 100]]))
 (def snake-body2 (r/atom [[300 200]]))
+(def ball (r/atom [290 290]))
 
 
 (defn connect_socket []
@@ -14,8 +15,9 @@
                                    (println "WebSocket connected")
                                    (.send ws {:id (rand-int 1000)})))
     (.addEventListener ws "message" (fn [e]
-                                      (let [data (edn/read-string (.-data e))]
-                                         ;(println data)
+                                      (let [data (edn/read-string (.-data e))] 
+                                        ;(println data)
+                                        (reset! ball (:ball data))
                                         (reset! snake-body1 (:snake1 data))
                                         (reset! snake-body2 (:snake2 data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
@@ -32,10 +34,20 @@
   (q/frame-rate 25)
   (q/background 0))
 
+(defn draw-grid []
+  (q/stroke 50)
+  (doseq [x (range 0 (q/width) 20)]
+    (q/line x 0 x (q/height)))
+  (doseq [y (range 0 (q/height) 20)]
+    (q/line 0 y (q/width) y)))
+
 (defn draw []
   (q/background 0)
+  (draw-grid)
   (q/stroke 0)
-  (q/stroke-weight 2)
+  (q/stroke-weight 2) 
+  (q/fill 0 0 255)
+  (q/ellipse (first @ball) (last @ball) 18 18)
   (q/fill 0 255 0)
   (doseq [[x y] @snake-body1]
     (q/rect x y 20 20))
@@ -51,7 +63,7 @@
    :settings #(q/smooth 2)
    :setup setup
    :draw draw
-   :size [700 500])
+   :size [600 600])
   )
 
 

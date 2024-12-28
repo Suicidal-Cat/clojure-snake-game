@@ -2,22 +2,26 @@
   (:require [ring.websocket :as ws]))
 
 ;hash-map - :snake array [X Y]
-;(def game-state (atom {:snake1 [[100 100] [120 100] [140 100] [160 100] [180 100]]
-;                       :snake2 [[300 120] [300 140] [300 160] [300 180] [300 200]]}))
+(def game-state (atom {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
+                       :snake2 [[180 160] [160 160] [140 160] [120 160] [100 160]]
+                       :ball [290 290]}))
 
 ;hash-map - :snake :player
 (def snakes-direction (atom {:snake1 {}
                             :snake2 {}}))
+
 (def stop-flag (atom false))
+
 
 ;update snake position
 (defn move-snake [snake direction]
-  (let [[x y] (first snake)]
-    (case direction
-      :up    (cons [x (- y 20)] (butlast snake))
-      :down  (cons [x (+ y 20)] (butlast snake))
-      :left  (cons [(- x 20) y] (butlast snake))
-      :right (cons [(+ x 20) y] (butlast snake)))))
+  (let [[x y] (first snake)
+        new-head (case direction
+                   :up    [x (- y 20)]
+                   :down  [x (+ y 20)]
+                   :left  [(- x 20) y]
+                   :right [(+ x 20) y])]
+    (into [new-head] (subvec snake 0 (dec (count snake))))))
 
 ;update snake direction
 (defn change-direction [player-socket dir]
@@ -32,20 +36,44 @@
         (and (= past-dir :left) (not= dir :right)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir)))
         (and (= past-dir :right) (not= dir :left)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir)))))))
 
+;generate random cordinates for ball generation
+(defn random-coordinate [field-size grid-size]
+  (let [num-cells (/ field-size grid-size)]
+    (+ (/ grid-size 2) (* grid-size (rand-int num-cells)))))
+
+;grow snake when it eats the ball and generate new ball
+(defn update-game-on-eat []
+  (let [[head-s1 & _] (:snake1 @game-state)
+        [head-s2 & _] (:snake2 @game-state)
+        ball (:ball @game-state)
+        fixed-ball (mapv #(- % 10) ball)]
+    (if (= fixed-ball head-s1)
+      (swap! game-state (fn [game-state] (hash-map :snake1 (conj (:snake1 game-state) [-1 -1])
+                                                   :snake2 (:snake2 game-state)
+                                                   :ball [(random-coordinate 600 20) (random-coordinate 600 20)])))
+      (if (= fixed-ball head-s2)
+        (fn [game-state] (hash-map :snake1 (:snake1 game-state)
+                                   :snake2 (conj (:snake2 game-state) [-1 -1])
+                                   :ball [(random-coordinate 600 20) (random-coordinate 600 20)]))
+        ()))))
+
 (defn broadcast-game-state [player1 player2]
   (future
     (reset! stop-flag false)
     (reset! snakes-direction {:snake1 (assoc player1 :direction :right)
                               :snake2 (assoc player2 :direction :right)})
-    (let [game-state (atom {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
-                            :snake2 [[180 160] [160 160] [140 160] [120 160] [100 160]]})]
+    ;(let [game-state (atom {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
+     ;                       :snake2 [[180 160] [160 160] [140 160] [120 160] [100 160]]
+    ;                        :ball [280 280]})]
       (while (not @stop-flag)
-        (Thread/sleep 200)
+        (Thread/sleep 150)
+        (ws/send (:socket player1) (pr-str @game-state))
+        (ws/send (:socket player2) (pr-str @game-state))
+        (update-game-on-eat)
         (swap! game-state (fn [game-state] (hash-map
                                             :snake1 (move-snake (:snake1 game-state) (:direction (:snake1 @snakes-direction)))
-                                            :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snakes-direction))))))
-        (ws/send (:socket player1) (pr-str @game-state))
-        (ws/send (:socket player2) (pr-str @game-state))))))
+                                            :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snakes-direction)))
+                                            :ball (:ball game-state)))))))
     
 
 (defn start-game [player1 player2]

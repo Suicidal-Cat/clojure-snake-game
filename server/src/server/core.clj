@@ -11,7 +11,6 @@
 
 ;trying to find available players and start the game
 (defn find-game [player-socket player-id]
-  (println player-id)
   (if (empty? @online-players)
     (swap! online-players conj {:id player-id :socket player-socket :in-game false})
     (let [player (some #(when (= false (:in-game %)) %) @online-players)]
