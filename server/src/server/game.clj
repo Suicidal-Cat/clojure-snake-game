@@ -1,7 +1,8 @@
 (ns server.game
   (:require
    [ring.websocket :as ws]
-   [server.game-helper-func :refer [in-bounds? random-coordinate]]))
+   [server.game-helper-func :refer [in-bounds? random-coordinate
+                                    vector-contains?]]))
 
 ;hash-map - :snake array [X Y]
 (def game-state (atom {:snake1 [[180 100] [160 100] [140 100] [120 100] [100 100]]
@@ -43,11 +44,11 @@
 
 ;check snake collisions
 (defn snake-collisions []
-  (let [[head-s1 & _] (:snake1 @game-state)
-       [head-s2 & _] (:snake2 @game-state)]
-    (if (false? (in-bounds? head-s1 600 20))
+  (let [snake1 (:snake1 @game-state)
+        snake2 (:snake2 @game-state)]
+    (if (or (false? (in-bounds? (first snake1) 600 20)) (vector-contains? snake2 (first snake1)))
       (stop-game)
-      (if (false? (in-bounds? head-s2 600 20))
+      (if (or (false? (in-bounds? (first snake2) 600 20)) (vector-contains? snake1 (first snake2)))
         (stop-game)
         ()))))
 
@@ -62,10 +63,10 @@
                                                    :snake2 (:snake2 game-state)
                                                    :ball [(random-coordinate 600 20) (random-coordinate 600 20)])))
       (if (= fixed-ball head-s2)
-        (fn [game-state] (hash-map :snake1 (:snake1 game-state)
-                                   :snake2 (conj (:snake2 game-state) [-1 -1])
-                                   :ball [(random-coordinate 600 20) (random-coordinate 600 20)]))
-        ()))))
+        (swap! game-state (fn [game-state] (hash-map :snake1 (:snake1 game-state)
+                                                    :snake2 (conj (:snake2 game-state) [-1 -1])
+                                                    :ball [(random-coordinate 600 20) (random-coordinate 600 20)])))
+        nil))))
 
 (defn broadcast-game-state [player1 player2]
   (future
@@ -81,9 +82,9 @@
       (ws/send (:socket player2) (pr-str @game-state))
       (update-game-on-eat)
       (swap! game-state (fn [game-state] (hash-map
-                                          :snake1 (move-snake (:snake1 game-state) (:direction (:snake1 @snakes-direction)))
-                                          ;:snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snakes-direction)))
-                                          :snake2 (:snake2 game-state)
+                                          ;:snake1 (move-snake (:snake1 game-state) (:direction (:snake1 @snakes-direction)))
+                                          :snake1 (:snake1 game-state)
+                                          :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snakes-direction)))
                                           :ball (:ball game-state))))
       (snake-collisions))))
     

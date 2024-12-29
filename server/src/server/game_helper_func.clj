@@ -9,7 +9,11 @@
        (>= y grid-size)
        (< y (- field-size grid-size))))
 
-;generate random cordinates for ball generation
+;generate random cordinates in playing field
 (defn random-coordinate [field-size grid-size]
   (let [num-cells (/ (- field-size (* 2 grid-size)) grid-size)]
     (+ grid-size (/ grid-size 2) (* grid-size (rand-int num-cells)))))
+
+;check if vector contains element
+(defn vector-contains? [v element]
+  (some #(= % element) v))
