@@ -34,16 +34,22 @@
   (q/frame-rate 25)
   (q/background 0))
 
-(defn draw-grid []
+(defn draw-grid-border [grid-size]
+  (q/fill 148 148 148)
+  (q/rect 0 0 (q/width) grid-size)
+  (q/rect 0 0 grid-size (q/height))
+  (q/rect 0 (- (q/height) grid-size) (q/width) grid-size)
+  (q/rect (- (q/width) grid-size) 0 grid-size (q/height))
   (q/stroke 50)
-  (doseq [x (range 0 (q/width) 20)]
+  (q/fill 0 0 0)
+  (doseq [x (range grid-size (- (q/width) 20) grid-size)]
     (q/line x 0 x (q/height)))
-  (doseq [y (range 0 (q/height) 20)]
+  (doseq [y (range grid-size (- (q/height) 20) grid-size)]
     (q/line 0 y (q/width) y)))
 
 (defn draw []
   (q/background 0)
-  (draw-grid)
+  (draw-grid-border 20)
   (q/stroke 0)
   (q/stroke-weight 2) 
   (q/fill 0 0 255)
