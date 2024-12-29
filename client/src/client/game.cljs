@@ -4,9 +4,11 @@
             [quil.core :as q]
             [clojure.edn :as edn]))
 
-(def snake-body1 (r/atom [[100 100]]))
-(def snake-body2 (r/atom [[300 200]]))
-(def ball (r/atom [290 290]))
+(def snake-body1 (r/atom [[]]))
+(def snake-body2 (r/atom [[]]))
+(def ball (r/atom []))
+(def field-size 600) ;field size in px
+(def grid-size 20) ;grid size in px
 
 
 (defn connect_socket []
@@ -42,34 +44,33 @@
   (q/rect (- (q/width) grid-size) 0 grid-size (q/height))
   (q/stroke 50)
   (q/fill 0 0 0)
-  (doseq [x (range grid-size (- (q/width) 20) grid-size)]
+  (doseq [x (range grid-size (- (q/width) grid-size) grid-size)]
     (q/line x 0 x (q/height)))
-  (doseq [y (range grid-size (- (q/height) 20) grid-size)]
+  (doseq [y (range grid-size (- (q/height) grid-size) grid-size)]
     (q/line 0 y (q/width) y)))
 
 (defn draw []
   (q/background 0)
-  (draw-grid-border 20)
+  (draw-grid-border grid-size)
   (q/stroke 0)
   (q/stroke-weight 2) 
   (q/fill 0 0 255)
   (q/ellipse (first @ball) (last @ball) 18 18)
   (q/fill 0 255 0)
   (doseq [[x y] @snake-body1]
-    (q/rect x y 20 20))
+    (q/rect x y grid-size grid-size))
   (q/fill 255 0 0)
   (doseq [[x y] @snake-body2]
-    (q/rect x y 20 20)))
+    (q/rect x y grid-size grid-size)))
 
 
 (defn start_game []
   (q/sketch
-   :title "Snake game"
    :host "game-canvas"
    :settings #(q/smooth 2)
    :setup setup
    :draw draw
-   :size [600 600])
+   :size [field-size field-size])
   )
 
 

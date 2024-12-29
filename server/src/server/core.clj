@@ -9,16 +9,17 @@
 
 (def online-players (atom [{:id 6, :socket "smth", :in-game true}]))
 
-;trying to find available players and start the game
+;try to find available players and start the game
 (defn find-game [player-socket player-id]
-  (if (empty? @online-players)
-    (swap! online-players conj {:id player-id :socket player-socket :in-game false})
-    (let [player (some #(when (= false (:in-game %)) %) @online-players)]
-      (if player
-        (do
-          (swap! online-players (fn [players] (filterv #(not= (:id %) (:id player)) players)))
-          (start-game player {:id player-id :socket player-socket :in-game false}))
-        (swap! online-players conj {:id player-id :socket player-socket :in-game false})))))
+  (let [new-player {:id player-id :socket player-socket :in-game false}]
+    (if (empty? @online-players)
+      (swap! online-players conj new-player)
+      (let [player (some #(when (= false (:in-game %)) %) @online-players)]
+        (if player
+          (do
+            (swap! online-players (fn [players] (filterv #(not= (:id %) (:id player)) players)))
+            (start-game player new-player))
+          (swap! online-players conj new-player))))))
 
 
 ;process messages form client's web socket
