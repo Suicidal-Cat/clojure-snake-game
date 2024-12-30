@@ -5,11 +5,11 @@
    [compojure.core :refer [defroutes GET]]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.websocket :as ws]
-   [server.game :refer [change-direction start-game stop-game]]))
+   [server.game :refer [change-direction start-game]]))
 
-(def online-players (atom [{:id 6, :socket "smth", :in-game true}]))
+(def online-players (atom []))
 
-;try to find available players and start the game
+;try to find available player and start the game
 (defn find-game [player-socket player-id]
   (let [new-player {:id player-id :socket player-socket :in-game false}]
     (if (empty? @online-players)
@@ -41,7 +41,7 @@
         (ws/close socket)
         (handle-message socket message)))
     :on-close
-    (fn [socket code reason] stop-game)}})
+    (fn [socket code reason] ())}})
 
 (defroutes app-routes
   (GET "/" [] "<h1>HELLO<h1>")

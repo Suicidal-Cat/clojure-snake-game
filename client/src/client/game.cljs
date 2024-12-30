@@ -8,7 +8,7 @@
 (def snake-body2 (r/atom [[]]))
 (def ball (r/atom []))
 (def field-size 600) ;field size in px
-(def grid-size 20) ;grid size in px
+(def grid-size 24) ;grid size in px
 
 
 (defn connect_socket []
@@ -55,7 +55,7 @@
   (q/stroke 0)
   (q/stroke-weight 2) 
   (q/fill 0 0 255)
-  (q/ellipse (first @ball) (last @ball) 18 18)
+  (q/ellipse (first @ball) (last @ball) 20 20)
   (q/fill 0 255 0)
   (doseq [[x y] @snake-body1]
     (q/rect x y grid-size grid-size))

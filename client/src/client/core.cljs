@@ -10,8 +10,7 @@
 (defonce app-state (r/atom {:text "Hello world!"}))
 
 
-(defn on-js-reload []
-)
+(defn on-js-reload [])
 
 
 
