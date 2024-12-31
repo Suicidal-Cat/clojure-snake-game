@@ -50,16 +50,10 @@
      (q/line x 0 x (q/height)))
    (doseq [y (range grid-size (- (q/height) grid-size) grid-size)]
      (q/line 0 y (q/width) y)))
-
- (defn draw-score [score]
-   (q/text (str (first score)) 10 10)
-   (q/text (str (last score)) 20 20))
  
-
 (defn draw []
   (q/background 0)
   (draw-grid-border grid-size)
-  (draw-score @score)
   (q/stroke 0)
   (q/stroke-weight 2)
   (q/fill 0 0 255)

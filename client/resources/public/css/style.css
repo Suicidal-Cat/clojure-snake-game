@@ -16,3 +16,10 @@
     display: flex;
     justify-content: center;
 }
+
+.score{
+    display: flex;
+    justify-content: space-between;
+    font-size: 32px;
+    width: 530px;
+}
