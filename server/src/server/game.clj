@@ -61,19 +61,21 @@
     (if (= fixed-ball head-s1)
       (swap! game-state (fn [game-state] (hash-map :snake1 (conj (:snake1 game-state) [-1 -1])
                                                    :snake2 (:snake2 game-state)
-                                                   :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)])))
+                                                   :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)]
+                                                   :score [(inc (first (:score game-state))) (last (:score game-state))])))
       (if (= fixed-ball head-s2)
         (swap! game-state (fn [game-state] (hash-map :snake1 (:snake1 game-state)
                                                      :snake2 (conj (:snake2 game-state) [-1 -1])
-                                                     :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)])))
+                                                     :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)]
+                                                     :score [(first (:score game-state)) (inc (last (:score game-state)))])))
         nil))))
 
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [
-          game-state (atom {:snake1 [[168 96] [144 96] [120 96] [96 96]]
+    (let [game-state (atom {:snake1 [[168 96] [144 96] [120 96] [96 96]]
                             :snake2 [[168 192] [144 192] [120 192] [96 192]]
-                            :ball [300 300]})
+                            :ball [300 300]
+                            :score [0 0]})
           stop-game (atom false)]
       (while (not @stop-game)
         (Thread/sleep 150)
@@ -84,7 +86,8 @@
                                             ;:snake1 (move-snake (:snake1 game-state) (:direction (:snake1 (deref (:gameId @online-games)))))
                                             :snake1 (:snake1 game-state)
                                             :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 (deref ((keyword game-id) @online-games)))))
-                                            :ball (:ball game-state))))
+                                            :ball (:ball game-state)
+                                            :score (:score game-state))))
         (snake-collisions game-state stop-game)))))
     
 
@@ -94,8 +97,3 @@
                                 :snake2 (assoc player2 :direction :right)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 player2 game-id)))
-
-
-;(reset! snakes-direction {:snake1 (assoc player1 :direction :right)
-;                          :snake2 (assoc player2 :direction :right)})
-
