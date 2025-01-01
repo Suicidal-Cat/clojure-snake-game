@@ -1,8 +1,9 @@
 (ns client.core
     (:require
-     [client.game :refer [connect_socket start_game score]]
-     [reagent.dom :as rdom]
-     [reagent.core :as r]))
+     [client.components :refer [canvas game-score]]
+     [client.game :refer [connect_socket score start_game]]
+     [reagent.core :as r]
+     [reagent.dom :as rdom]))
 
 (enable-console-print!)
 
@@ -14,22 +15,27 @@
 
 
 
-(defn canvas []
-  [:div {:id "game-canvas"}])
+
 
 (defn app []
   [:div {:class "game"}
    (when-not (:show-game @app-state)
-     [:div {:class "start-game"}
-      [:p "Snake game"]
-      [:button {:class "start-game-btn"
-                :on-click
-                (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true))}
-       "Start Game"]])
+     [:div {:class "game-cont"}
+      [:div {:class "start-game"}
+       [:img {:src "/images/snake-logo.png"
+              :alt "snake logo"
+              :class "snake-logo"}]
+       [:div {:class "menu-buttons"}
+        [:button {:class "start-game-btn"
+                  :on-click
+                  (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true))}
+         "New game"]]]
+      [:img {:src "/images/profile.png"
+             :alt "snake profile"
+             :class "snake-profile"}]]
+     )
    (when (:show-game @app-state)
-     [:div {:class "score"}
-      [:div {:class "score1"} (first @score)]
-      [:div {:class "score2"} (last @score)]])
+     (game-score score))
      [canvas]])
    
 
