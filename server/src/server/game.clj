@@ -6,11 +6,15 @@
 
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
+(def end-score 20) ;goal that player want to accomplish
 
 ;snakes-direction hash-map - (:snake1 plyer1 :snake2 player2)
 ;player - hash-map (:socket socket :direction direction)
 ;online-games - hash map :gameId snakes-direction
 (def online-games (atom {}))
+
+(defn end-game [stop-flag]
+  (reset! stop-flag true))
 
 ;update snake position
 (defn move-snake [snake direction]
@@ -44,13 +48,15 @@
     (if (or 
          (false? (in-bounds? (first snake1) field-size grid-size)) 
          (vector-contains? snake2 (first snake1))
-         (vector-contains? (subvec snake1 1) (first snake1)))
-      (reset! stop-game true)
+         (vector-contains? (subvec snake1 1) (first snake1))
+         (= (first (:score @game-state)) end-score))
+      (end-game stop-game)
       (if (or
            (false? (in-bounds? (first snake2) field-size grid-size))
            (vector-contains? snake1 (first snake2))
-           (vector-contains? (subvec snake2 1) (first snake2)))
-        (reset! stop-game true)
+           (vector-contains? (subvec snake2 1) (first snake2))
+           (= (last (:score @game-state)) end-score))
+        (end-game stop-game)
         nil))))
 
 ;grow snake when it eats the ball and generate new ball
