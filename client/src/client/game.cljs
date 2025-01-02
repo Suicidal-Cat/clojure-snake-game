@@ -4,12 +4,16 @@
     [quil.core :as q]
     [clojure.edn :as edn]))
 
- (def snake-body1 (r/atom [[0 0]]))
- (def snake-body2 (r/atom [[0 0]]))
- (def ball (r/atom [0 0]))
- (def score (r/atom [0 0]))
- (def field-size 600) ;field size in px
- (def grid-size 24) ;grid size in px
+; Atom za čuvanje Base64 stringa 
+(def img-atom (atom nil)) 
+
+
+(def snake-body1 (r/atom [[0 0]]))
+(def snake-body2 (r/atom [[0 0]]))
+(def ball (r/atom [0 0]))
+(def score (r/atom [0 0]))
+(def field-size 600) ;field size in px
+(def grid-size 24) ;grid size in px
 
 
  (defn connect_socket []
@@ -80,6 +84,18 @@
    :setup setup
    :draw draw
    :size [field-size field-size]))
+
+(defn save-region-screenshot! [x y width height]
+  (let [canvas (.getElementById js/document "defaultCanvas0")
+        ctx (.getContext canvas "2d")
+        image-data (.getImageData ctx x y width height)
+        temp-canvas (js/document.createElement "canvas")
+        temp-ctx (.getContext temp-canvas "2d")]
+    (set! (.-width temp-canvas) width)
+    (set! (.-height temp-canvas) height)
+    (.putImageData temp-ctx image-data 0 0)
+    (let [base64 (.toDataURL temp-canvas)]
+      (reset! img-atom base64))))
 
 
 

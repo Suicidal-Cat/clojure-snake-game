@@ -1,7 +1,8 @@
 (ns client.core
     (:require
      [client.components :refer [canvas game-score]]
-     [client.game :refer [connect_socket score start_game]]
+     [client.game :refer [connect_socket img-atom score start-interval
+                          start_game]]
      [reagent.core :as r]
      [reagent.dom :as rdom]))
 
@@ -15,10 +16,8 @@
 
 
 
-
-
 (defn app []
-  [:div {:class "game"}
+  [:div {:class "game"} 
    (when-not (:show-game @app-state)
      [:div {:class "game-cont"}
       [:div {:class "start-game"}
@@ -28,15 +27,16 @@
        [:div {:class "menu-buttons"}
         [:button {:class "start-game-btn"
                   :on-click
-                  (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true))}
+                  (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true) (start-interval))}
          "New game"]]]
       [:img {:src "/images/profile.png"
              :alt "snake profile"
-             :class "snake-profile"}]]
-     )
+             :class "snake-profile"}]])
    (when (:show-game @app-state)
-     (game-score score))
-     [canvas]])
+     (game-score score)) 
+   [canvas]
+   (when-let [screenshot @img-atom]
+     [:img {:src screenshot :alt "Game Region Screenshot"}])])
    
 
 (rdom/render [app] (.getElementById js/document "app"))
