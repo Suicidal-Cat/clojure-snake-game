@@ -35,7 +35,10 @@
        (.addEventListener js/document "keydown" handle-keypress))))
 
  (defn setup []
-   (q/frame-rate 25)
+   (let [
+         url "/images/snake2.png"]
+     (q/set-state! :image (q/load-image url)))
+   (q/frame-rate 30)
    (q/background 0))
 
  (defn draw-grid-border [grid-size]
@@ -45,6 +48,7 @@
    (q/rect 0 (- (q/height) grid-size) (q/width) grid-size)
    (q/rect (- (q/width) grid-size) 0 grid-size (q/height))
    (q/stroke 50)
+   (q/stroke-weight 1)
    (q/fill 0 0 0)
    (doseq [x (range grid-size (- (q/width) grid-size) grid-size)]
      (q/line x 0 x (q/height)))
@@ -54,16 +58,19 @@
 (defn draw []
   (q/background 0)
   (draw-grid-border grid-size)
-  (q/stroke 0)
-  (q/stroke-weight 2)
   (q/fill 0 0 255)
   (q/ellipse (first @ball) (last @ball) 20 20)
+  (q/stroke 0)
+  (q/stroke-weight 0)
   (q/fill 0 255 0)
   (doseq [[x y] @snake-body1]
     (q/rect x y grid-size grid-size))
   (q/fill 255 0 0)
-  (doseq [[x y] @snake-body2]
-    (q/rect x y grid-size grid-size)))
+  ;; (doseq [[x y] @snake-body2]
+  ;;   (q/rect x y grid-size grid-size))
+  (let [im (q/state :image)]
+    (doseq [[x y] @snake-body2]
+      (q/image im x y))))
 
 
 (defn start_game []

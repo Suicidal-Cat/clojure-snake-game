@@ -84,7 +84,7 @@
                             :score [0 0]})
           stop-game (atom false)]
       (while (not @stop-game)
-        (Thread/sleep 150)
+        (Thread/sleep 125)
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state)

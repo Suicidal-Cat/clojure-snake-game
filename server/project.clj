@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [ring/ring-core "1.13.0"]
                  [ring/ring-jetty-adapter "1.13.0"]
-                 [compojure "1.7.1"]]
+                 [compojure "1.7.1"]
+                 [aero "1.1.6"]]
   :main ^:skip-aot server.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
