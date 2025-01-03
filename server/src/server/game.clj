@@ -47,20 +47,20 @@
 (defn snake-collisions [game-state stop-game final-score player1 player2]
   (let [snake1 (:snake1 @game-state)
         snake2 (:snake2 @game-state)]
-    (if (or 
-         (false? (in-bounds? (first snake1) field-size grid-size)) 
+    (if (or
+         (false? (in-bounds? (first snake1) field-size grid-size))
          (vector-contains? snake2 (first snake1))
          (vector-contains? (subvec snake1 1) (first snake1))
-         (= (first (:score @game-state)) end-score))
-      (end-game stop-game final-score {:winner {:id (:id player2) :score (last (:score @game-state))}
-                                       :loser {:id (:id player1) :score (first (:score @game-state))}})
+         (= (last (:score @game-state)) end-score))
+      (end-game stop-game final-score {:winner {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}
+                                       :loser {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}})
       (if (or
            (false? (in-bounds? (first snake2) field-size grid-size))
            (vector-contains? snake1 (first snake2))
            (vector-contains? (subvec snake2 1) (first snake2))
-           (= (last (:score @game-state)) end-score))
-        (end-game stop-game final-score {:winner {:id (:id player1) :score (first (:score @game-state))}
-                                         :loser {:id (:id player2) :score (last (:score @game-state))}})
+           (= (first (:score @game-state)) end-score))
+        (end-game stop-game final-score {:winner {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}
+                                         :loser {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}})
         nil))))
 
 ;grow snake when it eats the ball and generate new ball
@@ -101,6 +101,7 @@
                                             :ball (:ball game-state)
                                             :score (:score game-state))))
         (snake-collisions game-state stop-game final-score player1 player2))
+      (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))
       (ws/send (:socket player2) (pr-str @final-score))
       (ws/close (:socket player1))

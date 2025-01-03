@@ -77,6 +77,11 @@
     color: rgba(239, 112, 255);
 }
 
+.screenshot-img{
+    width: 250px;
+    height: 250px;
+}
+
 
 /* font-family: 'Arcade Interlaced', sans-serif;
 font-family: 'Arcade Normal', sans-serif;

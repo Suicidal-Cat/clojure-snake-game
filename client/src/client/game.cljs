@@ -14,12 +14,29 @@
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
 (def stop-game-flag (atom false))
-
 (def random-id (atom 0))
 
+
+;take a screenshoot of the canvas
+(defn save-region-screenshot! [x y width height]
+  (let [canvas (.getElementById js/document "defaultCanvas0")
+        ctx (.getContext canvas "2d")
+        image-data (.getImageData ctx x y width height)
+        temp-canvas (js/document.createElement "canvas")
+        temp-ctx (.getContext temp-canvas "2d")]
+    (set! (.-width temp-canvas) width)
+    (set! (.-height temp-canvas) height)
+    (.putImageData temp-ctx image-data 0 0)
+    (let [base64 (.toDataURL temp-canvas)]
+      (reset! img-atom base64))))
+
 ;stoping game
-(defn stop-game [] 
-    (reset! stop-game-flag true))
+(defn stop-game [data]
+  (let [winner (:winner data)
+        [hx hy] (mapv #(* % 2) (:head winner))
+        loser (:loser data)] 
+    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
+    (reset! stop-game-flag true)))
 
 ;websocket communication
 (defn connect_socket []
@@ -31,12 +48,12 @@
                                      (.send ws {:id id}))))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
-                                        ;(println data)
-                                        (when (:winner data) (println data) (stop-game))
+                                        ;(println data) 
                                         (reset! ball (:ball data))
                                         (reset! snake-body1 (:snake1 data))
                                         (reset! snake-body2 (:snake2 data))
-                                        (reset! score (:score data)))))
+                                        (reset! score (:score data)) 
+                                        (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
     (let [handle-keypress (fn handle-keypress [e]
                             (let [key (.-key e)]
@@ -96,19 +113,6 @@
    :setup setup
    :draw draw
    :size [field-size field-size]))
-
-;take a screenshoot of the canvas
-(defn save-region-screenshot! [x y width height]
-  (let [canvas (.getElementById js/document "defaultCanvas0")
-        ctx (.getContext canvas "2d")
-        image-data (.getImageData ctx x y width height)
-        temp-canvas (js/document.createElement "canvas")
-        temp-ctx (.getContext temp-canvas "2d")]
-    (set! (.-width temp-canvas) width)
-    (set! (.-height temp-canvas) height)
-    (.putImageData temp-ctx image-data 0 0)
-    (let [base64 (.toDataURL temp-canvas)]
-      (reset! img-atom base64))))
 
 
 

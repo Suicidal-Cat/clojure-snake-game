@@ -35,7 +35,7 @@
      (game-score score)) 
    [canvas]
    (when-let [screenshot @img-atom]
-     [:img {:src screenshot :alt "Game Region Screenshot"}])])
+     [:img {:src screenshot :alt "Game Region Screenshot" :class "screenshot-img"}])])
    
 
 (rdom/render [app] (.getElementById js/document "app"))
