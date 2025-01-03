@@ -1,6 +1,6 @@
 (ns server.core-test
   (:require
-   [midje.sweet :refer [facts fact => contains]]
+   [midje.sweet :refer [facts fact =>]]
    [server.core :refer :all]
    [server.game-helper-func :refer :all]))
 
@@ -22,13 +22,13 @@
       snake2 [[100 200] [120 200]]]
   (facts "Testing generate-valid-coordinate-pair"
          (fact "Generated coordinate pair should be within the field bounds"
-               (let [[x y] (generate-valid-coordinate-pair field-size grid-size snake1 snake2)]
+               (let [[x y] (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
                  (in-bounds? [x y] field-size grid-size) => true))
          (fact "Generated coordinate pair should not be in snake1"
-               (let [coordinate (generate-valid-coordinate-pair field-size grid-size snake1 snake2)]
+               (let [coordinate (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
                  (vector-contains? snake1 coordinate) => nil))
          (fact "Generated coordinate pair should not be in snake2" 
-                 (let [coordinate (generate-valid-coordinate-pair field-size grid-size snake1 snake2)]
+                 (let [coordinate (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
                    (vector-contains? snake2 coordinate) => nil))))
 
 (facts "Testing find-players-by-socket"

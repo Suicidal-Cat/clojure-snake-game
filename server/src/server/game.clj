@@ -1,8 +1,9 @@
 (ns server.game
   (:require
    [ring.websocket :as ws]
-   [server.game-helper-func :refer [find-players-by-socket in-bounds?
-                                    random-coordinate vector-contains?]]))
+   [server.game-helper-func :refer [find-players-by-socket
+                                    generate-valid-coordinate-pair-ball
+                                    in-bounds? vector-contains?]]))
 
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
@@ -34,13 +35,14 @@
         [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
                          [:snake1 (:snake1 @snakes-direction)]
                          [:snake2 (:snake2 @snakes-direction)])
-        past-dir (:direction player)]
+        past-dir (:direction player)
+        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir))))]
     (if (not= past-dir dir)
       (cond
-        (and (= past-dir :up) (not= dir :down)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir)))
-        (and (= past-dir :down) (not= dir :up)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir)))
-        (and (= past-dir :left) (not= dir :right)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir)))
-        (and (= past-dir :right) (not= dir :left)) (swap! snakes-direction update snake (fn [_] (assoc player :direction dir))))
+        (and (= past-dir :up) (not= dir :down)) (update-dir)
+        (and (= past-dir :down) (not= dir :up)) (update-dir)
+        (and (= past-dir :left) (not= dir :right)) (update-dir)
+        (and (= past-dir :right) (not= dir :left)) (update-dir))
       nil)))
 
 ;check snake collisions
@@ -71,12 +73,12 @@
     (if (= fixed-ball head-s1)
       (swap! game-state (fn [game-state] (hash-map :snake1 (conj (:snake1 game-state) [-1 -1])
                                                    :snake2 (:snake2 game-state)
-                                                   :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)]
+                                                   :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
                                                    :score [(inc (first (:score game-state))) (last (:score game-state))])))
       (if (= fixed-ball head-s2)
         (swap! game-state (fn [game-state] (hash-map :snake1 (:snake1 game-state)
                                                      :snake2 (conj (:snake2 game-state) [-1 -1])
-                                                     :ball [(random-coordinate field-size grid-size) (random-coordinate field-size grid-size)]
+                                                     :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
                                                      :score [(first (:score game-state)) (inc (last (:score game-state)))])))
         nil))))
 
@@ -95,7 +97,7 @@
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state)
         (swap! game-state (fn [game-state] (hash-map
-                                            ;:snake1 (move-snake (:snake1 game-state) (:direction (:snake1 (deref (:gameId @online-games)))))
+                                            ;:snake1 (move-snake (:snake1 game-state) (:direction (:snake1 (deref ((keyword game-id) @online-games)))))
                                             :snake1 (:snake1 game-state)
                                             :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 (deref ((keyword game-id) @online-games)))))
                                             :ball (:ball game-state)
