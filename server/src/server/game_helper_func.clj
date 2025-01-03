@@ -14,6 +14,17 @@
   (let [num-cells (/ (- field-size (* 2 grid-size)) grid-size)]
     (+ grid-size (/ grid-size 2) (* grid-size (rand-int num-cells)))))
 
+;generate valid coordinate pair
+(defn generate-valid-coordinate-pair [field-size grid-size snake1 snake2]
+  (loop []
+    (let [x (random-coordinate field-size grid-size)
+          y (random-coordinate field-size grid-size)
+          coordinate [x y]]
+      (if (or (some #(= % coordinate) snake1)
+              (some #(= % coordinate) snake2))
+        (recur)
+        coordinate))))
+
 ;check if vector contains element
 (defn vector-contains? [v element]
   (some #(= % element) v))
