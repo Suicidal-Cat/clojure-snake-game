@@ -36,14 +36,15 @@
                          [:snake1 (:snake1 @snakes-direction)]
                          [:snake2 (:snake2 @snakes-direction)])
         past-dir (:direction player)
-        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir))))]
-    (if (not= past-dir dir)
-      (cond
-        (and (= past-dir :up) (not= dir :down)) (update-dir)
-        (and (= past-dir :down) (not= dir :up)) (update-dir)
-        (and (= past-dir :left) (not= dir :right)) (update-dir)
-        (and (= past-dir :right) (not= dir :left)) (update-dir))
-      nil)))
+        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
+    (when (:change-dir (snake @snakes-direction))
+      (if (not= past-dir dir)
+        (cond
+          (and (= past-dir :up) (not= dir :down)) (update-dir)
+          (and (= past-dir :down) (not= dir :up)) (update-dir)
+          (and (= past-dir :left) (not= dir :right)) (update-dir)
+          (and (= past-dir :right) (not= dir :left)) (update-dir))
+        nil))))
 
 ;check snake collisions
 (defn snake-collisions [game-state stop-game final-score player1 player2]
@@ -87,22 +88,29 @@
   (future
     (let [game-state (atom {:snake1 [[168 96] [144 96] [120 96] [96 96]]
                             :snake2 [[168 192] [144 192] [120 192] [96 192]]
-                            :ball [300 300]
+                            :ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                                       [[168 96] [144 96] [120 96] [96 96]]
+                                                                       [[168 192] [144 192] [120 192] [96 192]])
                             :score [0 0]})
+          snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
       (while (not @stop-game)
-        (Thread/sleep 125)
+        (Thread/sleep 120)
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state)
         (swap! game-state (fn [game-state] (hash-map
                                             ;:snake1 (move-snake (:snake1 game-state) (:direction (:snake1 (deref ((keyword game-id) @online-games)))))
                                             :snake1 (:snake1 game-state)
-                                            :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 (deref ((keyword game-id) @online-games)))))
+                                            :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)))
                                             :ball (:ball game-state)
                                             :score (:score game-state))))
-        (snake-collisions game-state stop-game final-score player1 player2))
+        (snake-collisions game-state stop-game final-score player1 player2)
+        (swap! snake-directions
+               (fn [state]
+                 (assoc-in (assoc-in state [:snake1 :change-dir] true)
+                           [:snake2 :change-dir] true))))
       (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))
       (ws/send (:socket player2) (pr-str @final-score))
@@ -112,7 +120,15 @@
 ;start the game
 (defn start-game [player1 player2]
   (let [game-id (str (:id player1) (:id player2))
-        snakes-direction (atom {:snake1 (assoc player1 :direction :right)
-                                :snake2 (assoc player2 :direction :right)})]
+        snakes-direction (atom {:snake1 (assoc player1 :direction :right :change-dir true)
+                                :snake2 (assoc player2 :direction :right :change-dir true)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 player2 game-id)))
+
+;;25
+;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
+;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]
+;;                   :ball (generate-valid-coordinate-pair-ball field-size grid-size
+;;                                                              [[200 100] [175 100] [150 100] [125 100]]
+;;                                                              [[200 200] [175 200] [150 200] [125 200]])
+;;                   :score [0 0]})
