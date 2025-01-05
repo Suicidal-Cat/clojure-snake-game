@@ -35,3 +35,14 @@
           (when (some #(= socket (:socket (val %))) @players)
             players))
         online-games))
+
+(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
+  (future 
+    (while (not @stop-game)
+      (Thread/sleep (+ 6000 (rand-int 3001)))
+      (let [power (rand-nth power-ups)
+            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
+            duration 3500]
+        (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates})))
+        (Thread/sleep duration)
+        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))

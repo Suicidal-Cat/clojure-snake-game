@@ -4,13 +4,11 @@
     [quil.core :as q]
     [clojure.edn :as edn]))
 
-; Atom za čuvanje Base64 stringa 
+; Atom za čuvanje ss-a
 (def img-atom (atom nil)) 
 
-(def snake-body1 (r/atom [[0 0]]))
-(def snake-body2 (r/atom [[0 0]]))
-(def ball (r/atom [0 0]))
 (def score (r/atom [0 0]))
+(def game-state (r/atom nil))
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
 (def stop-game-flag (atom false))
@@ -48,10 +46,8 @@
                                      (.send ws {:id id}))))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
-                                        ;(println data) 
-                                        (reset! ball (:ball data))
-                                        (reset! snake-body1 (:snake1 data))
-                                        (reset! snake-body2 (:snake2 data))
+                                        (print data)
+                                        (reset! game-state data)
                                         (reset! score (:score data)) 
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
@@ -91,19 +87,21 @@
   (q/background 0)
   (draw-grid-border grid-size)
   (q/fill 0 0 255)
-  (q/ellipse (first @ball) (last @ball) 20 20)
+  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 20 20)
+  (when-let [power (:power @game-state)]
+    (case (str (:value power))
+      "+2" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))
+      "-2" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))))
   (q/stroke 0)
   (q/stroke-weight 0)
   (q/fill 0 255 0)
-  (doseq [[x y] @snake-body1]
+  (doseq [[x y] (:snake1 @game-state)]
     (q/rect x y grid-size grid-size))
   (q/fill 255 0 0)
-  ;; (doseq [[x y] @snake-body2]
-  ;;   (q/rect x y grid-size grid-size))
   (let [im (q/state :image)]
-    (doseq [[x y] @snake-body2]
+    (doseq [[x y] (:snake2 @game-state)]
       (q/image im x y)))
-  (when @stop-game-flag (q/exit)))
+  (when @stop-game-flag (q/no-loop)))
 
 ;start the game
 (defn start_game []

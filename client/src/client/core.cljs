@@ -1,6 +1,6 @@
 (ns client.core
     (:require
-     [client.components :refer [canvas game-score]]
+     [client.components :refer [canvas end-game-pop-up game-score profile]]
      [client.game :refer [connect_socket img-atom score start_game]]
      [reagent.core :as r]
      [reagent.dom :as rdom]))
@@ -28,9 +28,7 @@
                   :on-click
                   (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true))}
          "New game"]]]
-      [:img {:src "/images/profile.png"
-             :alt "snake profile"
-             :class "snake-profile"}]])
+      [profile]])
    (when (:show-game @app-state)
      (game-score score)) 
    [canvas]
