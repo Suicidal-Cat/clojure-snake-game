@@ -1,7 +1,8 @@
 (ns server.core-test
   (:require
-   [midje.sweet :refer [facts fact =>]]
+   [midje.sweet :refer [=> fact facts]]
    [server.core :refer :all]
+   [server.game :refer [move-snake]]
    [server.game-helper-func :refer :all]))
 
 (fact "in-bounds? checks if a position is within the playing field"
@@ -46,3 +47,9 @@
 
          (fact "Should return nil for a socket that doesn't exist"
                (find-players-by-socket "socket6" online-games) => nil)))
+
+(facts "Move snake"
+       (move-snake [[50 50] [50 60] [50 70]] :up 10) => [[50 40] [50 50] [50 60]]
+       (move-snake [[50 50] [50 60] [50 70]] :down 10) => [[50 60] [50 50] [50 60]]
+       (move-snake [[50 50] [50 60] [50 70]] :left 10) => [[40 50] [50 50] [50 60]]
+       (move-snake [[50 50] [50 60] [50 70]] :right 10) => [[60 50] [50 50] [50 60]])

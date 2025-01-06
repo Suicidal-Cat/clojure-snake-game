@@ -89,8 +89,8 @@
   (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 20 20)
   (when-let [power (:power @game-state)]
     (case (:value power)
-      "+2" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))
-      "-2" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))))
+      "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))
+      "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))))
   (q/stroke 0)
   (q/stroke-weight 0)
   (q/fill 0 255 0)

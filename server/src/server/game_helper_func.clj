@@ -28,12 +28,13 @@
 
 ;init game-state
 (defn init-game-state [field-size grid-size]
-  {:snake1 [[168 96] [144 96] [120 96] [96 96]]
-   :snake2 [[168 192] [144 192] [120 192] [96 192]]
-   :ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                              [[168 96] [144 96] [120 96] [96 96]]
-                                              [[168 192] [144 192] [120 192] [96 192]])
-   :score [0 0]})
+  (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                  [[168 96] [144 96] [120 96] [96 96]]
+                                                  [[432 504] [456 504] [480 504] [504 504]])]
+    (hash-map :snake1 [[168 96] [144 96] [120 96] [96 96]]
+              :snake2 [[432 504] [456 504] [480 504] [504 504]]
+              :ball ball
+              :score [0 0])))
 
 ;check if vector contains element
 (defn vector-contains? [v el]
@@ -51,8 +52,8 @@
   (let [sn-consum-v (sn-consum game-state)
         sn-consum-size (count sn-consum-v)]
     (case power-val
-      "+2" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1]) :power nil)
-      "-2" (if (> sn-consum-size 4) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 2)) :power nil) game-state))))
+      "+3" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1] [-1 -1]) :power nil)
+      "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state))))
 
 
 ;;25

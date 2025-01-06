@@ -9,7 +9,7 @@
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
 (def end-score 20) ;goal that player want to accomplish
-(def power-ups ["-2","+2"])
+(def power-ups ["-3","+3"])
 
 ;snakes-direction hash-map - (:snake1 plyer1 :snake2 player2)
 ;player - hash-map (:socket socket :direction direction)
@@ -22,13 +22,13 @@
   (reset! stop-flag true))
 
 ;update snake position
-(defn move-snake [snake direction]
-  (let [[x y] (first snake)
+(defn move-snake [snake direction speed] 
+  (let [[x y] (snake 0)
         new-head (case direction
-                   :up    [x (- y grid-size)]
-                   :down  [x (+ y grid-size)]
-                   :left  [(- x grid-size) y]
-                   :right [(+ x grid-size) y])]
+                   :up    [x (- y speed)]
+                   :down  [x (+ y speed)]
+                   :left  [(- x speed) y]
+                   :right [(+ x speed) y])]
     (into [new-head] (subvec snake 0 (dec (count snake))))))
 
 ;update snake direction
@@ -53,19 +53,19 @@
   (let [snake1 (:snake1 @game-state)
         snake2 (:snake2 @game-state)]
     (if (or
-         (false? (in-bounds? (first snake1) field-size grid-size))
-         (vector-contains? snake2 (first snake1))
-         (vector-contains? (subvec snake1 1) (first snake1))
-         (>= (last (:score @game-state)) end-score))
-      (end-game-loop stop-game final-score {:winner {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}
-                                       :loser {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}})
+         (false? (in-bounds? (snake1 0) field-size grid-size))
+         (vector-contains? snake2 (snake1 0))
+         (vector-contains? (subvec snake1 1) (snake1 0))
+         (>= ((:score @game-state) 1) end-score))
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
+                                       :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
       (if (or
-           (false? (in-bounds? (first snake2) field-size grid-size))
-           (vector-contains? snake1 (first snake2))
-           (vector-contains? (subvec snake2 1) (first snake2))
-           (>= (first (:score @game-state)) end-score))
-        (end-game-loop stop-game final-score {:winner {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}
-                                         :loser {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}})
+           (false? (in-bounds? (snake2 0) field-size grid-size))
+           (vector-contains? snake1 (snake2 0))
+           (vector-contains? (subvec snake2 1) (snake2 0))
+           (>= ((:score @game-state) 0) end-score))
+        (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
+                                         :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})
         nil))))
 
 ;grow snake when it eats the ball and generate new ball
@@ -112,12 +112,7 @@
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [game-state (atom {:snake1 [[168 96] [144 96] [120 96] [96 96]]
-                            :snake2 [[168 192] [144 192] [120 192] [96 192]]
-                            :ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                                                       [[168 96] [144 96] [120 96] [96 96]]
-                                                                       [[168 192] [144 192] [120 192] [96 192]])
-                            :score [0 0]})
+    (let [game-state (atom (init-game-state field-size grid-size))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
@@ -131,9 +126,9 @@
         (swap! game-state (fn [game-state]
                             (assoc game-state
                                    :snake1 (:snake1 game-state)
-                                   :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions))))))
+                                   :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size))))
         (snake-collisions game-state stop-game final-score player1 player2)
-        (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
+        (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true)))) 
       (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))
       (ws/send (:socket player2) (pr-str @final-score))
@@ -144,6 +139,6 @@
 (defn start-game [player1 player2]
   (let [game-id (str (:id player1) (:id player2))
         snakes-direction (atom {:snake1 (assoc player1 :direction :right :change-dir true)
-                                :snake2 (assoc player2 :direction :right :change-dir true)})]
+                                :snake2 (assoc player2 :direction :left :change-dir true)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 player2 game-id)))
