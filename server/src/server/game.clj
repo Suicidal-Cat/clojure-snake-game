@@ -2,9 +2,9 @@
   (:require
    [ring.websocket :as ws]
    [server.game-helper-func :refer [find-players-by-socket
-                                    generate-random-power
                                     generate-valid-coordinate-pair-ball
-                                    in-bounds? vector-contains?]]))
+                                    in-bounds? init-game-state
+                                    update-power-consumed vector-contains?]]))
 
 (def field-size 600) ;field size in px
 (def grid-size 24) ;grid size in px
@@ -56,14 +56,14 @@
          (false? (in-bounds? (first snake1) field-size grid-size))
          (vector-contains? snake2 (first snake1))
          (vector-contains? (subvec snake1 1) (first snake1))
-         (= (last (:score @game-state)) end-score))
+         (>= (last (:score @game-state)) end-score))
       (end-game-loop stop-game final-score {:winner {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}
                                        :loser {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}})
       (if (or
            (false? (in-bounds? (first snake2) field-size grid-size))
            (vector-contains? snake1 (first snake2))
            (vector-contains? (subvec snake2 1) (first snake2))
-           (= (first (:score @game-state)) end-score))
+           (>= (first (:score @game-state)) end-score))
         (end-game-loop stop-game final-score {:winner {:id (:id player1) :score (first (:score @game-state)) :head (first snake1)}
                                          :loser {:id (:id player2) :score (last (:score @game-state)) :head (first snake2)}})
         nil))))
@@ -77,13 +77,37 @@
       (swap! game-state (fn [game-state] (assoc game-state
                                                 :snake1 (conj (:snake1 game-state) [-1 -1])
                                                 :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
-                                                :score [(inc (first (:score game-state))) (last (:score game-state))])))
+                                                :score [(inc ((:score game-state) 0)) ((:score game-state) 1)])))
       (if (= fixed-ball head-s2)
         (swap! game-state (fn [game-state] (assoc game-state
                                                   :snake2 (conj (:snake2 game-state) [-1 -1])
                                                   :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
-                                                  :score [(first (:score game-state)) (inc (last (:score game-state)))])))
+                                                  :score [((:score game-state) 0) (inc ((:score game-state) 1))])))
         nil))))
+
+;update game on consumed power
+(defn update-game-on-power [game-state]
+  (when-let [power (:power @game-state)]
+    (let [[head-s1 & _] (:snake1 @game-state)
+          [head-s2 & _] (:snake2 @game-state)
+          power-cord (mapv #(- % (/ grid-size 2)) (:cord power))]
+      (if (= power-cord head-s1)
+        (swap! game-state (fn [game-state] (update-power-consumed game-state :snake1 :snake2 (:value power))))
+        (if (= power-cord head-s2)
+          (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
+          nil)))))
+
+;generate power on the field
+(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
+  (future 
+    (while (not @stop-game)
+      (Thread/sleep (+ 6000 (rand-int 3001)))
+      (let [power (rand-nth power-ups)
+            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
+            duration 3500]
+        (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates})))
+        (Thread/sleep duration)
+        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))
 
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
@@ -103,6 +127,7 @@
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state)
+        (update-game-on-power game-state)
         (swap! game-state (fn [game-state]
                             (assoc game-state
                                    :snake1 (:snake1 game-state)
@@ -122,11 +147,3 @@
                                 :snake2 (assoc player2 :direction :right :change-dir true)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 player2 game-id)))
-
-;;25
-;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
-;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]
-;;                   :ball (generate-valid-coordinate-pair-ball field-size grid-size
-;;                                                              [[200 100] [175 100] [150 100] [125 100]]
-;;                                                              [[200 200] [175 200] [150 200] [125 200]])
-;;                   :score [0 0]})

@@ -2,6 +2,7 @@
 
 ;helper functions
 
+
 ;check if snake part is in playing field
 (defn in-bounds? [[x y] field-size grid-size]
   (and (>= x grid-size)
@@ -25,9 +26,18 @@
         (recur)
         (mapv #(+ (/ grid-size 2) %) coordinate)))))
 
+;init game-state
+(defn init-game-state [field-size grid-size]
+  {:snake1 [[168 96] [144 96] [120 96] [96 96]]
+   :snake2 [[168 192] [144 192] [120 192] [96 192]]
+   :ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                              [[168 96] [144 96] [120 96] [96 96]]
+                                              [[168 192] [144 192] [120 192] [96 192]])
+   :score [0 0]})
+
 ;check if vector contains element
-(defn vector-contains? [v element]
-  (some #(= % element) v))
+(defn vector-contains? [v el]
+  (some #(= % el) v))
 
 ;find game by player's socket
 (defn find-players-by-socket [socket online-games]
@@ -36,13 +46,19 @@
             players))
         online-games))
 
-(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
-  (future 
-    (while (not @stop-game)
-      (Thread/sleep (+ 6000 (rand-int 3001)))
-      (let [power (rand-nth power-ups)
-            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
-            duration 3500]
-        (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates})))
-        (Thread/sleep duration)
-        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))
+;update game-state based on power
+(defn update-power-consumed [game-state sn-consum sn-opp power-val]
+  (let [sn-consum-v (sn-consum game-state)
+        sn-consum-size (count sn-consum-v)]
+    (case power-val
+      "+2" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1]) :power nil)
+      "-2" (if (> sn-consum-size 4) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 2)) :power nil) game-state))))
+
+
+;;25
+;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
+;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]
+;;                   :ball (generate-valid-coordinate-pair-ball field-size grid-size
+;;                                                              [[200 100] [175 100] [150 100] [125 100]]
+;;                                                              [[200 200] [175 200] [150 200] [125 200]])
+;;                   :score [0 0]})

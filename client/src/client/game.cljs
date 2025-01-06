@@ -46,7 +46,6 @@
                                      (.send ws {:id id}))))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
-                                        (print data)
                                         (reset! game-state data)
                                         (reset! score (:score data)) 
                                         (when (:winner data) (stop-game data)))))
@@ -89,7 +88,7 @@
   (q/fill 0 0 255)
   (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 20 20)
   (when-let [power (:power @game-state)]
-    (case (str (:value power))
+    (case (:value power)
       "+2" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))
       "-2" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))))
   (q/stroke 0)
