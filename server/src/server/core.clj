@@ -5,7 +5,7 @@
    [compojure.core :refer [defroutes GET]]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.websocket :as ws]
-   [server.game :refer [change-direction start-game]]
+   [server.main-game :refer [change-direction start-game]]
    [aero.core :refer [read-config]]))
 
 (def config (read-config "config.edn"))

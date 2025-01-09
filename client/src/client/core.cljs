@@ -1,7 +1,7 @@
 (ns client.core
     (:require
      [client.components :refer [canvas game-score profile]]
-     [client.game :refer [connect_socket img-atom score start_game]]
+     [client.main-game :refer [connect_socket img-atom score start_game]]
      [reagent.core :as r]
      [reagent.dom :as rdom]))
 

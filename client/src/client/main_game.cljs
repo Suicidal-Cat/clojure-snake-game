@@ -1,4 +1,4 @@
-(ns client.game
+(ns client.main-game
    (:require
     [reagent.core :as r]
     [quil.core :as q]

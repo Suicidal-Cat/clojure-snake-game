@@ -1,4 +1,4 @@
-(ns server.game
+(ns server.main-game
   (:require
    [ring.websocket :as ws]
    [server.game-helper-func :refer [find-players-by-socket
