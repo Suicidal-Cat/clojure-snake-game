@@ -26,13 +26,22 @@
         (recur)
         (mapv #(+ (/ grid-size 2) %) coordinate)))))
 
-;init game-state
+;init main game-state
 (defn init-game-state [field-size grid-size]
   (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
                                                   [[168 96] [144 96] [120 96] [96 96]]
                                                   [[432 504] [456 504] [480 504] [504 504]])]
     (hash-map :snake1 [[168 96] [144 96] [120 96] [96 96]]
               :snake2 [[432 504] [456 504] [480 504] [504 504]]
+              :ball ball
+              :score [0 0])))
+
+;init singleplayer game state
+(defn game-state-single [field-size grid-size]
+  (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                  [[180 90] [150 90] [120 90] [90 90]]
+                                                  nil)]
+    (hash-map :snake1 [[180 90] [150 90] [120 90] [90 90]]
               :ball ball
               :score [0 0])))
 
@@ -56,7 +65,7 @@
       "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state))))
 
 
-;;25
+;;25 main game
 ;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
 ;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]
 ;;                   :ball (generate-valid-coordinate-pair-ball field-size grid-size

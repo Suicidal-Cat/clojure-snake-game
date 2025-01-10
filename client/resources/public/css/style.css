@@ -59,12 +59,15 @@
 }
 
 .menu-buttons{
-    margin-top: 32px;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap:16px;
 }
 
 .start-game-btn{
     font-family: 'Arcade Normal', sans-serif;
-    font-size: 20px;
+    font-size: 16px;
     color: white;
     padding: 12px 20px;
     word-spacing: -5px;
