@@ -43,7 +43,7 @@
                                                   nil)]
     (hash-map :snake1 [[180 90] [150 90] [120 90] [90 90]]
               :ball ball
-              :score [0 0])))
+              :score [0])))
 
 ;check if vector contains element
 (defn vector-contains? [v el]
