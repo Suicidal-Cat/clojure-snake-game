@@ -1,7 +1,7 @@
 (ns client.core
     (:require
      [client.components :refer [canvas game-score profile]]
-     [client.main-game :refer [connect_socket img-atom score start_game]]
+     [client.main-game :as main :refer [img-atom]]
      [client.singleplayer-game :as single]
      [reagent.core :as r]
      [reagent.dom :as rdom]))
@@ -27,7 +27,7 @@
        [:div {:class "menu-buttons"}
         [:button {:class "start-game-btn"
                   :on-click
-                  (fn [] (connect_socket) (start_game) (swap! app-state assoc :show-game true))}
+                  (fn [] (main/connect_socket) (main/start_game) (swap! app-state assoc :show-game true))}
          "MULTIPLAYER"]
         [:button {:class "start-game-btn"
                   :on-click
@@ -35,7 +35,7 @@
          "SINGLEPLAYER"]]]
       [profile]])
    (when (:show-game @app-state)
-     (game-score score)) 
+     (game-score main/score)) 
    [canvas]
    (when-let [screenshot @img-atom]
      [:img {:src screenshot :alt "Game Region Screenshot" :class "screenshot-img"}])])

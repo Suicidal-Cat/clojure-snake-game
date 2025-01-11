@@ -40,7 +40,7 @@
   (let [ws (js/WebSocket. "ws://localhost:8080/ws")]
     (.addEventListener ws "open" (fn [_]
                                    (reset! stop-game-flag false)
-                                   (let [id (rand-int 1000)]
+                                   (let [id (rand-int 10000)]
                                      (reset! random-id id)
                                      (.send ws {:id id :single true}))))
     (.addEventListener ws "message" (fn [e]

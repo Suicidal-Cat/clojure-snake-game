@@ -6,8 +6,8 @@
                                     in-bounds? init-game-state
                                     update-power-consumed vector-contains?]]))
 
-(def field-size 600) ;field size in px
-(def grid-size 24) ;grid size in px
+(def field-size 594) ;field size in px
+(def grid-size 27) ;grid size in px
 (def end-score 20) ;goal that player want to accomplish
 (def power-ups ["-3","+3"])
 

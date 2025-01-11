@@ -9,8 +9,8 @@
 
 (def score (r/atom [0 0]))
 (def game-state (r/atom nil))
-(def field-size 600) ;field size in px
-(def grid-size 24) ;grid size in px
+(def field-size 594) ;field size in px
+(def grid-size 27) ;grid size in px
 (def stop-game-flag (atom false))
 (def random-id (atom 0))
 
@@ -61,7 +61,7 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/snake2.png"]
+  (let [url "/images/snake27.png"]
     (q/set-state! :image (q/load-image url)))
   (q/frame-rate 30)
   (q/background 0))
