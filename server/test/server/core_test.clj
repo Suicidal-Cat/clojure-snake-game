@@ -2,7 +2,8 @@
   (:require
    [midje.sweet :refer [=> fact facts]]
    [server.core :refer :all]
-   [server.game :refer [move-snake]]
+   [server.main-game :as main]
+   [server.singleplayer-game :as single]
    [server.game-helper-func :refer :all]))
 
 (fact "in-bounds? checks if a position is within the playing field"
@@ -17,20 +18,16 @@
       (vector-contains? [1 2 3] 4) => nil
       (vector-contains? [] 1) => nil)
 
-(let [field-size 500
-      grid-size 20
-      snake1 [[240 120] [260 120]]
-      snake2 [[100 200] [120 200]]]
-  (facts "Testing generate-valid-coordinate-pair"
-         (fact "Generated coordinate pair should be within the field bounds"
-               (let [[x y] (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
-                 (in-bounds? [x y] field-size grid-size) => true))
-         (fact "Generated coordinate pair should not be in snake1"
-               (let [coordinate (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
-                 (vector-contains? snake1 coordinate) => nil))
-         (fact "Generated coordinate pair should not be in snake2" 
-                 (let [coordinate (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)]
-                   (vector-contains? snake2 coordinate) => nil))))
+(facts "Testing generate-valid-coordinate-pair"
+       (let [field-size 500
+             grid-size 20
+             snake1 [[240 120] [260 120]]
+             snake2 [[100 200] [120 200]]
+             [x y] (generate-valid-coordinate-pair-ball field-size grid-size snake1 snake2)
+             coordinate [x y]]
+         (fact (in-bounds? [x y] field-size grid-size) => true)
+         (fact (vector-contains? snake1 coordinate) => nil)
+         (fact (vector-contains? snake2 coordinate) => nil)))
 
 (facts "Testing find-players-by-socket"
        (let [game1 {:player1 {:socket "socket1"} :player2 {:socket "socket2"}}
@@ -49,7 +46,15 @@
                (find-players-by-socket "socket6" online-games) => nil)))
 
 (facts "Move snake"
-       (move-snake [[50 50] [50 60] [50 70]] :up 10) => [[50 40] [50 50] [50 60]]
-       (move-snake [[50 50] [50 60] [50 70]] :down 10) => [[50 60] [50 50] [50 60]]
-       (move-snake [[50 50] [50 60] [50 70]] :left 10) => [[40 50] [50 50] [50 60]]
-       (move-snake [[50 50] [50 60] [50 70]] :right 10) => [[60 50] [50 50] [50 60]])
+       (main/move-snake [[50 50] [50 60] [50 70]] :up 10) => [[50 40] [50 50] [50 60]]
+       (main/move-snake [[50 50] [50 60] [50 70]] :down 10) => [[50 60] [50 50] [50 60]]
+       (main/move-snake [[50 50] [50 60] [50 70]] :left 10) => [[40 50] [50 50] [50 60]]
+       (main/move-snake [[50 50] [50 60] [50 70]] :right 10) => [[60 50] [50 50] [50 60]]
+       (single/move-snake [[5 5] [5 6] [5 7]] :up 1 10) => [[5 4] [5 5] [5 6]]
+       (single/move-snake [[5 5] [5 4] [5 3]] :down 1 10) => [[5 6] [5 5] [5 4]]
+       (single/move-snake [[5 5] [6 5] [7 5]] :left 1 10) => [[4 5] [5 5] [6 5]]
+       (single/move-snake [[5 5] [4 5] [3 5]] :right 1 10) => [[6 5] [5 5] [4 5]]
+       (single/move-snake [[5 0] [5 9] [5 8]] :up 1 10) => [[5 9] [5 0] [5 9]]
+       (single/move-snake [[5 9] [5 8] [5 7]] :down 1 10) => [[5 0] [5 9] [5 8]]
+       (single/move-snake [[0 5] [9 5] [8 5]] :left 1 10) => [[9 5] [0 5] [9 5]]
+       (single/move-snake [[9 5] [8 5] [7 5]] :right 1 10) => [[0 5] [9 5] [8 5]])
