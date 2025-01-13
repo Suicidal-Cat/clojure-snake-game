@@ -69,10 +69,10 @@
         nil))))
 
 ;grow snake when it eats the ball and generate new ball
-(defn update-game-on-eat [game-state]
+(defn update-game-on-eat [game-state grid-size]
   (let [[head-s1 & _] (:snake1 @game-state)
         [head-s2 & _] (:snake2 @game-state)
-        fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
+        fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))] 
     (if (= fixed-ball head-s1)
       (swap! game-state (fn [game-state] (assoc game-state
                                                 :snake1 (conj (:snake1 game-state) [-1 -1])
@@ -121,7 +121,7 @@
         (Thread/sleep 120)
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
-        (update-game-on-eat game-state)
+        (update-game-on-eat game-state grid-size)
         (update-game-on-power game-state)
         (swap! game-state (fn [game-state]
                             (assoc game-state

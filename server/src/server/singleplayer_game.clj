@@ -49,7 +49,7 @@
       (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 1) :head (snake1 0)}}))))
 
 ;grow snake when it eats the ball and generate new ball
-(defn update-game-on-eat [game-state]
+(defn update-game-on-eat [game-state grid-size]
   (let [[head-s1 & _] (:snake1 @game-state)
         fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
     (when (= fixed-ball head-s1)
@@ -67,7 +67,7 @@
       (while (not @stop-game)
         (Thread/sleep 100)
         (ws/send (:socket player1) (pr-str @game-state))
-        (update-game-on-eat game-state)
+        (update-game-on-eat game-state grid-size)
         (swap! game-state (fn [game-state]
                             (assoc game-state
                                    :snake1 (move-snake (:snake1 game-state) (:direction (:snake1 @snake-directions)) grid-size field-size))))
