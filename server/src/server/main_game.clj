@@ -3,8 +3,7 @@
    [ring.websocket :as ws]
    [server.game-helper-func :refer [find-players-by-socket
                                     generate-valid-coordinate-pair-ball
-                                    in-bounds? init-game-state
-                                    update-power-consumed vector-contains?]]))
+                                    in-bounds? init-game-state vector-contains?]]))
 
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -22,7 +21,7 @@
   (reset! stop-flag true))
 
 ;update snake position
-(defn move-snake [snake direction speed] 
+(defn move-snake [snake direction speed]
   (let [[x y] (snake 0)
         new-head (case direction
                    :up    [x (- y speed)]
@@ -32,7 +31,7 @@
     (into [new-head] (subvec snake 0 (dec (count snake))))))
 
 ;update snake direction
-(defn change-direction [player-socket dir] 
+(defn change-direction [player-socket dir]
   (let [snakes-direction (find-players-by-socket player-socket @online-games)
         [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
                          [:snake1 (:snake1 @snakes-direction)]
@@ -58,21 +57,21 @@
          (vector-contains? (subvec snake1 1) (snake1 0))
          (>= ((:score @game-state) 1) end-score))
       (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
-                                       :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
+                                            :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
       (if (or
            (false? (in-bounds? (snake2 0) field-size grid-size))
            (vector-contains? snake1 (snake2 0))
            (vector-contains? (subvec snake2 1) (snake2 0))
            (>= ((:score @game-state) 0) end-score))
         (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
-                                         :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})
+                                              :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})
         nil))))
 
 ;grow snake when it eats the ball and generate new ball
 (defn update-game-on-eat [game-state grid-size]
   (let [[head-s1 & _] (:snake1 @game-state)
         [head-s2 & _] (:snake2 @game-state)
-        fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))] 
+        fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
     (if (= fixed-ball head-s1)
       (swap! game-state (fn [game-state] (assoc game-state
                                                 :snake1 (conj (:snake1 game-state) [-1 -1])
@@ -85,6 +84,29 @@
                                                   :score [((:score game-state) 0) (inc ((:score game-state) 1))])))
         nil))))
 
+;generate power on the field
+(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
+  (future
+    (while (not @stop-game)
+      (Thread/sleep (+ 6000 (rand-int 3001)))
+      (let [power (rand-nth power-ups)
+            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
+            duration 3500
+            hehe (if (= (rand-int (count power-ups)) 1) true false)]
+        (if hehe
+          (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates :random true})))
+          (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates}))))
+        (Thread/sleep duration)
+        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))
+
+;update game-state based on power
+(defn update-power-consumed [game-state sn-consum sn-opp power-val]
+  (let [sn-consum-v (sn-consum game-state)
+        sn-consum-size (count sn-consum-v)]
+    (case power-val
+      "+3" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1] [-1 -1]) :power nil)
+      "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state))))
+
 ;update game on consumed power
 (defn update-game-on-power [game-state]
   (when-let [power (:power @game-state)]
@@ -96,18 +118,6 @@
         (if (= power-cord head-s2)
           (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
           nil)))))
-
-;generate power on the field
-(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
-  (future 
-    (while (not @stop-game)
-      (Thread/sleep (+ 6000 (rand-int 3001)))
-      (let [power (rand-nth power-ups)
-            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
-            duration 3500]
-        (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates})))
-        (Thread/sleep duration)
-        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))
 
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
@@ -128,13 +138,13 @@
                                    :snake1 (:snake1 game-state)
                                    :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size))))
         (snake-collisions game-state stop-game final-score player1 player2)
-        (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true)))) 
+        (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))
       (ws/send (:socket player2) (pr-str @final-score))
       (ws/close (:socket player1))
       (ws/close (:socket player2)))))
-    
+
 ;start the game
 (defn start-game [player1 player2]
   (let [game-id (str (:id player1) (:id player2))

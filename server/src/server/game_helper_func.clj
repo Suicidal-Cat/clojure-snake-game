@@ -56,15 +56,6 @@
             players))
         online-games))
 
-;update game-state based on power
-(defn update-power-consumed [game-state sn-consum sn-opp power-val]
-  (let [sn-consum-v (sn-consum game-state)
-        sn-consum-size (count sn-consum-v)]
-    (case power-val
-      "+3" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1] [-1 -1]) :power nil)
-      "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state))))
-
-
 ;;25 main game
 ;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
 ;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]

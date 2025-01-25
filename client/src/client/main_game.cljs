@@ -1,11 +1,11 @@
 (ns client.main-game
-   (:require
-    [reagent.core :as r]
-    [quil.core :as q]
-    [clojure.edn :as edn]))
+  (:require
+   [reagent.core :as r]
+   [quil.core :as q]
+   [clojure.edn :as edn]))
 
 ; Atom za čuvanje ss-a
-(def img-atom (atom nil)) 
+(def img-atom (atom nil))
 
 (def score (r/atom [0 0]))
 (def game-state (r/atom nil))
@@ -32,7 +32,7 @@
 (defn stop-game [data]
   (let [winner (:winner data)
         [hx hy] (mapv #(* % 2) (:head winner))
-        loser (:loser data)] 
+        loser (:loser data)]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
     (reset! stop-game-flag true)))
 
@@ -47,7 +47,7 @@
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
-                                        (reset! score (:score data)) 
+                                        (reset! score (:score data))
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
     (let [handle-keypress (fn handle-keypress [e]
@@ -86,11 +86,13 @@
   (q/background 0)
   (draw-grid-border grid-size)
   (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 20 20)
+  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 24 24)
   (when-let [power (:power @game-state)]
-    (case (:value power)
-      "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))
-      "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 20 20))))
+    (if (:random power)
+      (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
+      (case (:value power)
+        "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
+        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24)))))
   (q/stroke 0)
   (q/stroke-weight 0)
   (q/fill 0 255 0)
