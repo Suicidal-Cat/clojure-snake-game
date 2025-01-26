@@ -1,8 +1,9 @@
 (ns client.singleplayer-game
   (:require
-    [reagent.core :as r]
-    [quil.core :as q]
-    [clojure.edn :as edn]))
+   [reagent.core :as r]
+   [quil.core :as q]
+   [clojure.edn :as edn]
+   [client.helper-func :as hf :refer [save-region-screenshot!]]))
 
 ; Atom za čuvanje ss-a
 (def img-atom (atom nil)) 
@@ -15,23 +16,11 @@
 (def random-id (atom 0))
 
 
-;take a screenshoot of the canvas
-(defn save-region-screenshot! [x y width height]
-  (let [canvas (.getElementById js/document "defaultCanvas0")
-        ctx (.getContext canvas "2d")
-        image-data (.getImageData ctx x y width height)
-        temp-canvas (js/document.createElement "canvas")
-        temp-ctx (.getContext temp-canvas "2d")]
-    (set! (.-width temp-canvas) width)
-    (set! (.-height temp-canvas) height)
-    (.putImageData temp-ctx image-data 0 0)
-    (let [base64 (.toDataURL temp-canvas)]
-      (reset! img-atom base64))))
-
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
-        [hx hy] (mapv #(* % 2) (:head winner))] 
+        [hx hy] (mapv #(* % 2) (:head winner))]
+    (println "yesss")
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
     (reset! stop-game-flag true)))
 
@@ -46,7 +35,7 @@
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
-                                        (reset! score (:score data)) 
+                                        (reset! score (:score data))
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
     (let [handle-keypress (fn handle-keypress [e]
@@ -75,12 +64,13 @@
   (doseq [y (range 0 (q/height) grid-size)]
     (q/line 0 y (q/width) y)))
 
-;main draw
-(defn draw []
-  (q/background 0)
-  (draw-grid-border grid-size)
+;draw food
+(defn draw-food []
   (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 25 25)
+  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 27 27))
+
+;draw snake
+(defn draw-snake []
   (q/stroke 0)
   (q/stroke-weight 0)
   (q/fill 255 0 0)
@@ -88,6 +78,13 @@
     (doseq [[x y] (:snake1 @game-state)]
       (q/image im x y)))
   (when @stop-game-flag (q/no-loop)))
+
+;main draw
+(defn draw []
+  (q/background 0)
+  (draw-grid-border grid-size)
+  (draw-food)
+  (draw-snake))
 
 ;start the game
 (defn start_game []

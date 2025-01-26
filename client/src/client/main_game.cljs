@@ -2,7 +2,8 @@
   (:require
    [reagent.core :as r]
    [quil.core :as q]
-   [clojure.edn :as edn]))
+   [clojure.edn :as edn]
+   [client.helper-func :as hf :refer [save-region-screenshot!]]))
 
 ; Atom za čuvanje ss-a
 (def img-atom (atom nil))
@@ -14,19 +15,6 @@
 (def stop-game-flag (atom false))
 (def random-id (atom 0))
 
-
-;take a screenshoot of the canvas
-(defn save-region-screenshot! [x y width height]
-  (let [canvas (.getElementById js/document "defaultCanvas0")
-        ctx (.getContext canvas "2d")
-        image-data (.getImageData ctx x y width height)
-        temp-canvas (js/document.createElement "canvas")
-        temp-ctx (.getContext temp-canvas "2d")]
-    (set! (.-width temp-canvas) width)
-    (set! (.-height temp-canvas) height)
-    (.putImageData temp-ctx image-data 0 0)
-    (let [base64 (.toDataURL temp-canvas)]
-      (reset! img-atom base64))))
 
 ;stoping game
 (defn stop-game [data]
@@ -81,18 +69,22 @@
   (doseq [y (range grid-size (- (q/height) grid-size) grid-size)]
     (q/line 0 y (q/width) y)))
 
-;main draw
-(defn draw []
-  (q/background 0)
-  (draw-grid-border grid-size)
+;draw food
+(defn draw-food []
   (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 24 24)
+  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 24 24))
+
+;draw power
+(defn draw-power []
   (when-let [power (:power @game-state)]
     (if (:random power)
       (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
       (case (:value power)
         "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
-        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24)))))
+        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))))))
+
+;draw snakes
+(defn draw-snakes []
   (q/stroke 0)
   (q/stroke-weight 0)
   (q/fill 0 255 0)
@@ -103,6 +95,14 @@
     (doseq [[x y] (:snake2 @game-state)]
       (q/image im x y)))
   (when @stop-game-flag (q/no-loop)))
+
+;main draw
+(defn draw []
+  (q/background 0)
+  (draw-grid-border grid-size)
+  (draw-food)
+  (draw-power)
+  (draw-snakes))
 
 ;start the game
 (defn start_game []

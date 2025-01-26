@@ -1,8 +1,9 @@
 (ns client.core
     (:require
      [client.components :refer [canvas game-score profile]]
-     [client.main-game :as main :refer [img-atom]]
+     [client.main-game :as main]
      [client.singleplayer-game :as single]
+     [client.helper-func :as h :refer [img-atom]]
      [reagent.core :as r]
      [reagent.dom :as rdom]))
 
