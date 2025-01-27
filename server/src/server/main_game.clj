@@ -119,6 +119,12 @@
           (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
           nil)))))
 
+;update snakes positions
+(defn update-snakes-positions [game-state snake-directions]
+  (assoc game-state
+         :snake1 (:snake1 game-state)
+         :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size)))
+
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
@@ -133,10 +139,7 @@
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state grid-size)
         (update-game-on-power game-state)
-        (swap! game-state (fn [game-state]
-                            (assoc game-state
-                                   :snake1 (:snake1 game-state)
-                                   :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size))))
+        (swap! game-state update-snakes-positions snake-directions)
         (snake-collisions game-state stop-game final-score player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
