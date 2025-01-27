@@ -46,7 +46,7 @@
 (defn snake-collisions [game-state stop-game final-score player1]
   (let [snake1 (:snake1 @game-state)]
     (when (vector-contains? (subvec snake1 1) (snake1 0))
-      (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 1) :head (snake1 0)}}))))
+      (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}}))))
 
 ;grow snake when it eats the ball and generate new ball
 (defn update-game-on-eat [game-state grid-size]

@@ -5,8 +5,6 @@
    [clojure.edn :as edn]
    [client.helper-func :as hf :refer [save-region-screenshot!]]))
 
-; Atom za čuvanje ss-a
-(def img-atom (atom nil))
 
 (def score (r/atom [0 0]))
 (def game-state (r/atom nil))
@@ -93,7 +91,10 @@
   (q/fill 255 0 0)
   (let [im (q/state :image)]
     (doseq [[x y] (:snake2 @game-state)]
-      (q/image im x y)))
+      (q/image im x y))))
+
+;stop drawing
+(defn stop-drwing []
   (when @stop-game-flag (q/no-loop)))
 
 ;main draw
@@ -102,7 +103,8 @@
   (draw-grid-border grid-size)
   (draw-food)
   (draw-power)
-  (draw-snakes))
+  (draw-snakes)
+  (stop-drwing))
 
 ;start the game
 (defn start_game []

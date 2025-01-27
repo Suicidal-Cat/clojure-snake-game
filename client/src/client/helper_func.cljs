@@ -1,6 +1,7 @@
-(ns client.helper-func)
+(ns client.helper-func
+  (:require [reagent.core :as r]))
 
-(def img-atom (atom nil))
+(def img-atom (r/atom nil))
 
 ;take a screenshoot of the canvas
 (defn save-region-screenshot! [x y width height]
