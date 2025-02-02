@@ -10,6 +10,7 @@
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
+(def circle-radius 24); radius for draw generation
 (def stop-game-flag (atom false))
 (def random-id (atom 0))
 
@@ -70,16 +71,16 @@
 ;draw food
 (defn draw-food []
   (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 24 24))
+  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) circle-radius circle-radius))
 
 ;draw power
 (defn draw-power []
   (when-let [power (:power @game-state)]
     (if (:random power)
-      (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
+      (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
       (case (:value power)
-        "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
-        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
+        "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
+        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
         "boom" (do (q/fill 196 112 112) (q/rect (- ((:cord power) 0) (/ grid-size 2)) (- ((:cord power) 1) (/ grid-size 2)) grid-size grid-size))))))
 
 ;draw snakes

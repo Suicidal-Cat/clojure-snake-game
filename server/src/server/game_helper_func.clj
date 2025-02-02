@@ -16,6 +16,7 @@
     (+ grid-size (* grid-size (rand-int num-cells)))))
 
 ;generate valid coordinate pair
+;may need update so its not in front of the snake
 (defn generate-valid-coordinate-pair-ball [field-size grid-size snake1 snake2]
   (loop []
     (let [x (random-coordinate field-size grid-size)
