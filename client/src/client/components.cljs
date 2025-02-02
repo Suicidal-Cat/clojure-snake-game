@@ -1,7 +1,8 @@
 (ns client.components
   (:require [client.main-game :as main]
             [client.singleplayer-game :as single]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [client.helper-func :as h :refer [img-atom]]))
 
 (defonce app-state (r/atom {:show-game false}))
 
@@ -20,10 +21,14 @@
          :alt "snake profile"
          :class "snake-profile"}])
 
+(defn screenshoot-canvas []
+  (when-let [screenshot @img-atom]
+    [:img {:src screenshot :alt "Game Region Screenshot" :class "screenshot-img"}]))
+
 (defn end-game-pop-up []
   [:div {:class "end-game-dialog"}])
 
-(defn game-layout []
+(defn page-layout []
   (when-not (:show-game @app-state)
     [:div {:class "game-cont"}
      [:div {:class "start-game"}
