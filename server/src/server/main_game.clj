@@ -8,7 +8,7 @@
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
 (def end-score 20) ;goal that player want to accomplish
-(def power-ups ["-3","+3"])
+(def power-ups ["-3","+3","boom"])
 
 ;snakes-direction hash-map - (:snake1 plyer1 :snake2 player2)
 ;player - hash-map (:socket socket :direction direction)
@@ -92,7 +92,7 @@
       (let [power (rand-nth power-ups)
             cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
             duration 3500
-            hehe (if (= (rand-int (count power-ups)) 1) true false)]
+            hehe (if (and (not= power "boom") (= (rand-int (count power-ups)) 1)) true false)]
         (if hehe
           (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates :random true})))
           (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates}))))
@@ -105,19 +105,25 @@
         sn-consum-size (count sn-consum-v)]
     (case power-val
       "+3" (assoc game-state sn-opp (conj (sn-opp game-state) [-1 -1] [-1 -1] [-1 -1]) :power nil)
-      "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state))))
+      "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state)
+      "boom" (assoc game-state :lost sn-consum))))
 
 ;update game on consumed power
-(defn update-game-on-power [game-state]
+(defn update-game-on-power [game-state final-score stop-game player1 player2]
   (when-let [power (:power @game-state)]
     (let [[head-s1 & _] (:snake1 @game-state)
           [head-s2 & _] (:snake2 @game-state)
           power-cord (mapv #(- % (/ grid-size 2)) (:cord power))]
       (if (= power-cord head-s1)
-        (swap! game-state (fn [game-state] (update-power-consumed game-state :snake1 :snake2 (:value power))))
-        (if (= power-cord head-s2)
+        (do (swap! game-state (fn [game-state] (update-power-consumed game-state :snake1 :snake2 (:value power))))
+            (when (:lost game-state)
+              (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}
+                                                    :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}})))
+        (when (= power-cord head-s2)
           (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
-          nil)))))
+          (when (:lost @game-state)
+            (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}
+                                                  :loser {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}})))))))
 
 ;update snakes positions
 (defn update-snakes-positions [game-state snake-directions]
@@ -138,7 +144,7 @@
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
         (update-game-on-eat game-state grid-size)
-        (update-game-on-power game-state)
+        (update-game-on-power game-state final-score stop-game player1 player2)
         (swap! game-state update-snakes-positions snake-directions)
         (snake-collisions game-state stop-game final-score player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))

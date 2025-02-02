@@ -79,7 +79,8 @@
       (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
       (case (:value power)
         "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
-        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))))))
+        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) 24 24))
+        "boom" (do (q/fill 196 112 112) (q/rect (- ((:cord power) 0) (/ grid-size 2)) (- ((:cord power) 1) (/ grid-size 2)) grid-size grid-size))))))
 
 ;draw snakes
 (defn draw-snakes []
