@@ -3,7 +3,8 @@
    [ring.websocket :as ws]
    [server.game-helper-func :refer [find-players-by-socket
                                     generate-valid-coordinate-pair-ball
-                                    in-bounds? init-game-state vector-contains?]]))
+                                    in-bounds? init-game-state inside?
+                                    vector-contains?]]))
 
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -58,14 +59,13 @@
          (>= ((:score @game-state) 1) end-score))
       (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
                                             :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
-      (if (or
-           (false? (in-bounds? (snake2 0) field-size grid-size))
-           (vector-contains? snake1 (snake2 0))
-           (vector-contains? (subvec snake2 1) (snake2 0))
-           (>= ((:score @game-state) 0) end-score))
+      (when (or
+             (false? (in-bounds? (snake2 0) field-size grid-size))
+             (vector-contains? snake1 (snake2 0))
+             (vector-contains? (subvec snake2 1) (snake2 0))
+             (>= ((:score @game-state) 0) end-score))
         (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
-                                              :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})
-        nil))))
+                                              :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})))))
 
 ;grow snake when it eats the ball and generate new ball
 (defn update-game-on-eat [game-state grid-size]
@@ -97,7 +97,9 @@
           (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates :random true})))
           (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates}))))
         (Thread/sleep duration)
-        (swap! game-state (fn [game-state] (assoc game-state :power nil)))))))
+        (if (= power "boom")
+          (swap! game-state (fn [game-state] (assoc-in game-state [:power, :value] "boomed")))
+          (swap! game-state (fn [game-state] (assoc game-state :power nil))))))))
 
 ;update game-state based on power
 (defn update-power-consumed [game-state sn-consum sn-opp power-val]
@@ -108,22 +110,39 @@
       "-3" (if (> sn-consum-size 5) (assoc game-state sn-consum (subvec sn-consum-v 0 (- sn-consum-size 3)) :power nil) game-state)
       "boom" (assoc game-state :lost sn-consum))))
 
+;update game on boomed
+(defn update-game-boomed [game-state final-score stop-game player1 player2 snh1 snh2 cord]
+  (let [x (- (cord 0) (* grid-size 3/2))
+        y (- (cord 1) (* grid-size 3/2))
+        size (* grid-size 3)
+        i1 (inside? snh1 x y size size)
+        i2 (inside? snh2 x y size size)]
+    (if (and i1 i2)
+      (end-game-loop stop-game final-score {:draw true})
+      (if i1 (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head snh2}
+                                                   :loser {:id (:id player1) :score ((:score @game-state) 0) :head snh1}})
+          (if i2 (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head snh1}
+                                                         :loser {:id (:id player2) :score ((:score @game-state) 1) :head snh2}})
+              (swap! game-state (fn [game-state] (assoc game-state :power nil))))))))
+
 ;update game on consumed power
 (defn update-game-on-power [game-state final-score stop-game player1 player2]
   (when-let [power (:power @game-state)]
     (let [[head-s1 & _] (:snake1 @game-state)
           [head-s2 & _] (:snake2 @game-state)
           power-cord (mapv #(- % (/ grid-size 2)) (:cord power))]
-      (if (= power-cord head-s1)
-        (do (swap! game-state (fn [game-state] (update-power-consumed game-state :snake1 :snake2 (:value power))))
-            (when (:lost game-state)
-              (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}
-                                                    :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}})))
-        (when (= power-cord head-s2)
-          (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
-          (when (:lost @game-state)
-            (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}
-                                                  :loser {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}})))))))
+      (if (= (:value power) "boomed")
+        (update-game-boomed game-state final-score stop-game player1 player2 head-s1 head-s2 power-cord)
+        (if (= power-cord head-s1)
+          (do (swap! game-state (fn [game-state] (update-power-consumed game-state :snake1 :snake2 (:value power))))
+              (when (:lost game-state)
+                (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}
+                                                      :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}})))
+          (when (= power-cord head-s2)
+            (swap! game-state (fn [game-state] (update-power-consumed game-state :snake2 :snake1 (:value power))))
+            (when (:lost @game-state)
+              (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}
+                                                    :loser {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}}))))))))
 
 ;update snakes positions
 (defn update-snakes-positions [game-state snake-directions]

@@ -2,7 +2,6 @@
 
 ;helper functions
 
-
 ;check if snake part is in playing field
 (defn in-bounds? [[x y] field-size grid-size]
   (and (>= x grid-size)
@@ -17,7 +16,7 @@
 
 ;generate valid coordinate pair
 ;may need update so its not in front of the snake
-(defn generate-valid-coordinate-pair-ball [field-size grid-size snake1 snake2]
+(defn generate-valid-coordinate-pair-ball [field-size grid-size snake1 snake2 & {:keys [offset] :or {offset 0}}]
   (loop []
     (let [x (random-coordinate field-size grid-size)
           y (random-coordinate field-size grid-size)
@@ -25,7 +24,7 @@
       (if (or (some #(= % coordinate) snake1)
               (some #(= % coordinate) snake2))
         (recur)
-        (mapv #(+ (/ grid-size 2) %) coordinate)))))
+        (mapv #(+ (/ grid-size 2) offset %) coordinate)))))
 
 ;init main game-state
 (defn init-game-state [field-size grid-size]
@@ -56,6 +55,13 @@
           (when (some #(= socket (:socket (val %))) @players)
             players))
         online-games))
+
+;check if coordinates are inside given field
+(defn inside? [[x y] x-rec y-rec h-rec w-rec]
+  (and (>= x x-rec)
+       (<= x (+ x-rec w-rec))
+       (>= y y-rec)
+       (<= y (+ y-rec h-rec))))
 
 ;;25 main game
 ;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]

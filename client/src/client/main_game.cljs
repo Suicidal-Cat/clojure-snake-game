@@ -49,9 +49,12 @@
 ;canvas setup
 (defn setup []
   (let [url "/images/snake27.png"]
-    (q/set-state! :image (q/load-image url)))
+    (q/set-state! :image (q/load-image url) :radius 5))
   (q/frame-rate 30)
   (q/background 0))
+
+(defn pulse []
+  (swap! (q/state-atom) assoc :radius (+ 27 (* 8 (Math/sin (/ (q/frame-count) 15.0))))))
 
 ;draw edges and grid
 (defn draw-grid-border [grid-size]
@@ -81,7 +84,8 @@
       (case (:value power)
         "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
         "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
-        "boom" (do (q/fill 196 112 112) (q/rect (- ((:cord power) 0) (/ grid-size 2)) (- ((:cord power) 1) (/ grid-size 2)) grid-size grid-size))))))
+        "boom" (do (pulse) (q/fill 196 112 112) (q/ellipse (first (:cord power)) (last (:cord power)) (q/state :radius) (q/state :radius)))
+        nil))))
 
 ;draw snakes
 (defn draw-snakes []

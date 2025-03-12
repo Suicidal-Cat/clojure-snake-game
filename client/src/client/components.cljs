@@ -9,7 +9,7 @@
 (defn canvas []
   [:div {:id "game-canvas"}])
 
-(defn game-score [score]
+(defn game-score []
   (when (:show-game @app-state)
     (let [score main/score]
       [:div {:class "score"}
