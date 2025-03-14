@@ -13,6 +13,19 @@
       (in-bounds? [50 10] 200 20) => false
       (in-bounds? [50 190] 200 20) => false)
 
+(facts "inside? check if cords are inside rectangle"
+       (fact "coordinates are inside the rectangle"
+             (inside? [5 5] 0 0 10 10) => true
+             (inside? [2 3] 1 1 5 5) => true
+             (inside? [9 9] 0 0 10 10) => true
+             (inside? [5 0] 0 0 10 10) => true)
+       
+       (fact "coordinates are outside the rectangle"
+             (inside? [15 15] 0 0 10 10) => false
+             (inside? [0 0] 1 1 5 5) => false
+             (inside? [10 10] 0 0 10 10) => false
+             (inside? [10 5] 0 0 10 10) => false))
+
 (fact "vector-contains? checks if an element is in a vector"
       (vector-contains? [1 2 3] 2) => true
       (vector-contains? [1 2 3] 4) => nil

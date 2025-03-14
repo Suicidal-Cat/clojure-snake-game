@@ -9,20 +9,29 @@
        (>= y grid-size)
        (< y (- field-size grid-size))))
 
+;check if coordinates are inside given field
+(defn inside? [[x y] x-rec y-rec h-rec w-rec]
+  (and (>= x x-rec)
+       (< x (+ x-rec w-rec))
+       (>= y y-rec)
+       (< y (+ y-rec h-rec))))
+
 ;generate random cordinates in playing field
 (defn random-coordinate [field-size grid-size]
   (let [num-cells (/ (- field-size (* 2 grid-size)) grid-size)]
     (+ grid-size (* grid-size (rand-int num-cells)))))
 
 ;generate valid coordinate pair
-;may need update so its not in front of the snake
-(defn generate-valid-coordinate-pair-ball [field-size grid-size snake1 snake2 & {:keys [offset] :or {offset 0}}]
+(defn generate-valid-coordinate-pair-ball [field-size grid-size sn1 sn2 & {:keys [offset] :or {offset 0}}]
   (loop []
     (let [x (random-coordinate field-size grid-size)
           y (random-coordinate field-size grid-size)
-          coordinate [x y]]
-      (if (or (some #(= % coordinate) snake1)
-              (some #(= % coordinate) snake2))
+          coordinate [x y]
+          safe-area (* grid-size 2)]
+      (if (or (some #(= % coordinate) sn1)
+              (some #(= % coordinate) sn2)
+              (inside? coordinate (- ((sn1 0) 0) safe-area) (- ((sn1 0) 1) safe-area) (* safe-area 2) (* safe-area 2))
+              (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)))
         (recur)
         (mapv #(+ (/ grid-size 2) offset %) coordinate)))))
 
@@ -55,24 +64,3 @@
           (when (some #(= socket (:socket (val %))) @players)
             players))
         online-games))
-
-;check if coordinates are inside given field
-(defn inside? [[x y] x-rec y-rec h-rec w-rec]
-  (and (>= x x-rec)
-       (<= x (+ x-rec w-rec))
-       (>= y y-rec)
-       (<= y (+ y-rec h-rec))))
-
-;;25 main game
-;; game-state (atom {:snake1 [[200 100] [175 100] [150 100] [125 100]]
-;;                   :snake2 [[200 200] [175 200] [150 200] [125 200]]
-;;                   :ball (generate-valid-coordinate-pair-ball field-size grid-size
-;;                                                              [[200 100] [175 100] [150 100] [125 100]]
-;;                                                              [[200 200] [175 200] [150 200] [125 200]])
-;;                   :score [0 0]})
-
-;; 27 594
-;; (hash-map :snake1 [[168 96] [144 96] [120 96] [96 96]]
-;;           :snake2 [[432 504] [456 504] [480 504] [504 504]]
-;;           :ball ball
-;;           :score [0 0])

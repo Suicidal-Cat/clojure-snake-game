@@ -39,14 +39,12 @@
                          [:snake2 (:snake2 @snakes-direction)])
         past-dir (:direction player)
         update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
-    (when (:change-dir (snake @snakes-direction))
-      (if (not= past-dir dir)
+    (when (and (:change-dir (snake @snakes-direction)) (not= past-dir dir))
         (cond
           (and (= past-dir :up) (not= dir :down)) (update-dir)
           (and (= past-dir :down) (not= dir :up)) (update-dir)
           (and (= past-dir :left) (not= dir :right)) (update-dir)
-          (and (= past-dir :right) (not= dir :left)) (update-dir))
-        nil))))
+          (and (= past-dir :right) (not= dir :left)) (update-dir)))))
 
 ;check snake collisions
 (defn snake-collisions [game-state stop-game final-score player1 player2]
@@ -77,12 +75,11 @@
                                                 :snake1 (conj (:snake1 game-state) [-1 -1])
                                                 :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
                                                 :score [(inc ((:score game-state) 0)) ((:score game-state) 1)])))
-      (if (= fixed-ball head-s2)
+      (when (= fixed-ball head-s2)
         (swap! game-state (fn [game-state] (assoc game-state
                                                   :snake2 (conj (:snake2 game-state) [-1 -1])
                                                   :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
-                                                  :score [((:score game-state) 0) (inc ((:score game-state) 1))])))
-        nil))))
+                                                  :score [((:score game-state) 0) (inc ((:score game-state) 1))])))))))
 
 ;generate power on the field
 (defn generate-random-power [game-state stop-game power-ups field-size grid-size]
@@ -90,7 +87,7 @@
     (while (not @stop-game)
       (Thread/sleep (+ 6000 (rand-int 3001)))
       (let [power (rand-nth power-ups)
-            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
+            cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 @game-state) (:snake2 @game-state))
             duration 3500
             hehe (if (and (not= power "boom") (= (rand-int (count power-ups)) 1)) true false)]
         (if hehe
