@@ -7,7 +7,9 @@
                  [ring/ring-core "1.13.0"]
                  [ring/ring-jetty-adapter "1.13.0"]
                  [compojure "1.7.1"]
-                 [aero "1.1.6"]]
+                 [aero "1.1.6"]
+                 [com.github.seancorfield/next.jdbc "1.3.955"]
+                 [com.mysql/mysql-connector-j "8.1.0"]]
   :main ^:skip-aot server.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

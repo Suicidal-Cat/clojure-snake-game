@@ -49,7 +49,7 @@
 ;canvas setup
 (defn setup []
   (let [url "/images/snake27.png"]
-    (q/set-state! :image (q/load-image url) :radius 5))
+    (q/set-state! :image (q/load-image url) :radius 0))
   (q/frame-rate 30)
   (q/background 0))
 

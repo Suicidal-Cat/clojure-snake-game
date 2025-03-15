@@ -7,7 +7,8 @@
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.websocket :as ws]
    [server.main-game :refer [change-direction start-game]]
-   [server.singleplayer-game :refer [change-direction-single start-game-single]]))
+   [server.singleplayer-game :refer [change-direction-single start-game-single]]
+   [server.db.dbBroker :as db]))
 
 (def config (read-config "config.edn"))
 (def online-players (atom []))

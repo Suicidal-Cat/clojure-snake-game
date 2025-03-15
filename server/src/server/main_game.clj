@@ -4,7 +4,8 @@
    [server.game-helper-func :refer [find-players-by-socket
                                     generate-valid-coordinate-pair-ball
                                     in-bounds? init-game-state inside?
-                                    vector-contains?]]))
+                                    vector-contains?]]
+   [server.db.dbBroker :as db]))
 
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
