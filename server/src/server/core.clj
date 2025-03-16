@@ -3,12 +3,14 @@
   (:require
    [aero.core :refer [read-config]]
    [clojure.edn :as edn]
-   [compojure.core :refer [defroutes GET]]
+   [compojure.core :refer [defroutes GET POST]]
    [ring.adapter.jetty :refer [run-jetty]]
+   [ring.middleware.cors :refer [wrap-cors]]
+   [ring.util.response :refer [header response]]
    [ring.websocket :as ws]
+   [server.db.dbBroker :refer [login]]
    [server.main-game :refer [change-direction start-game]]
-   [server.singleplayer-game :refer [change-direction-single start-game-single]]
-   [server.db.dbBroker :as db]))
+   [server.singleplayer-game :refer [change-direction-single start-game-single]]))
 
 (def config (read-config "config.edn"))
 (def online-players (atom []))
@@ -52,7 +54,19 @@
 
 (defroutes app-routes
   (GET "/" [] "<h1>HELLO<h1>")
+  (POST "/login" req
+    (let [body (-> req :body slurp edn/read-string)
+          username (:username body)
+          password (:password body)
+          user (login username password)]
+      (-> (response (pr-str {:status (if user "success" "unsuccessful") :value (if user user "Wrong credentials")}))
+            (header "Content-Type" "application/edn"))))
   (GET "/ws" [] echo-handler))
 
+(def app
+  (-> app-routes
+      (wrap-cors :access-control-allow-origin [#".*"]
+                 :access-control-allow-methods [:get :post :put :delete])))
+
 (defn -main []
-  (run-jetty app-routes {:port (:server-port config) :join? false}))
+  (run-jetty app {:port (:server-port config) :join? false}))

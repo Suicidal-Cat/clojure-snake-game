@@ -1,8 +1,10 @@
 (ns client.components
-  (:require [client.main-game :as main]
-            [client.singleplayer-game :as single]
-            [reagent.core :as r]
-            [client.helper-func :as h :refer [img-atom]]))
+  (:require
+   [client.api.api-calls :refer [login]]
+   [client.helper-func :as h :refer [img-atom]]
+   [client.main-game :as main]
+   [client.singleplayer-game :as single]
+   [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false}))
 
@@ -28,7 +30,7 @@
 (defn end-game-pop-up []
   [:div {:class "end-game-dialog"}])
 
-(defn page-layout []
+(defn game-layout []
   (when-not (:show-game @app-state)
     [:div {:class "game-cont"}
      [:div {:class "start-game"}
@@ -45,4 +47,23 @@
                  (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
         "SINGLEPLAYER"]]]
      [profile]]))
+
+(defn login-form []
+  (let [message (r/atom "")]
+    [:div
+     [:h2 "Login"]
+     [:form {:on-submit (fn [e]
+                          (.preventDefault e)
+                          (let [form-data (js/FormData. (.-target e))
+                                username (.get form-data "username")
+                                password (.get form-data "password")]
+                            (login username password (fn [result] (println result)))))}
+      [:div
+       [:label "Username: "]
+       [:input {:type "text" :name "username"}]]
+      [:div
+       [:label "Password: "]
+       [:input {:type "password" :name "password"}]]
+      [:button {:type "submit"} "Login"]]
+     [:p @message]]))
 
