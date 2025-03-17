@@ -3,13 +3,12 @@
   (:require
    [aero.core :refer [read-config]]
    [clojure.edn :as edn]
-   [compojure.core :refer [defroutes GET POST]]
+   [compojure.core :refer [GET routes]]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.middleware.cors :refer [wrap-cors]]
-   [ring.util.response :refer [header response]]
    [ring.websocket :as ws]
-   [server.db.dbBroker :refer [login]]
    [server.main-game :refer [change-direction start-game]]
+   [server.routes :refer [app-routes]]
    [server.singleplayer-game :refer [change-direction-single start-game-single]]))
 
 (def config (read-config "config.edn"))
@@ -52,19 +51,13 @@
     :on-close
     (fn [socket code reason] ())}})
 
-(defroutes app-routes
-  (GET "/" [] "<h1>HELLO<h1>")
-  (POST "/login" req
-    (let [body (-> req :body slurp edn/read-string)
-          username (:username body)
-          password (:password body)
-          user (login username password)]
-      (-> (response (pr-str {:status (if user "success" "unsuccessful") :value (if user user "Wrong credentials")}))
-            (header "Content-Type" "application/edn"))))
-  (GET "/ws" [] echo-handler))
+(def all-routes
+  (routes
+   app-routes
+   (GET "/ws" [] echo-handler)))
 
 (def app
-  (-> app-routes
+  (-> all-routes
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-methods [:get :post :put :delete])))
 

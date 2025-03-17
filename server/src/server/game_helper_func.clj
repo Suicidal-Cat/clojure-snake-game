@@ -31,7 +31,7 @@
       (if (or (some #(= % coordinate) sn1)
               (some #(= % coordinate) sn2)
               (inside? coordinate (- ((sn1 0) 0) safe-area) (- ((sn1 0) 1) safe-area) (* safe-area 2) (* safe-area 2))
-              (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)))
+              (if sn2 (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)) false))
         (recur)
         (mapv #(+ (/ grid-size 2) offset %) coordinate)))))
 
