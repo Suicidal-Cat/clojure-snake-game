@@ -10,7 +10,8 @@
                  [compojure "1.7.1"]
                  [aero "1.1.6"]
                  [com.github.seancorfield/next.jdbc "1.3.955"]
-                 [com.mysql/mysql-connector-j "8.1.0"]]
+                 [com.mysql/mysql-connector-j "8.1.0"]
+                 [buddy/buddy-hashers "2.0.167"]]
   :main ^:skip-aot server.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

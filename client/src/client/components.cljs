@@ -1,6 +1,6 @@
 (ns client.components
   (:require
-   [client.api.api-calls :refer [login]]
+   [client.api.api-calls :refer [login register]]
    [client.helper-func :as h :refer [img-atom]]
    [client.main-game :as main]
    [client.singleplayer-game :as single]
@@ -55,15 +55,38 @@
      [:form {:on-submit (fn [e]
                           (.preventDefault e)
                           (let [form-data (js/FormData. (.-target e))
-                                username (.get form-data "username")
+                                email (.get form-data "email")
                                 password (.get form-data "password")]
-                            (login username password (fn [result] (println result)))))}
+                            (login email password (fn [result] (println result)))))}
       [:div
-       [:label "Username: "]
-       [:input {:type "text" :name "username"}]]
+       [:label "Email: "]
+       [:input {:type "email" :name "email" :required true}]]
       [:div
        [:label "Password: "]
-       [:input {:type "password" :name "password"}]]
+       [:input {:type "password" :name "password" :required true :min-length 8}]]
       [:button {:type "submit"} "Login"]]
+     [:p @message]]))
+
+(defn register-form []
+  (let [message (r/atom "")]
+    [:div
+     [:h2 "Register"]
+     [:form {:on-submit (fn [e]
+                          (.preventDefault e)
+                          (let [form-data (js/FormData. (.-target e))
+                                email (.get form-data "email")
+                                username (.get form-data "username")
+                                password (.get form-data "password")]
+                            (register email username password (fn [result] (println result)))))}
+      [:div
+       [:label "Email: "]
+       [:input {:type "email" :name "email" :required true}]]
+      [:div
+       [:label "Username: "]
+       [:input {:type "text" :name "username" :required true :min-length 4}]]
+      [:div
+       [:label "Password: "]
+       [:input {:type "password" :name "password" :required true :min-length 8}]]
+      [:button {:type "submit"} "Register"]]
      [:p @message]]))
 
