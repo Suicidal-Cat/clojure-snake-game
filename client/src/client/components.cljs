@@ -1,12 +1,14 @@
 (ns client.components
   (:require
    [client.api.api-calls :refer [login register]]
-   [client.helper-func :as h :refer [img-atom]]
+   [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
    [client.main-game :as main]
    [client.singleplayer-game :as single]
    [reagent.core :as r]))
 
-(defonce app-state (r/atom {:show-game false}))
+(defonce app-state (r/atom {:show-game false
+                            :logged false
+                            :show-register false}))
 
 (defn canvas []
   [:div {:id "game-canvas"}])
@@ -49,44 +51,49 @@
      [profile]]))
 
 (defn login-form []
-  (let [message (r/atom "")]
-    [:div
-     [:h2 "Login"]
-     [:form {:on-submit (fn [e]
-                          (.preventDefault e)
-                          (let [form-data (js/FormData. (.-target e))
-                                email (.get form-data "email")
-                                password (.get form-data "password")]
-                            (login email password (fn [result] (println result)))))}
-      [:div
-       [:label "Email: "]
-       [:input {:type "email" :name "email" :required true}]]
-      [:div
-       [:label "Password: "]
-       [:input {:type "password" :name "password" :required true :min-length 8}]]
-      [:button {:type "submit"} "Login"]]
-     [:p @message]]))
+  (swap! app-state assoc :logged (some? (get-user-info)))
+  (when (not (:logged @app-state)) (let [message (r/atom "")]
+                                     [:div
+                                      [:h2 "Login"]
+                                      [:form {:on-submit (fn [e]
+                                                           (.preventDefault e)
+                                                           (let [form-data (js/FormData. (.-target e))
+                                                                 email (.get form-data "email")
+                                                                 password (.get form-data "password")]
+                                                             (login email password (fn [result] (if (:id result)
+                                                                                                  (do (set-local-storage "user" result)
+                                                                                                      (swap! app-state assoc :logged true))
+                                                                                                  (swap! app-state assoc :logged false))))))}
+                                       [:div
+                                        [:label "Email: "]
+                                        [:input {:type "email" :name "email" :required true}]]
+                                       [:div
+                                        [:label "Password: "]
+                                        [:input {:type "password" :name "password" :required true :min-length 8}]]
+                                       [:button {:type "submit"} "Login"]]
+                                      [:p @message]])))
 
 (defn register-form []
-  (let [message (r/atom "")]
-    [:div
-     [:h2 "Register"]
-     [:form {:on-submit (fn [e]
-                          (.preventDefault e)
-                          (let [form-data (js/FormData. (.-target e))
-                                email (.get form-data "email")
-                                username (.get form-data "username")
-                                password (.get form-data "password")]
-                            (register email username password (fn [result] (println result)))))}
-      [:div
-       [:label "Email: "]
-       [:input {:type "email" :name "email" :required true}]]
-      [:div
-       [:label "Username: "]
-       [:input {:type "text" :name "username" :required true :min-length 4}]]
-      [:div
-       [:label "Password: "]
-       [:input {:type "password" :name "password" :required true :min-length 8}]]
-      [:button {:type "submit"} "Register"]]
-     [:p @message]]))
+  (when (and (:show-register @app-state) (not (:logged @app-state)))
+             (let [message (r/atom "")]
+               [:div
+                [:h2 "Register"]
+                [:form {:on-submit (fn [e]
+                                     (.preventDefault e)
+                                     (let [form-data (js/FormData. (.-target e))
+                                           email (.get form-data "email")
+                                           username (.get form-data "username")
+                                           password (.get form-data "password")]
+                                       (register email username password (fn [result] (println result)))))}
+                 [:div
+                  [:label "Email: "]
+                  [:input {:type "email" :name "email" :required true}]]
+                 [:div
+                  [:label "Username: "]
+                  [:input {:type "text" :name "username" :required true :min-length 4}]]
+                 [:div
+                  [:label "Password: "]
+                  [:input {:type "password" :name "password" :required true :min-length 8}]]
+                 [:button {:type "submit"} "Register"]]
+                [:p @message]])))
 

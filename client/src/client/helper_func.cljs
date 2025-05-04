@@ -1,5 +1,6 @@
 (ns client.helper-func
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [clojure.edn :as edn]))
 
 (def img-atom (r/atom nil))
 
@@ -15,3 +16,18 @@
     (.putImageData temp-ctx image-data 0 0)
     (let [base64 (.toDataURL temp-canvas)]
       (reset! img-atom base64))))
+
+(defn set-local-storage [key value]
+  (.setItem js/localStorage key value))
+
+(defn get-local-storage [key]
+  (.getItem js/localStorage key))
+
+(defn get-user-info []
+  (edn/read-string (get-local-storage "user")))
+
+(defn get-player-id []
+  (let [user (get-user-info)]
+    (if (some? user)
+      (:id user)
+      (.now js/Date))))

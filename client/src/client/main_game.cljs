@@ -1,9 +1,9 @@
 (ns client.main-game
   (:require
-   [reagent.core :as r]
-   [quil.core :as q]
+   [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
    [clojure.edn :as edn]
-   [client.helper-func :as hf :refer [save-region-screenshot!]]))
+   [quil.core :as q]
+   [reagent.core :as r]))
 
 
 (def score (r/atom [0 0]))
@@ -12,7 +12,7 @@
 (def grid-size 27) ;grid size in px
 (def circle-radius 24); radius for draw generation
 (def stop-game-flag (atom false))
-(def random-id (atom 0))
+(def player-id (atom 0))
 
 
 ;stoping game
@@ -28,8 +28,8 @@
   (let [ws (js/WebSocket. "ws://localhost:8080/ws")]
     (.addEventListener ws "open" (fn [_]
                                    (reset! stop-game-flag false)
-                                   (let [id (rand-int 1000)]
-                                     (reset! random-id id)
+                                   (let [id (get-player-id)]
+                                     (reset! player-id id)
                                      (.send ws {:id id}))))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]

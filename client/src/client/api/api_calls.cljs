@@ -1,5 +1,6 @@
 (ns client.api.api-calls
-  (:require [clojure.edn :as edn]))
+  (:require
+   [clojure.edn :as edn]))
 
 (defn login [email password callback]
   (-> (js/fetch "http://localhost:8080/login"
