@@ -25,7 +25,15 @@
 
 ;websocket communication
 (defn connect_socket []
-  (let [ws (js/WebSocket. "ws://localhost:8080/ws")]
+  (let [ws (js/WebSocket. "ws://localhost:8080/ws")
+        handle-keypress (fn handle-keypress [e]
+                          (let [key (.-key e)]
+                            (case key
+                              "ArrowUp" (.send ws {:direction :up})
+                              "ArrowDown" (.send ws {:direction :down})
+                              "ArrowLeft" (.send ws {:direction :left})
+                              "ArrowRight" (.send ws {:direction :right}))))]
+    (.addEventListener js/document "keydown" handle-keypress)
     (.addEventListener ws "open" (fn [_]
                                    (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
@@ -36,15 +44,8 @@
                                         (reset! game-state data)
                                         (reset! score (:score data))
                                         (when (:winner data) (stop-game data)))))
-    (.addEventListener ws "close" (fn [_] (println "WebSocket closed")))
-    (let [handle-keypress (fn handle-keypress [e]
-                            (let [key (.-key e)]
-                              (case key
-                                "ArrowUp" (.send ws {:direction :up})
-                                "ArrowDown" (.send ws {:direction :down})
-                                "ArrowLeft" (.send ws {:direction :left})
-                                "ArrowRight" (.send ws {:direction :right}))))]
-      (.addEventListener js/document "keydown" handle-keypress))))
+    (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
+                                    (.removeEventListener js/document "keydown" handle-keypress)))))
 
 ;canvas setup
 (defn setup []
