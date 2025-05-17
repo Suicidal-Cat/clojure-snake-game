@@ -3,7 +3,8 @@
    [ring.websocket :as ws]
    [server.game-helper-func :refer [find-players-by-socket game-state-single
                                     generate-valid-coordinate-pair-ball
-                                    vector-contains?]]))
+                                    vector-contains?]]
+   [server.db.dbBroker :as db]))
 
 (def field-size 600) ;field size in px
 (def grid-size 30) ;grid size in px
@@ -16,7 +17,8 @@
 ;stop the game and save the result
 (defn end-game-loop [stop-flag final-score result]
   (reset! final-score result)
-  (reset! stop-flag true))
+  (reset! stop-flag true)
+  (db/save-game @final-score false))
 
 (defn change-direction-single [player-socket dir]
   (let [snakes-direction (find-players-by-socket player-socket @online-games)

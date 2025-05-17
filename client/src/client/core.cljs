@@ -14,7 +14,8 @@
    [game-score]
    [canvas]
    [screenshoot-canvas]
-   [login-form]])
+   [login-form]
+   [register-form]])
 
 
 (rdom/render [app] (.getElementById js/document "app"))

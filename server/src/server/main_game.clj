@@ -20,7 +20,8 @@
 ;stop the game and save the result
 (defn end-game-loop [stop-flag final-score result]
   (reset! final-score result)
-  (reset! stop-flag true))
+  (reset! stop-flag true)
+  (db/save-game @final-score true))
 
 ;update snake position
 (defn move-snake [snake direction speed]
@@ -116,7 +117,9 @@
         i1 (inside? snh1 x y size size)
         i2 (inside? snh2 x y size size)]
     (if (and i1 i2)
-      (end-game-loop stop-game final-score {:draw true})
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head snh2}
+                                            :loser {:id (:id player1) :score ((:score @game-state) 0) :head snh1}
+                                            :draw true})
       (if i1 (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head snh2}
                                                    :loser {:id (:id player1) :score ((:score @game-state) 0) :head snh1}})
           (if i2 (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head snh1}
