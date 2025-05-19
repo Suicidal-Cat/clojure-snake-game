@@ -23,6 +23,11 @@
 (defn get-gametypes []
   (when ds (jdbc/execute! ds ["SELECT * FROM Gametypes"])))
 
+;; get user by id
+(defn get-user-by-id [user-id]
+  (when ds (let [user (jdbc/execute! ds ["SELECT * FROM Users WHERE Id=?" user-id])]
+             (if (empty? user) nil user))))
+
 ;; login user
 (defn login [email password]
   (when ds
@@ -41,14 +46,19 @@
       (if data true nil))))
 
 ;; saves game result
-(defn save-game [game-result isMultiPlayer]
+(defn save-game [game-result is-multi-player]
   (when ds
-    (let [winnerId (:id (:winner game-result))
-          loserId (:id (:loser game-result))
-          score (str (:score (:winner game-result)) " - " (if isMultiPlayer (:score (:loser game-result)) 0))
+    (let [winnerId (:users/Id (first (get-user-by-id (:id (:winner game-result)))))
+          loserId (:users/Id (first (get-user-by-id (:id (:loser game-result)))))
+          score (str (:score (:winner game-result)) " - " (if is-multi-player (:score (:loser game-result)) 0))
           game-types (get-gametypes)
-          game-type (if isMultiPlayer (:multiplayer game-types-enum) (:singleplayer game-types-enum))
+          game-type (if is-multi-player (:multiplayer game-types-enum) (:singleplayer game-types-enum))
           game-typeId (some #(when (= (:gametypes/Name %) game-type) (:gametypes/Id %)) game-types)]
-      (jdbc/execute! ds
-                     ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
-                                     VALUES (?,?,?,?,?,?)" winnerId loserId score winnerId game-typeId (current-datetime)]))))
+      (when (or winnerId loserId)
+        (if (:draw game-result)
+        (jdbc/execute! ds
+                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
+                                             VALUES (?,?,?,?,?,?)" winnerId loserId score nil game-typeId (current-datetime)])
+        (jdbc/execute! ds
+                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
+                                             VALUES (?,?,?,?,?,?)" winnerId loserId score winnerId game-typeId (current-datetime)]))))))
