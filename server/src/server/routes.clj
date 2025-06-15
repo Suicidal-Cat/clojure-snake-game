@@ -3,7 +3,8 @@
    [clojure.edn :as edn]
    [compojure.core :refer [defroutes POST]]
    [ring.util.response :refer [header response]]
-   [server.db.dbBroker :refer [get-leaderboard login register]]))
+   [server.db.dbBroker :refer [get-leaderboard get-match-history login
+                               register]]))
 
 
 (defn response-data [status value]
@@ -28,4 +29,9 @@
     (let [body (-> req :body slurp edn/read-string)
           userId (:userId body)
           result (get-leaderboard userId)]
+      (response-data (if result "successful" "unsuccessful") (if result result false))))
+  (POST "/match-history" req
+    (let [body (-> req :body slurp edn/read-string)
+          userId (:userId body)
+          result (get-match-history userId)]
       (response-data (if result "successful" "unsuccessful") (if result result false)))))

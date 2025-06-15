@@ -1,6 +1,6 @@
 (ns client.components
   (:require
-   [client.api.api-calls :refer [get-leaderboard login register]]
+   [client.api.api-calls :refer [get-match-history login register]]
    [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
    [client.main-game :as main]
    [client.singleplayer-game :as single]
@@ -9,6 +9,8 @@
 (defonce app-state (r/atom {:show-game false
                             :logged false
                             :show-register false}))
+
+(get-match-history 5 (fn [result] (println result)))
 
 (defn canvas []
   [:div {:id "game-canvas"}])

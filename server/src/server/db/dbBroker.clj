@@ -73,7 +73,12 @@
                        ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
                                              VALUES (?,?,?,?,?,?)" winnerId loserId score winnerId game-typeId (current-datetime)]))))))
 
-;; get leaderboard
+;; get leaderboard for user
 (defn get-leaderboard [userId]
   (when ds
     (normalize-db-result (sql/query ds ["CALL GetPlayerStats(?)" userId]))))
+
+;; get match-history for user
+(defn get-match-history [userId]
+  (when ds
+    (normalize-db-result (sql/query ds ["CALL GetMatchHistory(?)" userId]))))
