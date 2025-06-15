@@ -3,7 +3,7 @@
    [clojure.edn :as edn]
    [compojure.core :refer [defroutes POST]]
    [ring.util.response :refer [header response]]
-   [server.db.dbBroker :refer [login register]]))
+   [server.db.dbBroker :refer [get-leaderboard login register]]))
 
 
 (defn response-data [status value]
@@ -23,4 +23,9 @@
           username (:username body)
           password (:password body)
           result (register email username password)]
-      (response-data (if result "successful" "unsuccessful") (if result true false)))))
+      (response-data (if result "successful" "unsuccessful") (if result true false))))
+  (POST "/leaderboard" req
+    (let [body (-> req :body slurp edn/read-string)
+          userId (:userId body)
+          result (get-leaderboard userId)]
+      (response-data (if result "successful" "unsuccessful") (if result result false)))))

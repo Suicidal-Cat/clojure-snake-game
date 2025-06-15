@@ -3,7 +3,9 @@
    [aero.core :refer [read-config]]
    [clojure.edn :as edn]
    [next.jdbc :as jdbc]
-   [buddy.hashers :as hashers])
+   [next.jdbc.sql :as sql]
+   [buddy.hashers :as hashers]
+   [clojure.string :as str])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter]))
 
@@ -15,6 +17,14 @@
   (let [formatter (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm:ss")]
     (.format (LocalDateTime/now) formatter)))
 
+(defn normalize-db-result [rows]
+  (map (fn [row]
+         (->> row
+              (map (fn [[k v]]
+                     [(-> k name str/lower-case keyword)
+                      (if (decimal? v) (double v) v)]))
+              (into {})))
+       rows))
 ;; get config
 (def config (read-config "config.edn"))
 (def ds (if (:disableDB config) nil (jdbc/get-datasource (:db-config config))))
@@ -62,3 +72,8 @@
         (jdbc/execute! ds
                        ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
                                              VALUES (?,?,?,?,?,?)" winnerId loserId score winnerId game-typeId (current-datetime)]))))))
+
+;; get leaderboard
+(defn get-leaderboard [userId]
+  (when ds
+    (normalize-db-result (sql/query ds ["CALL GetPlayerStats(?)" userId]))))

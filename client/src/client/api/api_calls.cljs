@@ -22,3 +22,12 @@
       (.then (fn [response] (.text response)))
       (.then (fn [data]
                (callback (:value (edn/read-string data)))))))
+
+(defn get-leaderboard [userId callback]
+  (-> (js/fetch "http://localhost:8080/leaderboard"
+                (clj->js {:method "POST"
+                          :headers {"Content-Type" "application/edn"}
+                          :body (pr-str {:userId userId})}))
+      (.then (fn [response] (.text response)))
+      (.then (fn [data]
+               (callback (:value (edn/read-string data)))))))
