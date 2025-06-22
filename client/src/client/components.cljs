@@ -10,8 +10,6 @@
                             :logged false
                             :show-register false}))
 
-(get-match-history 5 (fn [result] (println result)))
-
 (defn canvas []
   [:div {:id "game-canvas"}])
 
