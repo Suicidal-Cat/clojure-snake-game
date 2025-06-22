@@ -8,7 +8,10 @@
 
 (defonce app-state (r/atom {:show-game false
                             :logged false
-                            :show-register false}))
+                            :active-tab (r/atom 1)}))
+
+
+(swap! app-state assoc :logged (some? (get-user-info)))
 
 (defn canvas []
   [:div {:id "game-canvas"}])
@@ -51,7 +54,6 @@
      [profile]]))
 
 (defn login-form []
-  (swap! app-state assoc :logged (some? (get-user-info)))
   (when (not (:logged @app-state)) (let [message (r/atom "")]
                                      [:div
                                       [:h2 "Login"]
@@ -74,7 +76,7 @@
                                       [:p @message]])))
 
 (defn register-form []
-  (when (and (:show-register @app-state) (not (:logged @app-state)))
+  (when (not (:logged @app-state))
              (let [message (r/atom "")]
                [:div
                 [:h2 "Register"]
@@ -96,4 +98,26 @@
                   [:input {:type "password" :name "password" :required true :min-length 8}]]
                  [:button {:type "submit"} "Register"]]
                 [:p @message]])))
+
+(defn tab-header [label index]
+  [:div {:class "tab"
+         :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
+         :on-click #(swap! (:active-tab @app-state) (fn [_] index))}
+   label])
+
+(defn tab-content []
+  (case @(:active-tab @app-state)
+    1 (if (:logged @app-state) [:div "Meow1"] [login-form]) 
+    2 (if (:logged @app-state)  [:div "Meow2"] [register-form])))
+
+(defn user-dialog []
+  [:div {:class "user-dialog"}
+   (if (:logged @app-state)
+     [:<>
+      [tab-header "Leaderboard" 1]
+      [tab-header "Match History" 2]]
+     [:<>
+      [tab-header "Login" 1]
+      [tab-header "Register" 2]])
+   [tab-content]])
 

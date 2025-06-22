@@ -1,21 +1,20 @@
 (ns client.core
   (:require
-   [client.components :refer [canvas game-layout game-score login-form
-                              register-form screenshoot-canvas]]
+   [client.components :refer [canvas game-layout game-score screenshoot-canvas
+                              user-dialog]]
    [reagent.dom :as rdom]))
 
 (enable-console-print!)
 
 (defn on-js-reload [])
 
-(defn app []
+(defn app [] 
   [:div {:class "game"}
    [game-layout]
    [game-score]
    [canvas]
    [screenshoot-canvas]
-   [login-form]
-   [register-form]])
+   [user-dialog]])
 
 
 (rdom/render [app] (.getElementById js/document "app"))

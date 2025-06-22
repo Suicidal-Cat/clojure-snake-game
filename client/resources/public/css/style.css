@@ -1,34 +1,33 @@
-/* some style */
-
-#app{
+#app {
     height: 92vh;
 }
 
-.game{
+.game {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100%;
+    position: relative;
 }
 
-#game-canvas{
+#game-canvas {
     display: flex;
     justify-content: center;
 }
 
-.score{
+.score {
     display: flex;
     justify-content: space-between;
     font-size: 32px;
     width: 530px;
 }
 
-.game-cont{
+.game-cont {
     position: relative;
 }
 
-.start-game{
+.start-game {
     height: 600px;
     width: 600px;
     display: flex;
@@ -37,35 +36,35 @@
     background-color: rgb(84, 3, 95);
 }
 
-.snake-profile{
+.snake-profile {
     width: 35px;
     height: 35px;
     position: absolute;
-    top:30px;
+    top: 30px;
     right: 30px;
     padding: 8px;
-    border: 3px solid rgba(255,215,0, .6);
+    border: 3px solid rgba(255, 215, 0, .6);
     border-radius: 50%;
 }
 
-.snake-profile:hover{
+.snake-profile:hover {
     border: 3px solid white;
 }
 
-.snake-logo{
+.snake-logo {
     width: 360px;
     height: 225px;
     margin-top: 64px;
 }
 
-.menu-buttons{
+.menu-buttons {
     margin-top: 24px;
     display: flex;
     flex-direction: column;
-    gap:16px;
+    gap: 16px;
 }
 
-.start-game-btn{
+.start-game-btn {
     font-family: 'Arcade Normal', sans-serif;
     font-size: 16px;
     color: white;
@@ -76,16 +75,16 @@
     border-radius: 30px;
 }
 
-.start-game-btn:hover{
+.start-game-btn:hover {
     color: rgba(239, 112, 255);
 }
 
-.screenshot-img{
+.screenshot-img {
     width: 250px;
     height: 250px;
 }
 
-.end-game-dialog{
+.end-game-dialog {
     width: 300px;
     height: 300px;
     display: flex;
@@ -97,6 +96,22 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 20;
+}
+
+.user-dialog {
+    position: absolute;
+    width: 550px;
+    height: 550px;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    border: 1px solid green;
+
+    .tab {
+        display: inline-block;
+        padding: 10px;
+        cursor: pointer ;
+    }
 }
 
 
