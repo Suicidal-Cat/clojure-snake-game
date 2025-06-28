@@ -123,17 +123,7 @@
                    :style {:background-color result-color}}
              [:div {:class "match-opponent"} (str "vs " (:opponent match))]
              [:div {:class "match-score"} (:score match)]
-             [:div {:class "match-time"} (:played_ago match)]]))
-       (for [match matches]
-         (let [result-color (case (:result match)
-                              "Won"  "#d4edda"
-                              "Lost" "#f8d7da"
-                              "#e2e3e5")]
-           [:div {:class "match-card"
-                  :style {:background-color result-color}}
-            [:div {:class "match-opponent"} (str "vs " (:opponent match))]
-            [:div {:class "match-score"} (:score match)]
-            [:div {:class "match-time"} (:played_ago match)]]))])
+             [:div {:class "match-time"} (:played_ago match)]]))])
     [spinner]))
 
 (defn tab-header [label index]
