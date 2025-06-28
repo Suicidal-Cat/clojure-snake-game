@@ -8,10 +8,19 @@
 
 (defonce app-state (r/atom {:show-game false
                             :logged false
-                            :active-tab (r/atom 1)}))
+                            :active-tab (r/atom 1)
+                            :match-history (r/atom nil)}))
 
+(defn update-user-state []
+  (let [user (get-user-info)]
+    (if (some? user)
+      (swap! app-state assoc :logged true :id (:id user))
+      (swap! app-state assoc :logged false))))
 
-(swap! app-state assoc :logged (some? (get-user-info)))
+(update-user-state)
+
+(defn spinner []
+  [:div {:class "spinner"}])
 
 (defn canvas []
   [:div {:id "game-canvas"}])
@@ -64,8 +73,8 @@
                                                                  password (.get form-data "password")]
                                                              (login email password (fn [result] (if (:id result)
                                                                                                   (do (set-local-storage "user" result)
-                                                                                                      (swap! app-state assoc :logged true))
-                                                                                                  (swap! app-state assoc :logged false))))))}
+                                                                                                      (update-user-state))
+                                                                                                  (update-user-state))))))}
                                        [:div
                                         [:label "Email: "]
                                         [:input {:type "email" :name "email" :required true}]]
@@ -99,6 +108,34 @@
                  [:button {:type "submit"} "Register"]]
                 [:p @message]])))
 
+(defn match-history []
+  (when (nil? @(:match-history @app-state))
+    (get-match-history (:id @app-state) #(reset! (:match-history @app-state) %)))
+  (if (:match-history @app-state)
+    (let [matches @(:match-history @app-state)]
+      [:div {:class "match-container" }
+       (for [match matches]
+          (let [result-color (case (:result match)
+                                         "Won"  "#d4edda"
+                                         "Lost" "#f8d7da"
+                                         "#e2e3e5")]
+            [:div {:class "match-card"
+                   :style {:background-color result-color}}
+             [:div {:class "match-opponent"} (str "vs " (:opponent match))]
+             [:div {:class "match-score"} (:score match)]
+             [:div {:class "match-time"} (:played_ago match)]]))
+       (for [match matches]
+         (let [result-color (case (:result match)
+                              "Won"  "#d4edda"
+                              "Lost" "#f8d7da"
+                              "#e2e3e5")]
+           [:div {:class "match-card"
+                  :style {:background-color result-color}}
+            [:div {:class "match-opponent"} (str "vs " (:opponent match))]
+            [:div {:class "match-score"} (:score match)]
+            [:div {:class "match-time"} (:played_ago match)]]))])
+    [spinner]))
+
 (defn tab-header [label index]
   [:div {:class "tab"
          :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
@@ -108,7 +145,7 @@
 (defn tab-content []
   (case @(:active-tab @app-state)
     1 (if (:logged @app-state) [:div "Meow1"] [login-form]) 
-    2 (if (:logged @app-state)  [:div "Meow2"] [register-form])))
+    2 (if (:logged @app-state)  [match-history] [register-form])))
 
 (defn user-dialog []
   [:div {:class "user-dialog"}
