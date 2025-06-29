@@ -1,6 +1,7 @@
 (ns client.components
   (:require
-   [client.api.api-calls :refer [get-match-history login register]]
+   [client.api.api-calls :refer [get-leaderboard get-match-history login
+                                 register]]
    [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
    [client.main-game :as main]
    [client.singleplayer-game :as single]
@@ -9,7 +10,8 @@
 (defonce app-state (r/atom {:show-game false
                             :logged false
                             :active-tab (r/atom 1)
-                            :match-history (r/atom nil)}))
+                            :match-history (r/atom nil)
+                            :leaderboard (r/atom nil)}))
 
 (defn update-user-state []
   (let [user (get-user-info)]
@@ -108,6 +110,40 @@
                  [:button {:type "submit"} "Register"]]
                 [:p @message]])))
 
+(defn leaderboard []
+  (when (nil? @(:leaderboard @app-state))
+    (get-leaderboard (:id @app-state) #(reset! (:leaderboard @app-state) %)))
+  (if (:leaderboard @app-state)
+    (let [leaderboard @(:leaderboard @app-state)
+          current-user-id (:id @app-state)
+          top10 (->> leaderboard
+                     (filter #(= "Top10" (:resulttype %)))
+                     (take 10))
+          target (first (filter #(and (= "Target" (:resulttype %))
+                                      (> (:rankpos %) 10))
+                                leaderboard))
+          rows (if target
+                 (concat top10 [target])
+                 top10)]
+      [:table {:class "leaderboard-table"}
+       [:thead
+        [:tr
+         [:th "Rank & Username"]
+         [:th "Games Played"]
+         [:th "Games Won"]
+         [:th "Win %"]]]
+       [:tbody
+        (for [entry rows]
+          (let [highlight? (= (:userid entry) current-user-id)
+                row-class (if highlight? "highlight-target" "")]
+            ^{:key (str (:userid entry) "-" (:resulttype entry))}
+            [:tr {:class row-class}
+             [:td (str (:rankpos entry) ". " (:username entry))]
+             [:td (:gamesplayed entry)]
+             [:td (:gameswon entry)]
+             [:td (str (:winpercentage entry) "%")]]))]])
+    [spinner]))
+
 (defn match-history []
   (when (nil? @(:match-history @app-state))
     (get-match-history (:id @app-state) #(reset! (:match-history @app-state) %)))
@@ -119,6 +155,7 @@
                                          "Won"  "#d4edda"
                                          "Lost" "#f8d7da"
                                          "#e2e3e5")]
+            ^{:key (:id match)}
             [:div {:class "match-card"
                    :style {:background-color result-color}}
              [:div {:class "match-opponent"} (str "vs " (:opponent match))]
@@ -134,7 +171,7 @@
 
 (defn tab-content []
   (case @(:active-tab @app-state)
-    1 (if (:logged @app-state) [:div "Meow1"] [login-form]) 
+    1 (if (:logged @app-state) [leaderboard] [login-form]) 
     2 (if (:logged @app-state)  [match-history] [register-form])))
 
 (defn user-dialog []

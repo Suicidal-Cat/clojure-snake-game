@@ -3,7 +3,7 @@
    [clojure.edn :as edn]))
 
 (defn login [email password callback]
-  (-> (js/fetch "http://localhost:8080/login"
+  (-> (js/fetch "http://localhost:8085/login"
                 (clj->js {:method "POST"
                           :headers {"Content-Type" "application/edn"}
                           :body (pr-str {:email email
@@ -13,7 +13,7 @@
                (callback (:value (edn/read-string data)))))))
 
 (defn register [email username password callback]
-  (-> (js/fetch "http://localhost:8080/register"
+  (-> (js/fetch "http://localhost:8085/register"
                 (clj->js {:method "POST"
                           :headers {"Content-Type" "application/edn"}
                           :body (pr-str {:email email
@@ -24,7 +24,7 @@
                (callback (:value (edn/read-string data)))))))
 
 (defn get-leaderboard [userId callback]
-  (-> (js/fetch "http://localhost:8080/leaderboard"
+  (-> (js/fetch "http://localhost:8085/leaderboard"
                 (clj->js {:method "POST"
                           :headers {"Content-Type" "application/edn"}
                           :body (pr-str {:userId userId})}))
@@ -33,7 +33,7 @@
                (callback (:value (edn/read-string data)))))))
 
 (defn get-match-history [userId callback]
-  (-> (js/fetch "http://localhost:8080/match-history"
+  (-> (js/fetch "http://localhost:8085/match-history"
                 (clj->js {:method "POST"
                           :headers {"Content-Type" "application/edn"}
                           :body (pr-str {:userId userId})}))
