@@ -1,7 +1,6 @@
 (ns server.db.dbBroker
   (:require
    [aero.core :refer [read-config]]
-   [clojure.edn :as edn]
    [next.jdbc :as jdbc]
    [next.jdbc.sql :as sql]
    [buddy.hashers :as hashers]
@@ -11,6 +10,8 @@
 
 ;; game types enum
 (def game-types-enum {:singleplayer "Singleplayer" :multiplayer "Multiplayer"})
+;; friend request statuses
+(def friendship-status {:pending "Pending" :accepted "Accepted" :declined "Declined"})
 
 ;; returns current datetime
 (defn current-datetime []
@@ -82,3 +83,56 @@
 (defn get-match-history [userId]
   (when ds
     (normalize-db-result (sql/query ds ["CALL GetMatchHistory(?)" userId]))))
+
+;; send friend request
+(defn send-friend-request [senderId receiverId]
+  (when ds
+    (let [data (jdbc/execute! ds ["INSERT INTO Friendships (UserId1, UserId2, Status) VALUES (?,?,?)" 
+                                  senderId receiverId (:pending friendship-status)])]
+      (if data true nil))))
+
+;; update friend request status
+(defn update-friend-request [userId1 userId2 accepted]
+  (when ds
+    (let [data (jdbc/execute! ds ["UPDATE Friendships SET Status=? WHERE (UserId1=? AND UserId2=?) OR ((UserId1=? AND UserId2=?))" 
+                                  (if accepted (:accepted friendship-status) (:declined friendship-status)) 
+                                  userId1 userId2 userId2 userId1])]
+      (if data true nil))))
+
+;; search for friends
+(defn get-available-friend-requests
+  ([user-id] (get-available-friend-requests user-id nil))
+  ([user-id username]
+   (when ds
+     (let [declined-status (:declined friendship-status)
+           sql-base
+           "SELECT * FROM Users u
+            WHERE u.Id != ?
+              AND u.Id NOT IN (
+                SELECT CASE 
+                  WHEN f.UserId1 = ? THEN f.UserId2
+                  ELSE f.UserId1
+                END
+                FROM Friendships f
+                WHERE (f.UserId1 = ? OR f.UserId2 = ?)
+                  AND f.Status != ?
+              )"
+           [sql params] (if username
+                          [(str sql-base " AND u.Username LIKE ? LIMIT 20")
+                           [user-id user-id user-id user-id declined-status (str "%" username "%")]]
+                          [(str sql-base " LIMIT 20")
+                           [user-id user-id user-id user-id declined-status]])]
+       (normalize-db-result (jdbc/query ds (into [sql] params)))))))
+
+;; search for active friend requests
+(defn get-pending-friend-requests [user-id]
+  (when ds
+    (let [pending-status (:pending friendship-status)
+          sql
+          "SELECT u.Id, u.Username
+           FROM Friendships f
+           JOIN Users u ON u.Id = f.UserId1
+           WHERE f.Status = ?
+             AND f.UserId2 = ?"
+          params [pending-status user-id]]
+      (jdbc/query ds (into [sql] params)))))
