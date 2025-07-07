@@ -101,8 +101,8 @@
 
 ;; search for friends
 (defn get-available-friend-requests
-  ([user-id] (get-available-friend-requests user-id nil))
-  ([user-id username]
+  ([userId] (get-available-friend-requests userId nil))
+  ([userId username]
    (when ds
      (let [declined-status (:declined friendship-status)
            sql-base
@@ -119,13 +119,13 @@
               )"
            [sql params] (if username
                           [(str sql-base " AND u.Username LIKE ? LIMIT 20")
-                           [user-id user-id user-id user-id declined-status (str "%" username "%")]]
+                           [userId userId userId userId declined-status (str "%" username "%")]]
                           [(str sql-base " LIMIT 20")
-                           [user-id user-id user-id user-id declined-status]])]
+                           [userId userId userId userId declined-status]])]
        (normalize-db-result (jdbc/query ds (into [sql] params)))))))
 
 ;; search for active friend requests
-(defn get-pending-friend-requests [user-id]
+(defn get-pending-friend-requests [userId]
   (when ds
     (let [pending-status (:pending friendship-status)
           sql
@@ -134,5 +134,5 @@
            JOIN Users u ON u.Id = f.UserId1
            WHERE f.Status = ?
              AND f.UserId2 = ?"
-          params [pending-status user-id]]
+          params [pending-status userId]]
       (jdbc/query ds (into [sql] params)))))
