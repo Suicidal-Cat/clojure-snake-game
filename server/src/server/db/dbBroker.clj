@@ -106,7 +106,7 @@
    (when ds
      (let [declined-status (:declined friendship-status)
            sql-base
-           "SELECT * FROM Users u
+           "SELECT u.Id, u.Username FROM Users u
             WHERE u.Id != ?
               AND u.Id NOT IN (
                 SELECT CASE 
@@ -122,7 +122,7 @@
                            [userId userId userId userId declined-status (str "%" username "%")]]
                           [(str sql-base " LIMIT 20")
                            [userId userId userId userId declined-status]])]
-       (normalize-db-result (jdbc/query ds (into [sql] params)))))))
+       (normalize-db-result (jdbc/execute! ds (into [sql] params)))))))
 
 ;; search for active friend requests
 (defn get-pending-friend-requests [userId]
@@ -135,4 +135,4 @@
            WHERE f.Status = ?
              AND f.UserId2 = ?"
           params [pending-status userId]]
-      (jdbc/query ds (into [sql] params)))))
+      (normalize-db-result (jdbc/execute! ds (into [sql] params))))))

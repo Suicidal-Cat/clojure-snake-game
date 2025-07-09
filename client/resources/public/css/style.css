@@ -17,8 +17,13 @@
 }
 
 @keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }
 
 .game {
@@ -119,8 +124,8 @@
 
 .user-dialog {
     position: absolute;
-    width: 550px;
-    height: 550px;
+    width: 570px;
+    height: 570px;
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
@@ -132,6 +137,82 @@
         padding: 10px;
         cursor: pointer;
         color: white;
+    }
+}
+
+.friends-container {
+    height: 85%;
+    overflow: auto;
+    white-space: nowrap;
+    padding: 0rem 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+
+    .friends-search {
+        margin-bottom: 1rem;
+
+        input {
+            height: 2rem;
+        }
+
+        button {
+            height: 2.3rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem 0.5rem 1rem;
+        }
+    }
+
+    .friends-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .friends-send-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 26%;
+        padding: 0.8rem;
+        border: 1px solid yellowgreen;
+        color: white;
+    }
+
+    .friends-button {
+        border: none;
+        padding: 0.5rem 1rem 0.5rem 1rem;
+        background-color: chocolate;
+        font-weight: bold;
+    }
+
+    .friends-username {
+        font-weight: bold;
+        color: white;
+    }
+
+    .friend-requests {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .friend-req-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid orange;
+            border-radius: 10px;
+            padding: 0.8rem 2rem 0.8rem 2rem;
+
+            .friend-req-buttons {
+                display: flex;
+                gap: 1rem;
+
+                button {
+                    font-weight: bold;
+                    padding: 0.5rem 1rem 0.5rem 1rem;
+                }
+            }
+        }
     }
 }
 
@@ -165,28 +246,37 @@
 }
 
 .leaderboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: auto;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
 }
 
-.leaderboard-table th, .leaderboard-table td {
-  padding: 10px;
-  border: 1px solid #11eb5d;
-  text-align: left;
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 10px;
+    border: 1px solid #11eb5d;
+    text-align: left;
 }
 
 .leaderboard-table th {
-  background-color: #f8f8f8;
-  font-weight: bold;
+    background-color: #f8f8f8;
+    font-weight: bold;
 }
 
 .leaderboard-table td {
-  background-color: #f8f8f8;
+    background-color: #f8f8f8;
 }
 
-.highlight-target td{
+.highlight-target td {
     background-color: yellowgreen;
+}
+
+.divider {
+    font-size: 1.3rem;
+    color: orangered;
+    border-bottom: 1px solid orange;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 
 
