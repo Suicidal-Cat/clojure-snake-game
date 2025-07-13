@@ -5,7 +5,7 @@
                                  login register send-friend-request
                                  update-friend-request]]
    [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
-   [client.main-game :as main]
+   [client.main-game :as main :refer [game-time]]
    [client.singleplayer-game :as single]
    [reagent.core :as r]))
 
@@ -36,9 +36,11 @@
 
 (defn game-score []
   (when (:show-game @app-state)
-    (let [score main/score]
+    (let [score main/score
+          time main/time]
       [:div {:class "score"}
        [:div {:class "score1"} (first @score)]
+       [:div @game-time]
        [:div {:class "score2"} (last @score)]])))
 
 (defn profile []

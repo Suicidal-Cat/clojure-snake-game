@@ -11,6 +11,7 @@
 (def grid-size 27) ;grid size in px
 (def end-score 20) ;goal that player want to accomplish
 (def power-ups ["-3","+3","boom"])
+(def tick-duration 120)
 
 ;snakes-direction hash-map - (:snake1 plyer1 :snake2 player2)
 ;player - hash-map (:socket socket :direction direction)
@@ -21,7 +22,7 @@
 (defn end-game-loop [stop-flag final-score result]
   (reset! final-score result)
   (reset! stop-flag true)
-  (db/save-game @final-score true))
+  (db/save-game @final-score true (:time db/game-mode-enum)))
 
 ;update snake position
 (defn move-snake [snake direction speed]
@@ -68,7 +69,7 @@
                                               :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})))))
 
 ;grow snake when it eats the ball and generate new ball
-(defn update-game-on-eat [game-state grid-size]
+(defn update-game-on-eat [game-state]
   (let [[head-s1 & _] (:snake1 @game-state)
         [head-s2 & _] (:snake2 @game-state)
         fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
@@ -151,22 +152,39 @@
          :snake1 (:snake1 game-state)
          :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size)))
 
+(defn update-clock-time [game-state final-score stop-game player1 player2]
+  (swap! game-state update :time-left #(max 0 (- % tick-duration)))
+  (when (zero? (:time-left @game-state))
+    (let [[score1 score2] (:score @game-state)
+          [head-s1 & _] (:snake1 @game-state)
+          [head-s2 & _] (:snake2 @game-state)]
+      (cond
+        (> score1 score2) (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}
+                                                                :loser {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}})
+        (< score1 score2) (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s2}
+                                                                :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}})
+        :else             (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s1}
+                                                                :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s2}
+                                                                :draw true})))))
+
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [game-state (atom (init-game-state field-size grid-size))
+    (let [game-state (atom (assoc (init-game-state field-size grid-size)
+                                  :time-left (* 1 20 1000)))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
       (generate-random-power game-state stop-game power-ups field-size grid-size)
       (while (not @stop-game)
-        (Thread/sleep 120)
+        (Thread/sleep tick-duration)
         (ws/send (:socket player1) (pr-str @game-state))
         (ws/send (:socket player2) (pr-str @game-state))
-        (update-game-on-eat game-state grid-size)
+        (update-game-on-eat game-state)
         (update-game-on-power game-state final-score stop-game player1 player2)
         (swap! game-state update-snakes-positions snake-directions)
         (snake-collisions game-state stop-game final-score player1 player2)
+        (update-clock-time game-state final-score stop-game player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))

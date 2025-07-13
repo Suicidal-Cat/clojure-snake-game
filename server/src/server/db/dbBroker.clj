@@ -10,8 +10,10 @@
 
 ;; game types enum
 (def game-types-enum {:singleplayer "Singleplayer" :multiplayer "Multiplayer"})
-;; friend request statuses
+;; friend request statuses enum
 (def friendship-status {:pending "Pending" :accepted "Accepted" :declined "Declined"})
+;; game mode enum
+(def game-mode-enum {:time "Time" :cake "Cake"})
 
 ;; returns current datetime
 (defn current-datetime []
@@ -57,7 +59,7 @@
       (if data true nil))))
 
 ;; saves game result
-(defn save-game [game-result is-multi-player]
+(defn save-game [game-result is-multi-player game-mode]
   (when ds
     (let [winnerId (:users/Id (first (get-user-by-id (:id (:winner game-result)))))
           loserId (:users/Id (first (get-user-by-id (:id (:loser game-result)))))
@@ -68,11 +70,13 @@
       (when (or winnerId loserId)
         (if (:draw game-result)
         (jdbc/execute! ds
-                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
-                                             VALUES (?,?,?,?,?,?)" winnerId loserId score nil game-typeId (current-datetime)])
+                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, GameMode, CreatedAt) 
+                                             VALUES (?,?,?,?,?,?,?)" 
+                        winnerId loserId score nil game-typeId game-mode (current-datetime)])
         (jdbc/execute! ds
-                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, CreatedAt) 
-                                             VALUES (?,?,?,?,?,?)" winnerId loserId score winnerId game-typeId (current-datetime)]))))))
+                       ["INSERT INTO Games (UserId1, UserId2, Score, WinnerId, GameTypeId, GameMode, CreatedAt) 
+                                             VALUES (?,?,?,?,?,?,?)"
+                        winnerId loserId score winnerId game-typeId game-mode (current-datetime)]))))))
 
 ;; get leaderboard for user
 (defn get-leaderboard [userId]

@@ -23,7 +23,7 @@
 
 ;websocket communication
 (defn connect_socket []
-  (let [ws (js/WebSocket. "ws://localhost:8080/ws")
+  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key

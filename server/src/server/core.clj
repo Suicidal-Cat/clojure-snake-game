@@ -16,11 +16,12 @@
 
 ;try to find available player and start the game
 (defn find-game [player-socket data]
-  (let [new-player {:id (:id data) :socket player-socket :in-game false}]
+  (let [game-mode (:game-mode data)
+        new-player {:id (:id data) :socket player-socket :game-mode game-mode}]
     (if (:single data) (start-game-single new-player)
         (if (empty? @online-players)
           (swap! online-players conj new-player)
-          (let [player (some #(when (= false (:in-game %)) %) @online-players)]
+          (let [player (some #(when (= game-mode (:game-mode %)) %) @online-players)]
             (if player
               (do
                 (swap! online-players (fn [players] (filterv #(not= (:id %) (:id player)) players)))

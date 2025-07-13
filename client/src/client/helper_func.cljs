@@ -2,7 +2,11 @@
   (:require [reagent.core :as r]
             [clojure.edn :as edn]))
 
+;; screenshot
 (def img-atom (r/atom nil))
+
+;; game mode enum
+(def game-mode-enum {:time "Time" :cake "Cake"})
 
 ;take a screenshoot of the canvas
 (defn save-region-screenshot! [x y width height]
@@ -31,3 +35,9 @@
     (if (some? user)
       (:id user)
       (.now js/Date))))
+
+(defn format-time [ms]
+  (let [total-seconds (js/Math.floor (/ ms 1000))
+        minutes (js/Math.floor (/ total-seconds 60))
+        seconds (mod total-seconds 60)]
+    (str minutes ":" (if (< seconds 10) (str "0" seconds) seconds))))

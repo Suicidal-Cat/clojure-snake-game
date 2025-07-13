@@ -1,12 +1,14 @@
 (ns client.main-game
   (:require
-   [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
+   [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
+                                      save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
 
 
 (def score (r/atom [0 0]))
+(def game-time (r/atom "2:00"))
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -25,7 +27,7 @@
 
 ;websocket communication
 (defn connect_socket []
-  (let [ws (js/WebSocket. "ws://localhost:8080/ws")
+  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key
@@ -38,11 +40,12 @@
                                    (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
                                      (reset! player-id id)
-                                     (.send ws {:id id}))))
+                                     (.send ws {:id id :game-mode (:time game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
                                         (reset! score (:score data))
+                                        (reset! game-time (format-time (:time-left data)))
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))

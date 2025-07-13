@@ -14,7 +14,8 @@
    [game-score]
    [canvas]
    [screenshoot-canvas]
-   [user-dialog]])
+  ;;  [user-dialog]
+   ])
 
 
 (rdom/render [app] (.getElementById js/document "app"))
