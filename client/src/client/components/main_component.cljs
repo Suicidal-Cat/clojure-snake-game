@@ -1,10 +1,11 @@
 (ns client.components.main-component
   (:require
-   [client.api.api-calls :refer [get-leaderboard get-match-history login
-                                 register]]
+   [client.api.api-calls :refer [get-leaderboard login register]]
    [client.components.friends-tab-component :refer [friend-request
                                                     get-available-requests
                                                     get-pending-requests]]
+   [client.components.match-history-tab-component :refer [get-matches
+                                                          match-history]]
    [client.components.shared-components :refer [spinner]]
    [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
    [client.main-game :as main :refer [game-time]]
@@ -151,25 +152,6 @@
              [:td (str (:winpercentage entry) "%")]]))]])
     [spinner]))
 
-(defn match-history []
-  (when (nil? @(:match-history @app-state))
-    (get-match-history (:id @app-state) #(reset! (:match-history @app-state) %)))
-  (if (:match-history @app-state)
-    (let [matches @(:match-history @app-state)]
-      [:div {:class "match-container"}
-       (for [match matches]
-         (let [result-color (case (:result match)
-                              "Won"  "#d4edda"
-                              "Lost" "#f8d7da"
-                              "#e2e3e5")]
-           ^{:key (:id match)}
-           [:div {:class "match-card"
-                  :style {:background-color result-color}}
-            [:div {:class "match-opponent"} (str "vs " (:opponent match))]
-            [:div {:class "match-score"} (:score match)]
-            [:div {:class "match-time"} (:played_ago match)]]))])
-    [spinner]))
-
 (defn tab-header [label index]
   [:div {:class "tab"
          :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
@@ -179,7 +161,10 @@
 (defn tab-content []
   (case @(:active-tab @app-state)
     1 (if (:logged @app-state) [leaderboard] [login-form])
-    2 (if (:logged @app-state)  [match-history] [register-form])
+    2 (if (:logged @app-state)  
+        (do (get-matches)
+            [match-history]) 
+        [register-form])
     3 (do (get-available-requests nil)
           (get-pending-requests)
           [friend-request])))
