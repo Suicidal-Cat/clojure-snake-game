@@ -1,12 +1,13 @@
 (ns client.components.main-component
   (:require
-   [client.api.api-calls :refer [get-leaderboard login register]]
+   [client.api.api-calls :refer [login register]]
    [client.components.friends-tab-component :refer [friend-request
                                                     get-available-requests
                                                     get-pending-requests]]
+   [client.components.leaderboard-tab-component :refer [get-leaderboard-table
+                                                        leaderboard]]
    [client.components.match-history-tab-component :refer [get-matches
                                                           match-history]]
-   [client.components.shared-components :refer [spinner]]
    [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
    [client.main-game :as main :refer [game-time]]
    [client.singleplayer-game :as single]
@@ -14,9 +15,7 @@
 
 (defonce app-state (r/atom {:show-game false
                             :logged false
-                            :active-tab (r/atom 1)
-                            :match-history (r/atom nil)
-                            :leaderboard (r/atom nil)}))
+                            :active-tab (r/atom 1)}))
 
 (defn update-user-state []
   (let [user (get-user-info)]
@@ -118,40 +117,6 @@
         [:button {:type "submit"} "Register"]]
        [:p @message]])))
 
-(defn leaderboard []
-  (when (nil? @(:leaderboard @app-state))
-    (get-leaderboard (:id @app-state) #(reset! (:leaderboard @app-state) %)))
-  (if (:leaderboard @app-state)
-    (let [leaderboard @(:leaderboard @app-state)
-          current-user-id (:id @app-state)
-          top10 (->> leaderboard
-                     (filter #(= "Top10" (:resulttype %)))
-                     (take 10))
-          target (first (filter #(and (= "Target" (:resulttype %))
-                                      (> (:rankpos %) 10))
-                                leaderboard))
-          rows (if target
-                 (concat top10 [target])
-                 top10)]
-      [:table {:class "leaderboard-table"}
-       [:thead
-        [:tr
-         [:th "Rank & Username"]
-         [:th "Games Played"]
-         [:th "Games Won"]
-         [:th "Win %"]]]
-       [:tbody
-        (for [entry rows]
-          (let [highlight? (= (:userid entry) current-user-id)
-                row-class (if highlight? "highlight-target" "")]
-            ^{:key (str (:userid entry) "-" (:resulttype entry))}
-            [:tr {:class row-class}
-             [:td (str (:rankpos entry) ". " (:username entry))]
-             [:td (:gamesplayed entry)]
-             [:td (:gameswon entry)]
-             [:td (str (:winpercentage entry) "%")]]))]])
-    [spinner]))
-
 (defn tab-header [label index]
   [:div {:class "tab"
          :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
@@ -160,7 +125,10 @@
 
 (defn tab-content []
   (case @(:active-tab @app-state)
-    1 (if (:logged @app-state) [leaderboard] [login-form])
+    1 (if (:logged @app-state)
+        (do (get-leaderboard-table)
+            [leaderboard])
+        [login-form])
     2 (if (:logged @app-state)  
         (do (get-matches)
             [match-history]) 
