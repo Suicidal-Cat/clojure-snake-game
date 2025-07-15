@@ -1,6 +1,6 @@
 (ns client.core
   (:require
-   [client.components :refer [canvas game-layout game-score screenshoot-canvas
+   [client.components.main-component :refer [canvas game-layout game-score screenshoot-canvas
                               user-dialog]]
    [reagent.dom :as rdom]))
 
@@ -8,14 +8,13 @@
 
 (defn on-js-reload [])
 
-(defn app [] 
+(defn app []
   [:div {:class "game"}
    [game-layout]
    [game-score]
    [canvas]
    [screenshoot-canvas]
-  ;;  [user-dialog]
-   ])
+   [user-dialog]])
 
 
 (rdom/render [app] (.getElementById js/document "app"))

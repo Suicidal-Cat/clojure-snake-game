@@ -5,6 +5,9 @@
 ;; screenshot
 (def img-atom (r/atom nil))
 
+;; user info from local-storage
+(def user-info (r/atom nil))
+
 ;; game mode enum
 (def game-mode-enum {:time "Time" :cake "Cake"})
 
@@ -30,6 +33,9 @@
 (defn get-user-info []
   (edn/read-string (get-local-storage "user")))
 
+(defn update-user-info []
+  (reset! user-info (get-user-info)))
+
 (defn get-player-id []
   (let [user (get-user-info)]
     (if (some? user)
@@ -41,3 +47,6 @@
         minutes (js/Math.floor (/ total-seconds 60))
         seconds (mod total-seconds 60)]
     (str minutes ":" (if (< seconds 10) (str "0" seconds) seconds))))
+
+
+(update-user-info)
