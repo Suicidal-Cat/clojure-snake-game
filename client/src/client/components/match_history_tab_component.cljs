@@ -25,5 +25,6 @@
                   :style {:background-color result-color}}
             [:div {:class "match-opponent"} (str "vs " (:opponent match))]
             [:div {:class "match-score"} (:score match)]
-            [:div {:class "match-time"} (:played_ago match)]]))])
+            [:div {:class "match-time"} (:played_ago match)]]))
+       (when (= (count matches) 0) "You haven't played any matches.")]) 
     [spinner]))

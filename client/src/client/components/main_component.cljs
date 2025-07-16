@@ -1,6 +1,5 @@
 (ns client.components.main-component
   (:require
-   [client.api.api-calls :refer [login register]]
    [client.components.friends-tab-component :refer [friend-request
                                                     get-available-requests
                                                     get-pending-requests]]
@@ -8,7 +7,8 @@
                                                         leaderboard]]
    [client.components.match-history-tab-component :refer [get-matches
                                                           match-history]]
-   [client.helper-func :as h :refer [get-user-info img-atom set-local-storage]]
+   [client.components.sign-in-tabs-component :refer [login-form register-form]]
+   [client.helper-func :as h :refer [img-atom get-user-info]]
    [client.main-game :as main :refer [game-time]]
    [client.singleplayer-game :as single]
    [reagent.core :as r]))
@@ -18,10 +18,8 @@
                             :active-tab (r/atom 1)}))
 
 (defn update-user-state []
-  (let [user (get-user-info)]
-    (if (some? user)
-      (swap! app-state assoc :logged true :id (:id user))
-      (swap! app-state assoc :logged false))))
+  (let [user (get-user-info)] 
+    (swap! app-state assoc :logged (some? user))))
 
 (update-user-state)
 
@@ -66,57 +64,6 @@
         "SINGLEPLAYER"]]]
      [profile]]))
 
-(defn login-form []
-  (when (not (:logged @app-state)) (let [message (r/atom "")]
-                                     [:div
-                                      [:h2 "Login"]
-                                      [:form {:on-submit (fn [e]
-                                                           (.preventDefault e)
-                                                           (let [form-data (js/FormData. (.-target e))
-                                                                 email (.get form-data "email")
-                                                                 password (.get form-data "password")]
-                                                             (login email password (fn [result] (if (:id result)
-                                                                                                  (do (set-local-storage "user" result)
-                                                                                                      (update-user-state))
-                                                                                                  (update-user-state))))))}
-                                       [:div
-                                        [:label "Email: "]
-                                        [:input {:type "email" :name "email" :required true}]]
-                                       [:div
-                                        [:label "Password: "]
-                                        [:input {:type "password" :name "password" :required true :min-length 8}]]
-                                       [:button {:type "submit"} "Login"]]
-                                      [:p @message]])))
-
-(defn register-form []
-  (when (not (:logged @app-state))
-    (let [message (r/atom "")]
-      [:div
-       [:h2 "Register"]
-       [:form {:on-submit (fn [e]
-                            (.preventDefault e)
-                            (let [form-data (js/FormData. (.-target e))
-                                  email (.get form-data "email")
-                                  username (.get form-data "username")
-                                  password (.get form-data "password")
-                                  form-el (.-target e)]
-                              (register email username password
-                                        (fn [result] (when result
-                                                       (reset! (:active-tab @app-state) 1)
-                                                       (.reset form-el)
-                                                       (reset! message ""))))))}
-        [:div
-         [:label "Email: "]
-         [:input {:type "email" :name "email" :required true}]]
-        [:div
-         [:label "Username: "]
-         [:input {:type "text" :name "username" :required true :min-length 4}]]
-        [:div
-         [:label "Password: "]
-         [:input {:type "password" :name "password" :required true :min-length 8}]]
-        [:button {:type "submit"} "Register"]]
-       [:p @message]])))
-
 (defn tab-header [label index]
   [:div {:class "tab"
          :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
@@ -128,11 +75,11 @@
     1 (if (:logged @app-state)
         (do (get-leaderboard-table)
             [leaderboard])
-        [login-form])
+        [login-form #(swap! app-state assoc :logged true)])
     2 (if (:logged @app-state)  
         (do (get-matches)
             [match-history]) 
-        [register-form])
+        [register-form #(reset! (:active-tab @app-state) 1)])
     3 (do (get-available-requests nil)
           (get-pending-requests)
           [friend-request])))
