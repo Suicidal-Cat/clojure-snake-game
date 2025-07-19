@@ -8,7 +8,7 @@
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.websocket :as ws]
    [server.main-game :refer [change-direction start-game]]
-   [server.routes :refer [app-routes]]
+   [server.routes :refer [public-routes wrapped-protected-routes]]
    [server.singleplayer-game :refer [change-direction-single start-game-single]]))
 
 (def config (read-config "config.edn"))
@@ -54,12 +54,13 @@
 
 (def all-routes
   (routes
-   app-routes
+   public-routes
+   wrapped-protected-routes
    (GET "/ws" [] echo-handler)))
 
 (def app
   (-> all-routes
-      (wrap-cors :access-control-allow-origin [#".*"]
+      (wrap-cors :access-control-allow-origin [#"^http://localhost:3449$"]
                  :access-control-allow-methods [:get :post :put :delete])))
 
 (defn -main []

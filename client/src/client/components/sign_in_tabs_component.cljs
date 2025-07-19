@@ -21,8 +21,9 @@
                                                                    (let [form-data (js/FormData. (.-target e))
                                                                          email (.get form-data "email")
                                                                          password (.get form-data "password")]
-                                                                     (login email password (fn [result] (when (:id result)
-                                                                                                          (set-local-storage "user" result)
+                                                                     (login email password (fn [result] (when (:user result)
+                                                                                                          (set-local-storage "user" (:user result))
+                                                                                                          (set-local-storage "token" (:token result))
                                                                                                           (callback))
                                                                                              (update-user-state)))))}
                                                [:div

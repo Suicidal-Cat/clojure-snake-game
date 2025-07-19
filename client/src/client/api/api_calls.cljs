@@ -1,6 +1,11 @@
 (ns client.api.api-calls
   (:require
+   [client.helper-func :refer [get-user-token]]
    [clojure.edn :as edn]))
+
+(defn auth-headers []
+  #js {"Content-Type"  "application/edn"
+       "Authorization" (str "Bearer " (get-user-token))})
 
 ;; send login request
 (defn login [email password callback]
@@ -29,7 +34,7 @@
 (defn get-leaderboard [userId callback]
   (-> (js/fetch "http://localhost:8085/leaderboard"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:userId userId})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
@@ -39,7 +44,7 @@
 (defn get-match-history [userId callback]
   (-> (js/fetch "http://localhost:8085/match-history"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:userId userId})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
@@ -49,7 +54,7 @@
 (defn send-friend-request [senderId receiverId callback]
   (-> (js/fetch "http://localhost:8085/friendlist/send"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:senderId senderId :receiverId receiverId})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
@@ -59,7 +64,7 @@
 (defn update-friend-request [userId1 userId2 accepted callback]
   (-> (js/fetch "http://localhost:8085/friendlist/update-status"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:userId1 userId1 :userId2 userId2 :accepted accepted})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
@@ -69,7 +74,7 @@
 (defn get-available-friend-requests [userId username callback]
   (-> (js/fetch "http://localhost:8085/friendlist/available-friend-requests"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:userId userId :username username})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
@@ -79,7 +84,7 @@
 (defn get-pending-friend-requests [userId callback]
   (-> (js/fetch "http://localhost:8085/friendlist/pending-friend-requests"
                 (clj->js {:method "POST"
-                          :headers {"Content-Type" "application/edn"}
+                          :headers (auth-headers)
                           :body (pr-str {:userId userId})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]

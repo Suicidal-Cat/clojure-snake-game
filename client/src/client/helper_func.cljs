@@ -33,6 +33,9 @@
 (defn get-user-info []
   (edn/read-string (get-local-storage "user")))
 
+(defn get-user-token []
+  (edn/read-string (get-local-storage "token")))
+
 (defn update-user-info []
   (reset! user-info (get-user-info)))
 

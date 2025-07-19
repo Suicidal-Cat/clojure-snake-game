@@ -11,7 +11,8 @@
                  [aero "1.1.6"]
                  [com.github.seancorfield/next.jdbc "1.3.955"]
                  [com.mysql/mysql-connector-j "8.1.0"]
-                 [buddy/buddy-hashers "2.0.167"]]
+                 [buddy/buddy-hashers "2.0.167"]
+                 [buddy/buddy-sign "3.4.333"]]
   :main ^:skip-aot server.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

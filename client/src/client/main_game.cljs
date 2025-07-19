@@ -24,7 +24,8 @@
         [hx hy] (mapv #(* % 2) (:head winner))
         loser (:loser data)]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
-    (reset! stop-game-flag true)))
+    (reset! stop-game-flag true)
+    (reset! start-game-flag false)))
 
 ;canvas setup
 (defn setup []
@@ -119,10 +120,9 @@
                                      (.send ws {:id id :game-mode (:time game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
                                       (when (not @start-game-flag)
-                                        (do
                                           (disable-loading)
                                           (reset! start-game-flag true)
-                                          (start_game)))
+                                          (start_game))
 
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
