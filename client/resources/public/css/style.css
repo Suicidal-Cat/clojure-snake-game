@@ -1,5 +1,5 @@
 #app {
-    height: 92vh;
+    height: 97vh;
 }
 
 .spinner {
@@ -50,6 +50,50 @@
 .game-cont {
     position: relative;
 }
+
+
+.load-cont {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    z-index: 21;
+    font-family: 'Arcade Normal', sans-serif;
+    font-size: 2rem;
+    height: 600px;
+    width: 600px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+
+    .loading-box {
+        display: flex;
+        align-items: end;
+        gap: 0.3rem
+    }
+}
+
+.letter {
+  opacity: 0.2;
+  animation: dot-flash 1.5s infinite;
+}
+
+.letter.l1 { animation-delay: 0s; }
+.letter.l2 { animation-delay: 0.1s; }
+.letter.l3 { animation-delay: 0.2s; }
+.letter.l4 { animation-delay: 0.3s; }
+.letter.l5 { animation-delay: 0.4s; }
+.letter.l6 { animation-delay: 0.5s; }
+.letter.l7 { animation-delay: 0.6s; }
+
+.dot {
+    letter-spacing: -0.7rem !important;
+}
+
+.letter.dot:nth-child(1) { animation-delay: 0.7s; }
+.letter.dot:nth-child(2) { animation-delay: 0.8s; }
+.letter.dot:nth-child(3) { animation-delay: 0.9s; }
 
 .start-game {
     height: 600px;
@@ -283,3 +327,35 @@
 /* font-family: 'Arcade Interlaced', sans-serif;
 font-family: 'Arcade Normal', sans-serif;
 font-family: 'Arcade Rounded', sans-serif; */
+
+@keyframes dot-flash {
+
+    0%,
+    20% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}
+
+@keyframes letter-flash {
+
+    0%,
+    20% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}

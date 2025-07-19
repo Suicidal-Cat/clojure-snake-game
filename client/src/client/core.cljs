@@ -13,8 +13,7 @@
    [game-layout]
    [game-score]
    [canvas]
-   [screenshoot-canvas]
-   [user-dialog]])
+   [screenshoot-canvas]])
 
 
 (rdom/render [app] (.getElementById js/document "app"))

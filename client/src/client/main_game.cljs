@@ -13,6 +13,7 @@
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
 (def circle-radius 24); radius for draw generation
+(def start-game-flag (atom false))
 (def stop-game-flag (atom false))
 (def player-id (atom 0))
 
@@ -24,31 +25,6 @@
         loser (:loser data)]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
     (reset! stop-game-flag true)))
-
-;websocket communication
-(defn connect_socket []
-  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
-        handle-keypress (fn handle-keypress [e]
-                          (let [key (.-key e)]
-                            (case key
-                              "ArrowUp" (.send ws {:direction :up})
-                              "ArrowDown" (.send ws {:direction :down})
-                              "ArrowLeft" (.send ws {:direction :left})
-                              "ArrowRight" (.send ws {:direction :right}))))]
-    (.addEventListener js/document "keydown" handle-keypress)
-    (.addEventListener ws "open" (fn [_]
-                                   (reset! stop-game-flag false)
-                                   (let [id (get-player-id)]
-                                     (reset! player-id id)
-                                     (.send ws {:id id :game-mode (:time game-mode-enum)}))))
-    (.addEventListener ws "message" (fn [e]
-                                      (let [data (edn/read-string (.-data e))]
-                                        (reset! game-state data)
-                                        (reset! score (:score data))
-                                        (reset! game-time (format-time (:time-left data)))
-                                        (when (:winner data) (stop-game data)))))
-    (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
-                                    (.removeEventListener js/document "keydown" handle-keypress)))))
 
 ;canvas setup
 (defn setup []
@@ -124,6 +100,37 @@
    :setup setup
    :draw draw
    :size [field-size field-size]))
+
+;websocket communication
+(defn connect_socket [disable-loading]
+  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
+        handle-keypress (fn handle-keypress [e]
+                          (let [key (.-key e)]
+                            (case key
+                              "ArrowUp" (.send ws {:direction :up})
+                              "ArrowDown" (.send ws {:direction :down})
+                              "ArrowLeft" (.send ws {:direction :left})
+                              "ArrowRight" (.send ws {:direction :right}))))]
+    (.addEventListener js/document "keydown" handle-keypress)
+    (.addEventListener ws "open" (fn [_]
+                                   (reset! stop-game-flag false)
+                                   (let [id (get-player-id)]
+                                     (reset! player-id id)
+                                     (.send ws {:id id :game-mode (:time game-mode-enum)}))))
+    (.addEventListener ws "message" (fn [e]
+                                      (when (not @start-game-flag)
+                                        (do
+                                          (disable-loading)
+                                          (reset! start-game-flag true)
+                                          (start_game)))
+
+                                      (let [data (edn/read-string (.-data e))]
+                                        (reset! game-state data)
+                                        (reset! score (:score data))
+                                        (reset! game-time (format-time (:time-left data)))
+                                        (when (:winner data) (stop-game data)))))
+    (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
+                                    (.removeEventListener js/document "keydown" handle-keypress)))))
 
 
 

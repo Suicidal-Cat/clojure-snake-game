@@ -14,6 +14,7 @@
    [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false
+                            :show-loading false
                             :logged false
                             :active-tab (r/atom 1)}))
 
@@ -25,6 +26,22 @@
 
 (defn canvas []
   [:div {:id "game-canvas"}])
+
+(defn loading []
+  [:div {:class "load-cont"}
+   [:div {:class "loading-box"}
+    [:div
+     [:span {:class "letter l1"} "L"]
+     [:span {:class "letter l2"} "o"]
+     [:span {:class "letter l3"} "a"]
+     [:span {:class "letter l4"} "d"]
+     [:span {:class "letter l5"} "i"]
+     [:span {:class "letter l6"} "n"]
+     [:span {:class "letter l7"} "g"]]
+    [:div
+     [:span {:class "letter dot"} "."]
+     [:span {:class "letter dot"} "."]
+     [:span {:class "letter dot"} "."]]]])
 
 (defn game-score []
   (when (:show-game @app-state)
@@ -56,13 +73,16 @@
       [:div {:class "menu-buttons"}
        [:button {:class "start-game-btn"
                  :on-click
-                 (fn [] (main/connect_socket) (main/start_game) (swap! app-state assoc :show-game true))}
+                 (fn [] 
+                   (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                   (swap! app-state assoc :show-game false :show-loading true))}
         "MULTIPLAYER"]
        [:button {:class "start-game-btn"
                  :on-click
                  (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
         "SINGLEPLAYER"]]]
-     [profile]]))
+     [profile]
+     (when (:show-loading @app-state) [loading])]))
 
 (defn tab-header [label index]
   [:div {:class "tab"
