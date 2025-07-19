@@ -8,7 +8,8 @@
    [client.components.match-history-tab-component :refer [get-matches
                                                           match-history]]
    [client.components.sign-in-tabs-component :refer [login-form register-form]]
-   [client.helper-func :as h :refer [img-atom get-user-info]]
+   [client.helper-func :as h :refer [clear-local-storage get-user-info
+                                     img-atom]]
    [client.main-game :as main :refer [game-time]]
    [client.singleplayer-game :as single]
    [reagent.core :as r]))
@@ -57,6 +58,15 @@
          :alt "snake profile"
          :class "snake-profile"
          :on-click #(swap! app-state update :show-tabs not)}])
+
+(defn logout []
+  (when (and (:logged @app-state) (not (:show-tabs @app-state)))
+    [:img {:src "/images/logout.png"
+           :alt "logout"
+           :class "logout"
+           :on-click #(do
+                        (clear-local-storage)
+                        (swap! app-state assoc :logged false))}]))
 
 (defn screenshoot-canvas []
   (when-let [screenshot @img-atom]
@@ -118,6 +128,7 @@
                      (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
             "SINGLEPLAYER"]]])
        
+       (when (:show-loading @app-state) [loading])
        [profile]
-       (when (:show-loading @app-state) [loading])]))
+       [logout]]))
 

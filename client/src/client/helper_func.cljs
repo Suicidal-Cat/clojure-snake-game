@@ -30,6 +30,9 @@
 (defn get-local-storage [key]
   (.getItem js/localStorage key))
 
+(defn clear-local-storage []
+  (.clear js/localStorage))
+
 (defn get-user-info []
   (edn/read-string (get-local-storage "user")))
 

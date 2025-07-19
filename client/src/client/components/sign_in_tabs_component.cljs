@@ -10,9 +10,8 @@
   (let [user (get-user-info)]
     (reset! (:logged sign-in-tabs-state) (some? user))))
 
-(update-user-state)
-
 (defn login-form [callback]
+  (update-user-state) 
   (when (not @(:logged sign-in-tabs-state)) (let [message (r/atom "")]
                                              [:div
                                               [:h2 "Login"]
@@ -24,6 +23,7 @@
                                                                      (login email password (fn [result] (when (:user result)
                                                                                                           (set-local-storage "user" (:user result))
                                                                                                           (set-local-storage "token" (:token result))
+                                                                                                          (reset! (:logged sign-in-tabs-state) true)
                                                                                                           (callback))
                                                                                              (update-user-state)))))}
                                                [:div
