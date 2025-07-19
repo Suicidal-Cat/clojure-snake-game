@@ -15,6 +15,7 @@
 
 (defonce app-state (r/atom {:show-game false
                             :show-loading false
+                            :show-tabs false
                             :logged false
                             :active-tab (r/atom 1)}))
 
@@ -54,7 +55,8 @@
 (defn profile []
   [:img {:src "/images/profile.png"
          :alt "snake profile"
-         :class "snake-profile"}])
+         :class "snake-profile"
+         :on-click #(swap! app-state update :show-tabs not)}])
 
 (defn screenshoot-canvas []
   (when-let [screenshot @img-atom]
@@ -62,27 +64,6 @@
 
 (defn end-game-pop-up []
   [:div {:class "end-game-dialog"}])
-
-(defn game-layout []
-  (when-not (:show-game @app-state)
-    [:div {:class "game-cont"}
-     [:div {:class "start-game"}
-      [:img {:src "/images/snake-logo.png"
-             :alt "snake logo"
-             :class "snake-logo"}]
-      [:div {:class "menu-buttons"}
-       [:button {:class "start-game-btn"
-                 :on-click
-                 (fn [] 
-                   (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                   (swap! app-state assoc :show-game false :show-loading true))}
-        "MULTIPLAYER"]
-       [:button {:class "start-game-btn"
-                 :on-click
-                 (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
-        "SINGLEPLAYER"]]]
-     [profile]
-     (when (:show-loading @app-state) [loading])]))
 
 (defn tab-header [label index]
   [:div {:class "tab"
@@ -115,4 +96,28 @@
       [tab-header "Login" 1]
       [tab-header "Register" 2]])
    [tab-content]])
+
+(defn game-layout []
+  (when-not (:show-game @app-state)
+      [:div {:class "game-cont"} 
+       (if (:show-tabs @app-state)
+         [user-dialog]
+         [:div {:class "start-game"}
+          [:img {:src "/images/snake-logo.png"
+                 :alt "snake logo"
+                 :class "snake-logo"}]
+          [:div {:class "menu-buttons"}
+           [:button {:class "start-game-btn"
+                     :on-click
+                     (fn []
+                       (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                       (swap! app-state assoc :show-game false :show-loading true))}
+            "MULTIPLAYER"]
+           [:button {:class "start-game-btn"
+                     :on-click
+                     (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
+            "SINGLEPLAYER"]]])
+       
+       [profile]
+       (when (:show-loading @app-state) [loading])]))
 
