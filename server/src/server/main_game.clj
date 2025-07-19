@@ -165,7 +165,11 @@
                                                                 :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s1}})
         :else             (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head head-s1}
                                                                 :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s2}
+ 
                                                                 :draw true})))))
+;; send snake data
+(defn send-snake-data [player game-state]
+  (ws/send (:socket player) (pr-str game-state)))
 
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
@@ -174,12 +178,15 @@
                                   :time-left (* 1 20 1000)))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
-          final-score (atom nil)]
+          final-score (atom nil)] 
+      (send-snake-data player1 @game-state)
+      (send-snake-data player2 @game-state)
+      (Thread/sleep 3000)
       (generate-random-power game-state stop-game power-ups field-size grid-size)
       (while (not @stop-game)
         (Thread/sleep tick-duration)
-        (ws/send (:socket player1) (pr-str @game-state))
-        (ws/send (:socket player2) (pr-str @game-state))
+        (send-snake-data player1 @game-state)
+        (send-snake-data player2 @game-state)
         (update-game-on-eat game-state)
         (update-game-on-power game-state final-score stop-game player1 player2)
         (swap! game-state update-snakes-positions snake-directions)

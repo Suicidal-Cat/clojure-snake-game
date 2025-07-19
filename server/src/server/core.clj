@@ -54,9 +54,9 @@
 
 (def all-routes
   (routes
+   (GET "/ws" [] echo-handler)
    public-routes
-   wrapped-protected-routes
-   (GET "/ws" [] echo-handler)))
+   wrapped-protected-routes))
 
 (def app
   (-> all-routes
