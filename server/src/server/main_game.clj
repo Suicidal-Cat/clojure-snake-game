@@ -10,7 +10,7 @@
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
 (def end-score 20) ;goal that player want to accomplish
-(def power-ups ["-3","+3","boom"])
+(def power-ups ["boom","boom","boom"])
 (def tick-duration 120)
 
 ;snakes-direction hash-map - (:snake1 plyer1 :snake2 player2)
@@ -91,7 +91,7 @@
       (Thread/sleep (+ 6000 (rand-int 3001)))
       (let [power (rand-nth power-ups)
             cordinates (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 @game-state) (:snake2 @game-state))
-            duration 3500
+            duration 5000
             hehe (if (and (not= power "boom") (= (rand-int (count power-ups)) 1)) true false)]
         (if hehe
           (swap! game-state (fn [game-state] (assoc game-state :power {:value power :cord cordinates :random true})))
@@ -175,7 +175,7 @@
 (defn broadcast-game-state [player1 player2 game-id]
   (future
     (let [game-state (atom (assoc (init-game-state field-size grid-size)
-                                  :time-left (* 1 20 1000)))
+                                  :time-left (* 2 60 1000)))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)] 

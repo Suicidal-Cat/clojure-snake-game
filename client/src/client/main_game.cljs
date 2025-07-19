@@ -29,13 +29,21 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/snake27.png"]
-    (q/set-state! :image (q/load-image url) :radius 0))
+  (let [url "/images/snake27.png"
+        bomb  "/images/bomb.png"
+        add3  "/images/+3.png"
+        minus3  "/images/-3.png"]
+    (q/set-state!
+     :image (q/load-image url)
+     :radius 0
+     :bomb (q/load-image bomb)
+     :add3 (q/load-image add3)
+     :minus3 (q/load-image minus3)))
   (q/frame-rate 30)
   (q/background 0))
 
 (defn pulse []
-  (swap! (q/state-atom) assoc :radius (+ 27 (* 8 (Math/sin (/ (q/frame-count) 15.0))))))
+  (swap! (q/state-atom) assoc :radius (+ 27 (* 9 (Math/sin (/ (q/frame-count) 16.0))))))
 
 ;draw edges and grid
 (defn draw-grid-border [grid-size]
@@ -60,13 +68,18 @@
 ;draw power
 (defn draw-power []
   (when-let [power (:power @game-state)]
-    (if (:random power)
-      (do (q/fill 255 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
-      (case (:value power)
-        "+3" (do (q/fill 255 0 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
-        "-3" (do (q/fill 0 255 0) (q/ellipse (first (:cord power)) (last (:cord power)) circle-radius circle-radius))
-        "boom" (do (pulse) (q/fill 196 112 112) (q/ellipse (first (:cord power)) (last (:cord power)) (q/state :radius) (q/state :radius)))
-        nil))))
+    (let [r (q/state :radius)
+          x (first (:cord power))
+          y (last (:cord power))]
+      (if (:random power)
+        (do (q/fill 255 255 0) (q/ellipse x y circle-radius circle-radius))
+        (do
+          (pulse)
+          (case (:value power)
+            "+3" (q/image (q/state :add3) (- x (/ grid-size 2)) (- y (/ grid-size 2)) grid-size grid-size)
+            "-3" (q/image (q/state :minus3) (- x (/ grid-size 2)) (- y (/ grid-size 2)) grid-size grid-size)
+            "boom" (q/image (q/state :bomb) (- x (/ r 2)) (- y (/ r 2)) r r)
+            nil))))))
 
 ;draw snakes
 (defn draw-snakes []
