@@ -1,7 +1,6 @@
 (ns client.core
   (:require
-   [client.components.main-component :refer [canvas game-layout game-score screenshoot-canvas
-                              user-dialog]]
+   [client.components.main-component :refer [canvas game-layout game-score screenshoot-canvas]]
    [reagent.dom :as rdom]))
 
 (enable-console-print!)

@@ -7,9 +7,9 @@
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.websocket :as ws]
-   [server.main-game :refer [change-direction start-game]]
+   [server.game.main-game :refer [change-direction start-game]]
    [server.routes :refer [public-routes wrapped-protected-routes]]
-   [server.singleplayer-game :refer [change-direction-single start-game-single]]))
+   [server.game.singleplayer-game :refer [change-direction-single start-game-single]]))
 
 (def config (read-config "config.edn"))
 (def online-players (atom []))

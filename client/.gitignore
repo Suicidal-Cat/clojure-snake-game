@@ -12,3 +12,5 @@ pom.xml
 .repl
 config.edn
 .nrepl-port
+.clj-kondo
+.lsp

@@ -2,9 +2,9 @@
   (:require
    [midje.sweet :refer [=> fact facts]]
    [server.core :refer :all]
-   [server.main-game :as main]
-   [server.singleplayer-game :as single]
-   [server.game-helper-func :refer :all]))
+   [server.game.main-game :as main]
+   [server.game.singleplayer-game :as single]
+   [server.game.game-helper-func :refer :all]))
 
 (fact "in-bounds? checks if a position is within the playing field"
       (in-bounds? [50 50] 200 20) => true
@@ -77,16 +77,16 @@
                                :snake2 [[405 486] [432 486] [459 486] [486 486]]
                                :ball [351/2 243/2]
                                :score [0 0]})]
-         (main/update-game-on-eat game-state 27)
+         (main/update-game-on-eat game-state)
          (fact (count (:snake1 @game-state)) => 5)
          (fact (not= (:ball @game-state) [162 108]) => true)
          (fact (:score @game-state) => [1 0])
          (swap! game-state (fn [game-state] (assoc game-state :ball [837/2 999/2])))
-         (main/update-game-on-eat game-state 27)
+         (main/update-game-on-eat game-state)
          (fact (count (:snake2 @game-state)) => 5)
          (fact (not= (:ball @game-state) [162 108]) => true)
          (fact (:score @game-state) => [1 1])
-         (main/update-game-on-eat game-state 27)
+         (main/update-game-on-eat game-state)
          (fact (count (:snake1 @game-state)) => 5)
          (fact (count (:snake2 @game-state)) => 5)
          (fact (:score @game-state) => [1 1])

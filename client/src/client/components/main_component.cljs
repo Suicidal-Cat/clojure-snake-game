@@ -10,8 +10,8 @@
    [client.components.sign-in-tabs-component :refer [login-form register-form]]
    [client.helper-func :as h :refer [clear-local-storage get-user-info
                                      img-atom]]
-   [client.main-game :as main :refer [game-time]]
-   [client.singleplayer-game :as single]
+   [client.game.main-game :as main :refer [game-time]]
+   [client.game.singleplayer-game :as single]
    [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false
