@@ -1,5 +1,6 @@
 (ns client.game.singleplayer-game
   (:require
+   [client.game.game-helper-func :refer [draw-grid]]
    [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
@@ -49,18 +50,8 @@
 (defn setup []
   (let [url "/images/snake22.png"]
     (q/set-state! :image (q/load-image url)))
-  (q/frame-rate 30)
+  (q/frame-rate 30) 
   (q/background 0))
-
-(defn draw-grid-border [grid-size]
-  (q/fill 148 148 148)
-  (q/stroke 50)
-  (q/stroke-weight 1)
-  (q/fill 0 0 0)
-  (doseq [x (range 0 (q/width) grid-size)]
-    (q/line x 0 x (q/height)))
-  (doseq [y (range 0 (q/height) grid-size)]
-    (q/line 0 y (q/width) y)))
 
 ;draw food
 (defn draw-food []
@@ -77,16 +68,16 @@
       (q/image im x y))))
 
 ;stop drawing
-(defn stop-drwing []
+(defn stop-drawing []
   (when @stop-game-flag (q/no-loop)))
 
 ;main draw
 (defn draw []
   (q/background 0)
-  (draw-grid-border grid-size)
+  (draw-grid grid-size)
   (draw-food)
   (draw-snake)
-  (stop-drwing))
+  (stop-drawing))
 
 ;start the game
 (defn start_game []

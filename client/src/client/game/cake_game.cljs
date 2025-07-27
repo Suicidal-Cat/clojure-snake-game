@@ -1,6 +1,6 @@
-(ns client.game.main-game
+(ns client.game.cake-game
   (:require
-   [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
+   [client.helper-func :as hf :refer [game-mode-enum get-player-id
                                       save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
@@ -8,7 +8,6 @@
 
 
 (def score (r/atom [0 0]))
-(def game-time (r/atom "2:00"))
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -29,25 +28,13 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/snake27.png"
-        bomb  "/images/bomb.png"
-        add3  "/images/+3.png"
-        minus3  "/images/-3.png"]
+  (let [url "/images/snake27.png"]
     (q/set-state!
      :image (q/load-image url)
-     :radius 0
-     :bomb (q/load-image bomb)
-     :add3 (q/load-image add3)
-     :minus3 (q/load-image minus3)))
+     :radius 0))
   (q/frame-rate 30)
   (q/background 0))
 
-(defn pulse [min max]
-  (let [min-radius min
-        max-radius max
-        t         (/ (+ 1 (Math/sin (/ (q/frame-count) 15.0))) 2)
-        radius    (+ min-radius (* t (- max-radius min-radius)))]
-    (swap! (q/state-atom) assoc :radius radius)))
 
 ;draw edges and grid
 (defn draw-grid-border [grid-size]
@@ -69,21 +56,6 @@
   (q/fill 0 0 255)
   (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) circle-radius circle-radius))
 
-;draw power
-(defn draw-power []
-  (when-let [power (:power @game-state)]
-    (let [r (q/state :radius)
-          x (first (:cord power))
-          y (last (:cord power))]
-      (if (:random power)
-        (do (q/fill 255 255 0) (q/ellipse x y circle-radius circle-radius))
-        (do
-          (pulse 27 45)
-          (case (:value power)
-            "+3" (q/image (q/state :add3) (- x (/ grid-size 2)) (- y (/ grid-size 2)) grid-size grid-size)
-            "-3" (q/image (q/state :minus3) (- x (/ grid-size 2)) (- y (/ grid-size 2)) grid-size grid-size)
-            "boom" (q/image (q/state :bomb) (- x (/ r 2)) (- y (/ r 2)) r r)
-            nil))))))
 
 ;draw snakes
 (defn draw-snakes []
@@ -106,7 +78,6 @@
   (q/background 0)
   (draw-grid-border grid-size)
   (draw-food)
-  (draw-power)
   (draw-snakes)
   (stop-drawing))
 
@@ -125,26 +96,25 @@
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key
-                              "ArrowUp" (.send ws {:direction :up :time true})
-                              "ArrowDown" (.send ws {:direction :down :time true})
-                              "ArrowLeft" (.send ws {:direction :left :time true})
-                              "ArrowRight" (.send ws {:direction :right :time true}))))]
+                              "ArrowUp" (.send ws {:direction :up :cake true})
+                              "ArrowDown" (.send ws {:direction :down :cake true})
+                              "ArrowLeft" (.send ws {:direction :left :cake true})
+                              "ArrowRight" (.send ws {:direction :right :cake true}))))]
     (.addEventListener js/document "keydown" handle-keypress)
     (.addEventListener ws "open" (fn [_]
                                    (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
                                      (reset! player-id id)
-                                     (.send ws {:id id :game-mode (:time game-mode-enum)}))))
+                                     (.send ws {:id id :game-mode (:cake game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
                                       (when (not @loading-flag)
-                                          (disable-loading)
-                                          (reset! loading-flag true)
-                                          (start_game))
+                                        (disable-loading)
+                                        (reset! loading-flag true)
+                                        (start_game))
 
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
                                         (reset! score (:score data))
-                                        (reset! game-time (format-time (:time-left data)))
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))

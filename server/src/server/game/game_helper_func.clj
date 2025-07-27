@@ -64,3 +64,13 @@
           (when (some #(= socket (:socket (val %))) @players)
             players))
         online-games))
+
+;update snake position
+(defn move-snake [snake direction speed]
+  (let [[x y] (snake 0)
+        new-head (case direction
+                   :up    [x (- y speed)]
+                   :down  [x (+ y speed)]
+                   :left  [(- x speed) y]
+                   :right [(+ x speed) y])]
+    (into [new-head] (subvec snake 0 (dec (count snake))))))

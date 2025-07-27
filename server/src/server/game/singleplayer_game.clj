@@ -18,7 +18,7 @@
 (defn end-game-loop [stop-flag final-score result]
   (reset! final-score result)
   (reset! stop-flag true)
-  (db/save-game @final-score false))
+  (db/save-game @final-score false nil))
 
 (defn change-direction-single [player-socket dir]
   (let [snakes-direction (find-players-by-socket player-socket @online-games)

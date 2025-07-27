@@ -10,8 +10,9 @@
    [client.components.sign-in-tabs-component :refer [login-form register-form]]
    [client.helper-func :as h :refer [clear-local-storage get-user-info
                                      img-atom]]
-   [client.game.main-game :as main :refer [game-time]]
+   [client.game.main-game :as main]
    [client.game.singleplayer-game :as single]
+   [client.game.cake-game :as cake]
    [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false
@@ -50,7 +51,7 @@
     (let [score main/score]
       [:div {:class "score"}
        [:div {:class "score1"} (first @score)]
-       [:div @game-time]
+       [:div @main/game-time]
        [:div {:class "score2"} (last @score)]])))
 
 (defn profile []
@@ -122,7 +123,13 @@
                      (fn []
                        (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
                        (swap! app-state assoc :show-game false :show-loading true))}
-            "MULTIPLAYER"]
+            "TIME GAME"]
+           [:button {:class "start-game-btn"
+                     :on-click
+                     (fn []
+                       (cake/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                       (swap! app-state assoc :show-game false :show-loading true))}
+            "CAKE GAME"]
            [:button {:class "start-game-btn"
                      :on-click
                      (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}

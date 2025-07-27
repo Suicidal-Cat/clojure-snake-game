@@ -7,26 +7,30 @@
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.websocket :as ws]
-   [server.game.main-game :refer [change-direction start-game]]
-   [server.routes :refer [public-routes wrapped-protected-routes]]
-   [server.game.singleplayer-game :refer [change-direction-single start-game-single]]))
+   [server.db.dbBroker :refer [game-mode-enum]]
+   [server.game.cake-game :as cake]
+   [server.game.main-game :as main]
+   [server.game.singleplayer-game :as single]
+   [server.routes :refer [public-routes wrapped-protected-routes]]))
 
 (def config (read-config "config.edn"))
-(def online-players (atom []))
+(def players-queue (atom []))
 
 ;try to find available player and start the game
 (defn find-game [player-socket data]
   (let [game-mode (:game-mode data)
         new-player {:id (:id data) :socket player-socket :game-mode game-mode}]
-    (if (:single data) (start-game-single new-player)
-        (if (empty? @online-players)
-          (swap! online-players conj new-player)
-          (let [player (some #(when (= game-mode (:game-mode %)) %) @online-players)]
+    (if (:single data) (single/start-game-single new-player)
+        (if (empty? @players-queue)
+          (swap! players-queue conj new-player)
+          (let [player (some #(when (= game-mode (:game-mode %)) %) @players-queue)]
             (if player
               (do
-                (swap! online-players (fn [players] (filterv #(not= (:id %) (:id player)) players)))
-                (start-game player new-player))
-              (swap! online-players conj new-player)))))))
+                (swap! players-queue (fn [players] (filterv #(not= (:id %) (:id player)) players)))
+                (if (= game-mode (:time game-mode-enum))
+                  (main/start-main-game player new-player)
+                  (cake/start-cake-game player new-player)))
+              (swap! players-queue conj new-player)))))))
 
 
 ;process messages form client's web socket
@@ -35,9 +39,10 @@
         dir (:direction data)]
     (if (int? (:id data))
       (find-game socket data)
-      (if (:single data)
-        (change-direction-single socket dir)
-        (change-direction socket dir)))))
+      (cond
+        (:time data) (main/change-direction socket dir)
+        (:cake data) (cake/change-direction socket dir)
+        (:single data) (single/change-direction-single socket dir)))))
 
 (defn echo-handler [request]
   (assert (ws/upgrade-request? request))

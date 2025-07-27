@@ -1,15 +1,14 @@
 (ns server.game.main-game
   (:require
    [ring.websocket :as ws]
+   [server.db.dbBroker :as db]
    [server.game.game-helper-func :refer [find-players-by-socket
-                                    generate-valid-coordinate-pair-ball
-                                    in-bounds? init-game-state inside?
-                                    vector-contains?]]
-   [server.db.dbBroker :as db]))
+                                         generate-valid-coordinate-pair-ball
+                                         in-bounds? init-game-state inside?
+                                         move-snake vector-contains?]]))
 
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
-(def end-score 20) ;goal that player want to accomplish
 (def power-ups ["+3","-3","boom"])
 (def tick-duration 120)
 
@@ -23,16 +22,6 @@
   (reset! final-score result)
   (reset! stop-flag true)
   (db/save-game @final-score true (:time db/game-mode-enum)))
-
-;update snake position
-(defn move-snake [snake direction speed]
-  (let [[x y] (snake 0)
-        new-head (case direction
-                   :up    [x (- y speed)]
-                   :down  [x (+ y speed)]
-                   :left  [(- x speed) y]
-                   :right [(+ x speed) y])]
-    (into [new-head] (subvec snake 0 (dec (count snake))))))
 
 ;update snake direction
 (defn change-direction [player-socket dir]
@@ -56,15 +45,13 @@
     (if (or
          (false? (in-bounds? (snake1 0) field-size grid-size))
          (vector-contains? snake2 (snake1 0))
-         (vector-contains? (subvec snake1 1) (snake1 0))
-         (>= ((:score @game-state) 1) end-score))
+         (vector-contains? (subvec snake1 1) (snake1 0)))
       (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
                                             :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
       (when (or
              (false? (in-bounds? (snake2 0) field-size grid-size))
              (vector-contains? snake1 (snake2 0))
-             (vector-contains? (subvec snake2 1) (snake2 0))
-             (>= ((:score @game-state) 0) end-score))
+             (vector-contains? (subvec snake2 1) (snake2 0)))
         (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
                                               :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})))))
 
@@ -200,7 +187,7 @@
       (ws/close (:socket player2)))))
 
 ;start the game
-(defn start-game [player1 player2]
+(defn start-main-game [player1 player2]
   (let [game-id (str (:id player1) (:id player2))
         snakes-direction (atom {:snake1 (assoc player1 :direction :right :change-dir true)
                                 :snake2 (assoc player2 :direction :left :change-dir true)})]
