@@ -48,9 +48,9 @@
 ;init singleplayer game state
 (defn game-state-single [field-size grid-size]
   (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                                  [[180 90] [150 90] [120 90] [90 90]]
+                                                  [[210 105] [175 105] [140 105] [105 105]]
                                                   nil)]
-    (hash-map :snake1 [[180 90] [150 90] [120 90] [90 90]]
+    (hash-map :snake1 [[210 105] [175 105] [140 105] [105 105]]
               :ball ball
               :score [0])))
 

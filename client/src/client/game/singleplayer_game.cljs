@@ -9,8 +9,8 @@
 
 (def score (r/atom [0 0]))
 (def game-state (r/atom nil))
-(def field-size 600) ;field size in px
-(def grid-size 30) ;grid size in px
+(def field-size 595) ;field size in px
+(def grid-size 35) ;grid size in px
 (def stop-game-flag (atom false))
 (def player-id (atom 0))
 
@@ -48,8 +48,9 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/snake22.png"]
-    (q/set-state! :image (q/load-image url)))
+  (let [head "/images/hgreen.png"
+        body "/images/bgreen.png"]
+    (q/set-state! :head (q/load-image head) :body (q/load-image body)))
   (q/frame-rate 30) 
   (q/background 0))
 
@@ -60,12 +61,13 @@
 
 ;draw snake
 (defn draw-snake []
-  (q/stroke 0)
-  (q/stroke-weight 0)
-  (q/fill 255 0 0)
-  (let [im (q/state :image)]
-    (doseq [[x y] (:snake1 @game-state)]
-      (q/image im x y))))
+  (let [head-im (q/state :head)
+        body-im (q/state :body)
+        [head & body] (:snake1 @game-state)]
+    (let [[x y] head]
+      (q/image head-im x y grid-size grid-size))
+    (doseq [[x y] body]
+      (q/image body-im x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []

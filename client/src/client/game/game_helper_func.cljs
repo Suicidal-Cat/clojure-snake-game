@@ -5,7 +5,9 @@
 (def light-purple [182 127 189])
 (def white [237 239 239])
 
-(defn draw-grid [cell-size]
+(defn draw-grid [cell-size] 
+  (q/stroke 0)
+  (q/stroke-weight 0)
   (let [w (/ (q/width) cell-size)
         h (/ (q/height) cell-size)]
     (doseq [y (range h)
