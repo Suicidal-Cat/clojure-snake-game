@@ -1,6 +1,7 @@
 (ns client.core
   (:require
-   [client.components.main-component :refer [canvas game-layout game-score screenshoot-canvas]]
+   [client.components.main-component :refer [border-terrain canvas game-layout
+                                             game-score screenshoot-canvas]]
    [reagent.dom :as rdom]))
 
 (enable-console-print!)
@@ -10,8 +11,8 @@
 (defn app []
   [:div {:class "game"}
    [game-layout]
-   [game-score]
    [canvas]
+   [border-terrain]
    [screenshoot-canvas]])
 
 

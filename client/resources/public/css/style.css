@@ -330,6 +330,10 @@
     margin-bottom: 1rem;
 }
 
+.grass-terrain-single {
+    position: absolute;
+}
+
 
 /* font-family: 'Arcade Interlaced', sans-serif;
 font-family: 'Arcade Normal', sans-serif;

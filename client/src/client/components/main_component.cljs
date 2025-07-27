@@ -8,24 +8,32 @@
    [client.components.match-history-tab-component :refer [get-matches
                                                           match-history]]
    [client.components.sign-in-tabs-component :refer [login-form register-form]]
-   [client.helper-func :as h :refer [clear-local-storage get-user-info
-                                     img-atom]]
+   [client.game.cake-game :as cake]
    [client.game.main-game :as main]
    [client.game.singleplayer-game :as single]
-   [client.game.cake-game :as cake]
+   [client.helper-func :as h :refer [clear-local-storage game-mode-enum
+                                     get-user-info img-atom]]
    [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false
                             :show-loading false
                             :show-tabs false
                             :logged false
-                            :active-tab (r/atom 1)}))
+                            :active-tab (r/atom 1)
+                            :game-mode nil}))
 
 (defn update-user-state []
   (let [user (get-user-info)] 
     (swap! app-state assoc :logged (some? user))))
 
 (update-user-state)
+
+(defn border-terrain []
+  (when (:show-game @app-state)
+    (let [mode (:game-mode @app-state)]
+      (cond
+        (= mode "single") [:img {:src "/images/grass-terrain-single.png"
+                                 :class "grass-terrain-single"}]))))
 
 (defn canvas []
   [:div {:id "game-canvas"}])
@@ -122,17 +130,17 @@
                      :on-click
                      (fn []
                        (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                       (swap! app-state assoc :show-game false :show-loading true))}
+                       (swap! app-state assoc :show-game false :show-loading true :game-mode (:time game-mode-enum)))}
             "TIME GAME"]
            [:button {:class "start-game-btn"
                      :on-click
                      (fn []
                        (cake/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                       (swap! app-state assoc :show-game false :show-loading true))}
+                       (swap! app-state assoc :show-game false :show-loading true :game-mode (:cake game-mode-enum)))}
             "CAKE GAME"]
            [:button {:class "start-game-btn"
                      :on-click
-                     (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true))}
+                     (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true :game-mode "single"))}
             "SINGLEPLAYER"]]])
        
        (when (:show-loading @app-state) [loading])

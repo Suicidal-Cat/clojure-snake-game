@@ -140,3 +140,34 @@
              AND f.UserId2 = ?"
           params [pending-status userId]]
       (normalize-db-result (jdbc/execute! ds (into [sql] params))))))
+
+;; get cake with ingredient
+(defn get-random-cake-with-parts []
+  (when ds
+    (let [results (jdbc/execute! ds
+                                 ["WITH RandomCakes AS (
+                                   SELECT Id, ImageName
+                                   FROM Cakes
+                                   ORDER BY RAND()
+                                   LIMIT 1)
+                                  SELECT
+                                    rc.Id AS CakeId,
+                                    rc.ImageName AS CakeImage,
+                                    i.Id AS IngredientId,
+                                    i.ImageName AS PartImage,
+                                    ci.Amount
+                                  FROM RandomCakes rc
+                                  JOIN CakeIngredients ci ON rc.Id = ci.CakeId
+                                  JOIN Ingredients i ON ci.IngredientId = i.Id"])
+          normalized (normalize-db-result results)
+          cake-image (:cakeimage (first normalized))
+          cake-id (:cakeid (first normalized))
+          parts (mapv (fn [{:keys [ingredientid partimage amount]}]
+                        {:part-id ingredientid
+                         :part-image partimage
+                         :amount amount
+                         :current 0})
+                      normalized)]
+      {:cake-id cake-id
+       :cake-image cake-image
+       :parts parts})))
