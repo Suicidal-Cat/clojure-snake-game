@@ -9,8 +9,8 @@
 
 (def score (r/atom [0 0]))
 (def game-state (r/atom nil))
-(def field-size 595) ;field size in px
-(def grid-size 35) ;grid size in px
+(def field-size 594) ;field size in px
+(def grid-size 33) ;grid size in px
 (def stop-game-flag (atom false))
 (def player-id (atom 0))
 
@@ -65,9 +65,9 @@
         body-im (q/state :body)
         [head & body] (:snake1 @game-state)]
     (let [[x y] head]
-      (q/image head-im x y grid-size grid-size))
+      (q/image head-im x y 33 33))
     (doseq [[x y] body]
-      (q/image body-im x y grid-size grid-size))))
+      (q/image body-im x y 33 33))))
 
 ;stop drawing
 (defn stop-drawing []

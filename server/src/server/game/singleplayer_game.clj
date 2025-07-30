@@ -6,8 +6,8 @@
                                     vector-contains?]]
    [server.db.dbBroker :as db]))
 
-(def field-size 595) ;field size in px
-(def grid-size 35) ;grid size in px
+(def field-size 594) ;field size in px
+(def grid-size 33) ;grid size in px
 
 ;snakes-direction hash-map - (:snake1 plyer1)
 ;player - hash-map (:socket socket :direction direction)
@@ -67,7 +67,7 @@
           stop-game (atom false)
           final-score (atom nil)]
       (while (not @stop-game)
-        (Thread/sleep 115)
+        (Thread/sleep 110)
         (ws/send (:socket player1) (pr-str @game-state))
         (update-game-on-eat game-state grid-size)
         (swap! game-state (fn [game-state]

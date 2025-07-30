@@ -37,20 +37,23 @@
 
 ;init main game-state
 (defn init-game-state [field-size grid-size]
-  (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                                  [[162 108] [135 108] [108 108] [81 108]]
-                                                  [[405 486] [432 486] [459 486] [486 486]])]
-    (hash-map :snake1 [[162 108] [135 108] [108 108] [81 108]]
-              :snake2 [[405 486] [432 486] [459 486] [486 486]]
+  (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
+        snake2 [[405 486] [432 486] [459 486] [486 486]]
+        ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                  snake1
+                                                  snake2)]
+    (hash-map :snake1 snake1
+              :snake2 snake2
               :ball ball
               :score [0 0])))
 
 ;init singleplayer game state
 (defn game-state-single [field-size grid-size]
-  (let [ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                                  [[210 105] [175 105] [140 105] [105 105]]
+  (let [snake [[198 99] [165 99] [132 99] [99 99]]
+        ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                  snake
                                                   nil)]
-    (hash-map :snake1 [[210 105] [175 105] [140 105] [105 105]]
+    (hash-map :snake1 snake
               :ball ball
               :score [0])))
 
