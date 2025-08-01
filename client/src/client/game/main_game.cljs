@@ -29,7 +29,7 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/snake27.png"
+  (let [url "/images/bgreen.png"
         bomb  "/images/bomb.png"
         add3  "/images/+3.png"
         minus3  "/images/-3.png"]
@@ -95,7 +95,7 @@
   (q/fill 255 0 0)
   (let [im (q/state :image)]
     (doseq [[x y] (:snake2 @game-state)]
-      (q/image im x y))))
+      (q/image im x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []

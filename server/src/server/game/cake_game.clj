@@ -1,10 +1,11 @@
 (ns server.game.cake-game
   (:require
    [ring.websocket :as ws]
-   [server.db.dbBroker :as db]
+   [server.db.dbBroker :as db :refer [get-random-cake-with-parts]]
    [server.game.game-helper-func :refer [find-players-by-socket
                                          generate-valid-coordinate-pair-ball
-                                         in-bounds? init-game-state move-snake
+                                         init-game-cake-state
+                                         move-snake-borderless
                                          vector-contains?]]))
 
 (def field-size 594) ;field size in px
@@ -42,13 +43,11 @@
   (let [snake1 (:snake1 @game-state)
         snake2 (:snake2 @game-state)]
     (if (or
-         (false? (in-bounds? (snake1 0) field-size grid-size))
          (vector-contains? snake2 (snake1 0))
          (vector-contains? (subvec snake1 1) (snake1 0)))
       (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
                                             :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
       (when (or
-             (false? (in-bounds? (snake2 0) field-size grid-size))
              (vector-contains? snake1 (snake2 0))
              (vector-contains? (subvec snake2 1) (snake2 0)))
         (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
@@ -74,7 +73,7 @@
 (defn update-snakes-positions [game-state snake-directions]
   (assoc game-state
          :snake1 (:snake1 game-state)
-         :snake2 (move-snake (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size)))
+         :snake2 (move-snake-borderless (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size field-size)))
 
 ;; send snake data
 (defn send-snake-data [player game-state]
@@ -83,7 +82,9 @@
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [game-state (atom (init-game-state field-size grid-size))
+    (let [game-state (atom (assoc (init-game-cake-state field-size grid-size)
+                                  :cake1 (get-random-cake-with-parts)
+                                  :cake2 (get-random-cake-with-parts)))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
@@ -99,8 +100,8 @@
         (snake-collisions game-state stop-game final-score player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
-      (ws/send (:socket player1) (pr-str @final-score))
-      (ws/send (:socket player2) (pr-str @final-score))
+      (send-snake-data player1 @game-state)
+      (send-snake-data player2 @game-state)
       (ws/close (:socket player1))
       (ws/close (:socket player2)))))
 

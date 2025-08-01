@@ -22,7 +22,7 @@
     (+ grid-size (* grid-size (rand-int num-cells)))))
 
 ;generate valid coordinate pair
-(defn generate-valid-coordinate-pair-ball [field-size grid-size sn1 sn2 & {:keys [offset] :or {offset 0}}]
+(defn generate-valid-coordinate-pair-ball [field-size grid-size sn1 sn2 & {:keys [offset] :or {offset (/ grid-size 2)}}]
   (loop []
     (let [x (random-coordinate field-size grid-size)
           y (random-coordinate field-size grid-size)
@@ -33,7 +33,7 @@
               (inside? coordinate (- ((sn1 0) 0) safe-area) (- ((sn1 0) 1) safe-area) (* safe-area 2) (* safe-area 2))
               (if sn2 (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)) false))
         (recur)
-        (mapv #(+ (/ grid-size 2) offset %) coordinate)))))
+        (mapv #(+ offset %) coordinate)))))
 
 ;init main game-state
 (defn init-game-state [field-size grid-size]
@@ -57,6 +57,18 @@
               :ball ball
               :score [0])))
 
+;init main game-state
+(defn init-game-cake-state [field-size grid-size]
+  (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
+        snake2 [[405 486] [432 486] [459 486] [486 486]]
+        ball (generate-valid-coordinate-pair-ball field-size grid-size
+                                                  snake1
+                                                  snake2)]
+    (hash-map :snake1 snake1
+              :snake2 snake2
+              :ball ball
+              :score [0 0])))
+
 ;check if vector contains element
 (defn vector-contains? [v el]
   (some #(= % el) v))
@@ -68,7 +80,7 @@
             players))
         online-games))
 
-;update snake position
+;update snake position with border
 (defn move-snake [snake direction speed]
   (let [[x y] (snake 0)
         new-head (case direction
@@ -76,4 +88,14 @@
                    :down  [x (+ y speed)]
                    :left  [(- x speed) y]
                    :right [(+ x speed) y])]
+    (into [new-head] (subvec snake 0 (dec (count snake))))))
+
+;update snake position without border
+(defn move-snake-borderless [snake direction speed field-size]
+  (let [[x y] (snake 0)
+        new-head (case direction
+                   :up    [x (mod (- y speed) field-size)]
+                   :down  [x (mod (+ y speed) field-size)]
+                   :left  [(mod (- x speed) field-size) y]
+                   :right [(mod (+ x speed) field-size) y])]
     (into [new-head] (subvec snake 0 (dec (count snake))))))

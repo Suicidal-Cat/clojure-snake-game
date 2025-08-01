@@ -63,14 +63,14 @@
        (move-snake [[50 50] [50 60] [50 70]] :down 10) => [[50 60] [50 50] [50 60]]
        (move-snake [[50 50] [50 60] [50 70]] :left 10) => [[40 50] [50 50] [50 60]]
        (move-snake [[50 50] [50 60] [50 70]] :right 10) => [[60 50] [50 50] [50 60]]
-       (single/move-snake [[5 5] [5 6] [5 7]] :up 1 10) => [[5 4] [5 5] [5 6]]
-       (single/move-snake [[5 5] [5 4] [5 3]] :down 1 10) => [[5 6] [5 5] [5 4]]
-       (single/move-snake [[5 5] [6 5] [7 5]] :left 1 10) => [[4 5] [5 5] [6 5]]
-       (single/move-snake [[5 5] [4 5] [3 5]] :right 1 10) => [[6 5] [5 5] [4 5]]
-       (single/move-snake [[5 0] [5 9] [5 8]] :up 1 10) => [[5 9] [5 0] [5 9]]
-       (single/move-snake [[5 9] [5 8] [5 7]] :down 1 10) => [[5 0] [5 9] [5 8]]
-       (single/move-snake [[0 5] [9 5] [8 5]] :left 1 10) => [[9 5] [0 5] [9 5]]
-       (single/move-snake [[9 5] [8 5] [7 5]] :right 1 10) => [[0 5] [9 5] [8 5]])
+       (move-snake-borderless [[5 5] [5 6] [5 7]] :up 1 10) => [[5 4] [5 5] [5 6]]
+       (move-snake-borderless [[5 5] [5 4] [5 3]] :down 1 10) => [[5 6] [5 5] [5 4]]
+       (move-snake-borderless [[5 5] [6 5] [7 5]] :left 1 10) => [[4 5] [5 5] [6 5]]
+       (move-snake-borderless [[5 5] [4 5] [3 5]] :right 1 10) => [[6 5] [5 5] [4 5]]
+       (move-snake-borderless [[5 0] [5 9] [5 8]] :up 1 10) => [[5 9] [5 0] [5 9]]
+       (move-snake-borderless [[5 9] [5 8] [5 7]] :down 1 10) => [[5 0] [5 9] [5 8]]
+       (move-snake-borderless [[0 5] [9 5] [8 5]] :left 1 10) => [[9 5] [0 5] [9 5]]
+       (move-snake-borderless [[9 5] [8 5] [7 5]] :right 1 10) => [[0 5] [9 5] [8 5]])
 
 (facts "On eat snake"
        (let [game-state (atom {:snake1 [[162 108] [135 108] [108 108] [81 108]]
@@ -90,8 +90,8 @@
          (fact (count (:snake1 @game-state)) => 5)
          (fact (count (:snake2 @game-state)) => 5)
          (fact (:score @game-state) => [1 1])
-         (single/update-game-on-eat game-state 27)
+         (single/update-game-on-eat game-state)
          (fact (count (:snake1 @game-state)) => 5)
-         (swap! game-state (fn [game-state] (assoc game-state :ball [351/2 243/2])))
-         (single/update-game-on-eat game-state 27)
+         (swap! game-state (fn [game-state] (assoc game-state :ball [357/2 249/2])))
+         (single/update-game-on-eat game-state)
          (fact (count (:snake1 @game-state)) => 6)))

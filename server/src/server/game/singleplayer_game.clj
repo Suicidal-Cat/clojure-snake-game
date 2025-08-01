@@ -1,10 +1,12 @@
 (ns server.game.singleplayer-game
   (:require
    [ring.websocket :as ws]
-   [server.game.game-helper-func :refer [find-players-by-socket game-state-single
-                                    generate-valid-coordinate-pair-ball
-                                    vector-contains?]]
-   [server.db.dbBroker :as db]))
+   [server.db.dbBroker :as db]
+   [server.game.game-helper-func :refer [find-players-by-socket
+                                         game-state-single
+                                         generate-valid-coordinate-pair-ball
+                                         move-snake-borderless
+                                         vector-contains?]]))
 
 (def field-size 594) ;field size in px
 (def grid-size 33) ;grid size in px
@@ -34,16 +36,6 @@
           (and (= past-dir :right) (not= dir :left)) (update-dir))
         nil))))
 
-;update snake position
-(defn move-snake [snake direction speed field-size]
-  (let [[x y] (snake 0)
-        new-head (case direction
-                   :up    [x (mod (- y speed) field-size)]
-                   :down  [x (mod (+ y speed) field-size)]
-                   :left  [(mod (- x speed) field-size) y]
-                   :right [(mod (+ x speed) field-size) y])]
-    (into [new-head] (subvec snake 0 (dec (count snake))))))
-
 ;check snake collisions
 (defn snake-collisions [game-state stop-game final-score player1]
   (let [snake1 (:snake1 @game-state)]
@@ -51,7 +43,7 @@
       (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}}))))
 
 ;grow snake when it eats the ball and generate new ball
-(defn update-game-on-eat [game-state grid-size]
+(defn update-game-on-eat [game-state]
   (let [[head-s1 & _] (:snake1 @game-state)
         fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
     (when (= fixed-ball head-s1)
@@ -69,10 +61,10 @@
       (while (not @stop-game)
         (Thread/sleep 110)
         (ws/send (:socket player1) (pr-str @game-state))
-        (update-game-on-eat game-state grid-size)
+        (update-game-on-eat game-state)
         (swap! game-state (fn [game-state]
                             (assoc game-state
-                                   :snake1 (move-snake (:snake1 game-state) (:direction (:snake1 @snake-directions)) grid-size field-size))))
+                                   :snake1 (move-snake-borderless (:snake1 game-state) (:direction (:snake1 @snake-directions)) grid-size field-size))))
         (snake-collisions game-state stop-game final-score player1)
         (swap! snake-directions (fn [state] (assoc-in state [:snake1 :change-dir] true)))) 
       (Thread/sleep 50)
