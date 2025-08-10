@@ -23,21 +23,6 @@
   (reset! stop-flag true)
   (db/save-game @final-score true (:time db/game-mode-enum)))
 
-;update snake direction
-(defn change-direction [player-socket dir]
-  (let [snakes-direction (find-players-by-socket player-socket @online-games)
-        [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
-                         [:snake1 (:snake1 @snakes-direction)]
-                         [:snake2 (:snake2 @snakes-direction)])
-        past-dir (:direction player)
-        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
-    (when (and (:change-dir (snake @snakes-direction)) (not= past-dir dir))
-        (cond
-          (and (= past-dir :up) (not= dir :down)) (update-dir)
-          (and (= past-dir :down) (not= dir :up)) (update-dir)
-          (and (= past-dir :left) (not= dir :right)) (update-dir)
-          (and (= past-dir :right) (not= dir :left)) (update-dir)))))
-
 ;check snake collisions
 (defn snake-collisions [game-state stop-game final-score player1 player2]
   (let [snake1 (:snake1 @game-state)
@@ -72,7 +57,7 @@
                                                   :score [((:score game-state) 0) (inc ((:score game-state) 1))])))))))
 
 ;generate power on the field
-(defn generate-random-power [game-state stop-game power-ups field-size grid-size]
+(defn generate-random-power [game-state stop-game power-ups]
   (future
     (while (not @stop-game)
       (Thread/sleep (+ 6000 (rand-int 3001)))
@@ -169,7 +154,7 @@
       (send-snake-data player1 @game-state)
       (send-snake-data player2 @game-state)
       (Thread/sleep 3000)
-      (generate-random-power game-state stop-game power-ups field-size grid-size)
+      (generate-random-power game-state stop-game power-ups)
       (while (not @stop-game)
         (Thread/sleep tick-duration)
         (send-snake-data player1 @game-state)
@@ -193,3 +178,18 @@
                                 :snake2 (assoc player2 :direction :left :change-dir true)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 player2 game-id)))
+
+;update snake direction
+(defn change-direction [player-socket dir]
+  (let [snakes-direction (find-players-by-socket player-socket @online-games)
+        [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
+                         [:snake1 (:snake1 @snakes-direction)]
+                         [:snake2 (:snake2 @snakes-direction)])
+        past-dir (:direction player)
+        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
+    (when (and (:change-dir (snake @snakes-direction)) (not= past-dir dir))
+        (cond
+          (and (= past-dir :up) (not= dir :down)) (update-dir)
+          (and (= past-dir :down) (not= dir :up)) (update-dir)
+          (and (= past-dir :left) (not= dir :right)) (update-dir)
+          (and (= past-dir :right) (not= dir :left)) (update-dir)))))

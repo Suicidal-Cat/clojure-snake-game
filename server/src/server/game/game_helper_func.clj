@@ -16,24 +16,31 @@
        (>= y y-rec)
        (< y (+ y-rec h-rec))))
 
-;generate random cordinates in playing field
-(defn random-coordinate [field-size grid-size]
-  (let [num-cells (/ (- field-size (* 2 grid-size)) grid-size)]
-    (+ grid-size (* grid-size (rand-int num-cells)))))
+;; gets random coordinate depending on exlude-edges flag
+(defn random-coordinate
+  [field-size grid-size & {:keys [exclude-edges] :or {exclude-edges true}}]
+  (let [usable-size (if exclude-edges
+                      (- field-size (* 2 grid-size))
+                      field-size)
+        num-cells (/ usable-size grid-size)
+        base (if exclude-edges grid-size 0)]
+    (+ base (* grid-size (rand-int num-cells)))))
 
-;generate valid coordinate pair
-(defn generate-valid-coordinate-pair-ball [field-size grid-size sn1 sn2 & {:keys [offset] :or {offset (/ grid-size 2)}}]
-  (loop []
-    (let [x (random-coordinate field-size grid-size)
-          y (random-coordinate field-size grid-size)
-          coordinate [x y]
-          safe-area (* grid-size 2)]
-      (if (or (some #(= % coordinate) sn1)
-              (some #(= % coordinate) sn2)
-              (inside? coordinate (- ((sn1 0) 0) safe-area) (- ((sn1 0) 1) safe-area) (* safe-area 2) (* safe-area 2))
-              (if sn2 (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)) false))
-        (recur)
-        (mapv #(+ offset %) coordinate)))))
+(defn generate-valid-coordinate-pair-ball
+  [field-size grid-size sn1 sn2
+   & {:keys [offset exclude-edges blocked-fields]
+      :or {offset (/ grid-size 2) exclude-edges true blocked-fields []}}]
+  (let [blocked (set (concat sn1 sn2 blocked-fields))
+        safe-area (* grid-size 2)]
+    (loop []
+      (let [x (random-coordinate field-size grid-size :exclude-edges exclude-edges)
+            y (random-coordinate field-size grid-size :exclude-edges exclude-edges)
+            coordinate [x y]]
+        (if (or (contains? blocked coordinate)
+                (inside? coordinate (- ((sn1 0) 0) safe-area) (- ((sn1 0) 1) safe-area) (* safe-area 2) (* safe-area 2))
+                (if sn2 (inside? coordinate (- ((sn2 0) 0) safe-area) (- ((sn2 0) 1) safe-area) (* safe-area 2) (* safe-area 2)) false))
+          (recur)
+          (mapv #(+ offset %) coordinate))))))
 
 ;init main game-state
 (defn init-game-state [field-size grid-size]
@@ -60,14 +67,9 @@
 ;init main game-state
 (defn init-game-cake-state [field-size grid-size]
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
-        snake2 [[405 486] [432 486] [459 486] [486 486]]
-        ball (generate-valid-coordinate-pair-ball field-size grid-size
-                                                  snake1
-                                                  snake2)]
+        snake2 [[405 486] [432 486] [459 486] [486 486]]]
     (hash-map :snake1 snake1
-              :snake2 snake2
-              :ball ball
-              :score [0 0])))
+              :snake2 snake2)))
 
 ;check if vector contains element
 (defn vector-contains? [v el]

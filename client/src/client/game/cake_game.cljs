@@ -26,12 +26,24 @@
     (reset! stop-game-flag true)
     (reset! loading-flag false)))
 
-;canvas setup
+(defn load-cake-images []
+  {:apple.png     (q/load-image "/images/parts/apple.png")
+   :banana.png    (q/load-image "/images/parts/banana.png")
+   :butter.png    (q/load-image "/images/parts/butter.png")
+   :cherry.png    (q/load-image "/images/parts/cherry.png")
+   :floury.png    (q/load-image "/images/parts/floury.png")
+   :grape.png     (q/load-image "/images/parts/grape.png")
+   :honey.png     (q/load-image "/images/parts/honey.png")
+   :lemon.png     (q/load-image "/images/parts/lemon.png")
+   :milk.png      (q/load-image "/images/parts/milk.png")
+   :strawberry.png (q/load-image "/images/parts/strawberry.png")})
+
 (defn setup []
-  (let [url "/images/snake27.png"]
-    (q/set-state!
-     :image (q/load-image url)
-     :radius 0))
+  (let [images (load-cake-images)]
+    (q/set-state! :image  (q/load-image "/images/bgreen.png")
+                  :radius 0)
+    (doseq [[k v] (load-cake-images)]
+      (swap! (q/state-atom) assoc k v)))
   (q/frame-rate 30)
   (q/background 0))
 
@@ -52,10 +64,10 @@
     (q/line 0 y (q/width) y)))
 
 ;draw food
-(defn draw-food []
-  (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) circle-radius circle-radius))
-
+(defn draw-parts []
+  (doseq [part (:parts @game-state)]
+    (let [[x y] (:coordinate part)]
+      (q/image (q/state (keyword (:image part))) x y grid-size grid-size))))
 
 ;draw snakes
 (defn draw-snakes []
@@ -67,7 +79,7 @@
   (q/fill 255 0 0)
   (let [im (q/state :image)]
     (doseq [[x y] (:snake2 @game-state)]
-      (q/image im x y))))
+      (q/image im x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []
@@ -77,7 +89,7 @@
 (defn draw []
   (q/background 0)
   (draw-grid-border grid-size)
-  (draw-food)
+  (draw-parts)
   (draw-snakes)
   (stop-drawing))
 

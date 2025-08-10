@@ -141,7 +141,7 @@
           params [pending-status userId]]
       (normalize-db-result (jdbc/execute! ds (into [sql] params))))))
 
-;; get cake with ingredient
+;; get cake with ingredients
 (defn get-random-cake-with-parts []
   (when ds
     (let [results (jdbc/execute! ds
@@ -170,4 +170,5 @@
                       normalized)]
       {:cake-id cake-id
        :cake-image cake-image
+       :percentage 0
        :parts parts})))

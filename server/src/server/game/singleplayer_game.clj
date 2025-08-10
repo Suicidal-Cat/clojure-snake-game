@@ -22,20 +22,6 @@
   (reset! stop-flag true)
   (db/save-game @final-score false nil))
 
-(defn change-direction-single [player-socket dir]
-  (let [snakes-direction (find-players-by-socket player-socket @online-games)
-        [snake player] [:snake1 (:snake1 @snakes-direction)]
-        past-dir (:direction player)
-        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
-    (when (:change-dir (snake @snakes-direction))
-      (if (not= past-dir dir)
-        (cond
-          (and (= past-dir :up) (not= dir :down)) (update-dir)
-          (and (= past-dir :down) (not= dir :up)) (update-dir)
-          (and (= past-dir :left) (not= dir :right)) (update-dir)
-          (and (= past-dir :right) (not= dir :left)) (update-dir))
-        nil))))
-
 ;check snake collisions
 (defn snake-collisions [game-state stop-game final-score player1]
   (let [snake1 (:snake1 @game-state)]
@@ -77,3 +63,17 @@
         snakes-direction (atom {:snake1 (assoc player1 :direction :right :change-dir true)})]
     (swap! online-games assoc (keyword game-id) snakes-direction)
     (broadcast-game-state player1 game-id)))
+
+(defn change-direction-single [player-socket dir]
+  (let [snakes-direction (find-players-by-socket player-socket @online-games)
+        [snake player] [:snake1 (:snake1 @snakes-direction)]
+        past-dir (:direction player)
+        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
+    (when (:change-dir (snake @snakes-direction))
+      (if (not= past-dir dir)
+        (cond
+          (and (= past-dir :up) (not= dir :down)) (update-dir)
+          (and (= past-dir :down) (not= dir :up)) (update-dir)
+          (and (= past-dir :left) (not= dir :right)) (update-dir)
+          (and (= past-dir :right) (not= dir :left)) (update-dir))
+        nil))))
