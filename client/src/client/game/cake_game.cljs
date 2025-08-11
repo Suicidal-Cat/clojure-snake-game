@@ -6,8 +6,6 @@
    [quil.core :as q]
    [reagent.core :as r]))
 
-
-(def score (r/atom [0 0]))
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -39,11 +37,10 @@
    :strawberry.png (q/load-image "/images/parts/strawberry.png")})
 
 (defn setup []
-  (let [images (load-cake-images)]
-    (q/set-state! :image  (q/load-image "/images/bgreen.png")
-                  :radius 0)
-    (doseq [[k v] (load-cake-images)]
-      (swap! (q/state-atom) assoc k v)))
+  (q/set-state! :image  (q/load-image "/images/bgreen.png")
+                :radius 0)
+  (doseq [[k v] (load-cake-images)]
+    (swap! (q/state-atom) assoc k v))
   (q/frame-rate 30)
   (q/background 0))
 
@@ -126,7 +123,6 @@
 
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
-                                        (reset! score (:score data))
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))

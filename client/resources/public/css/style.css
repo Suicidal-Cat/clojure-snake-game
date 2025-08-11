@@ -334,11 +334,6 @@
     position: absolute;
 }
 
-
-/* font-family: 'Arcade Interlaced', sans-serif;
-font-family: 'Arcade Normal', sans-serif;
-font-family: 'Arcade Rounded', sans-serif; */
-
 @keyframes dot-flash {
 
     0%,
@@ -370,3 +365,41 @@ font-family: 'Arcade Rounded', sans-serif; */
         opacity: 0.2;
     }
 }
+
+.cake-score-cont {
+    margin-top: 3.3rem;
+    width: 770px;
+    height: 600px;
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+
+    .cake-score {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+
+        .part {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            .part-image {
+                width: 28px;
+                height: 28px;
+            }
+
+            .part-text {
+                color: black;
+                font-size: 1.5rem;
+                margin-top: 0.2rem;
+            }
+        }
+    }
+}
+
+
+
+/* font-family: 'Arcade Interlaced', sans-serif;
+font-family: 'Arcade Normal', sans-serif;
+font-family: 'Arcade Rounded', sans-serif; */

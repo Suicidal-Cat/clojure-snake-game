@@ -21,23 +21,24 @@
                             :logged false
                             :active-tab (r/atom 1)
                             :game-mode nil}))
-
+;; check if user is logged
 (defn update-user-state []
   (let [user (get-user-info)] 
     (swap! app-state assoc :logged (some? user))))
 
 (update-user-state)
 
+(defn canvas []
+  [:div {:id "game-canvas"}])
+
+;; terrain around canvas based on mode
 (defn border-terrain []
   (when (:show-game @app-state)
     (let [mode (:game-mode @app-state)]
       (cond
         (= mode "single") [:img {:src "/images/grass-terrain-single.png"
                                  :class "grass-terrain-single"}]))))
-
-(defn canvas []
-  [:div {:id "game-canvas"}])
-
+;; loading screen
 (defn loading []
   [:div {:class "load-cont"}
    [:div {:class "loading-box"}
@@ -54,20 +55,54 @@
      [:span {:class "letter dot"} "."]
      [:span {:class "letter dot"} "."]]]])
 
-(defn game-score []
-  (when (:show-game @app-state)
-    (let [score main/score]
-      [:div {:class "score"}
-       [:div {:class "score1"} (first @score)]
-       [:div @main/game-time]
-       [:div {:class "score2"} (last @score)]])))
+;; game score component for cake mode
+(defn game-score-cake []
+  (let [game-state @cake/game-state]
+    [:div {:class "cake-score-cont"}
+     [:div {:class "cake-score"}
+      (for [part (get-in game-state [:cake1 :parts])]
+        ^{:key (:part-id part)}
+        [:div {:class "part"}
+         [:img {:src (str "/images/parts/" (:part-image part))
+                :alt (:part-image part)
+                :class "part-image"}]
+         [:div {:class "part-text"}
+          (str (:current part) "/" (:amount part))]])]
+     [:div {:class "cake-score"}
+      (for [part (get-in game-state [:cake2 :parts])]
+        ^{:key (:part-id part)}
+        [:div {:class "part"}
+         [:img {:src (str "/images/parts/" (:part-image part))
+                :alt (:part-image part)
+                :class "part-image"}]
+         [:div {:class "part-text"}
+          (str (:current part) "/" (:amount part))]])]]))
 
+;; game score based on mode
+(defn game-score []
+  (when (:show-game @app-state) 
+    (let [mode (:game-mode @app-state)]
+      (cond
+        (and (= mode (:cake game-mode-enum)) (not= nil @cake/game-state) (= false @cake/stop-game-flag))
+        (game-score-cake)
+        
+        (= mode (:time game-mode-enum))
+        (let [score main/score]
+          [:div {:class "score"}
+           [:div {:class "score1"} (first @score)]
+           [:div @main/game-time]
+           [:div {:class "score2"} (last @score)]])
+        
+        (= mode "single") ""))))
+
+;; profile icon
 (defn profile []
   [:img {:src "/images/profile.png"
          :alt "snake profile"
          :class "snake-profile"
          :on-click #(swap! app-state update :show-tabs not)}])
 
+;; logout icon
 (defn logout []
   (when (and (:logged @app-state) (not (:show-tabs @app-state)))
     [:img {:src "/images/logout.png"
@@ -77,19 +112,23 @@
                         (clear-local-storage)
                         (swap! app-state assoc :logged false))}]))
 
+;; screenshoot of the canvas
 (defn screenshoot-canvas []
   (when-let [screenshot @img-atom]
     [:img {:src screenshot :alt "Game Region Screenshot" :class "screenshot-img"}]))
 
+;; dialog that shows at the end of the game
 (defn end-game-pop-up []
   [:div {:class "end-game-dialog"}])
 
+;; header tab
 (defn tab-header [label index]
   [:div {:class "tab"
          :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
          :on-click #(swap! (:active-tab @app-state) (fn [_] index))}
    label])
 
+;; show content based on clicked tab
 (defn tab-content []
   (case @(:active-tab @app-state)
     1 (if (:logged @app-state)
@@ -104,6 +143,7 @@
           (get-pending-requests)
           [friend-request])))
 
+;; list tabs
 (defn user-dialog []
   [:div {:class "user-dialog"}
    (if (:logged @app-state)
@@ -116,7 +156,8 @@
       [tab-header "Register" 2]])
    [tab-content]])
 
-(defn game-layout []
+;; main screen
+(defn home-layout []
   (when-not (:show-game @app-state)
       [:div {:class "game-cont"} 
        (if (:show-tabs @app-state)
