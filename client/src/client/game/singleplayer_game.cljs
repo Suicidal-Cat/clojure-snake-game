@@ -1,6 +1,7 @@
 (ns client.game.singleplayer-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid]]
+   [client.game.game-helper-func :refer [draw-grid draw-snake
+                                         random-snake-image]]
    [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
@@ -51,23 +52,15 @@
   (let [head "/images/hgreen.png"
         body "/images/bgreen.png"]
     (q/set-state! :head (q/load-image head) :body (q/load-image body)))
-  (q/frame-rate 30) 
+  (doseq [[k v] (random-snake-image)]
+    (swap! (q/state-atom) assoc k v))
+  (q/frame-rate 30)
   (q/background 0))
 
 ;draw food
 (defn draw-food []
   (q/fill 0 0 255)
   (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 27 27))
-
-;draw snake
-(defn draw-snake []
-  (let [head-im (q/state :head)
-        body-im (q/state :body)
-        [head & body] (:snake1 @game-state)]
-    (let [[x y] head]
-      (q/image head-im x y grid-size grid-size))
-    (doseq [[x y] body]
-      (q/image body-im x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []
@@ -78,7 +71,7 @@
   (q/background 0)
   (draw-grid grid-size)
   (draw-food)
-  (draw-snake)
+  (draw-snake (q/state :head) (q/state :body) (:snake1 @game-state) grid-size)
   (stop-drawing))
 
 ;start the game

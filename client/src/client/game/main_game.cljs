@@ -1,5 +1,6 @@
 (ns client.game.main-game
   (:require
+   [client.game.game-helper-func :refer [draw-snake random-snake-images]]
    [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
                                       save-region-screenshot!]]
    [clojure.edn :as edn]
@@ -33,12 +34,12 @@
         add3  "/images/+3.png"
         minus3  "/images/-3.png"]
     (q/set-state!
-     :body2  (q/load-image "/images/bgreen.png")
-     :head2 (q/load-image "images/hgreen.png")
      :radius 0
      :bomb (q/load-image bomb)
      :add3 (q/load-image add3)
      :minus3 (q/load-image minus3)))
+  (doseq [[k v] (random-snake-images)]
+    (swap! (q/state-atom) assoc k v))
   (q/frame-rate 30)
   (q/background 0))
 
@@ -87,18 +88,8 @@
 
 ;draw snakes
 (defn draw-snakes []
-  (q/stroke 0)
-  (q/stroke-weight 0)
-  (q/fill 0 255 0)
-  (doseq [[x y] (:snake1 @game-state)]
-    (q/rect x y grid-size grid-size))
-  (q/fill 255 0 0)
-  (let [head2 (q/state :head2)
-        body2 (q/state :body2) 
-        [[hx2 hy2] & sbody] (:snake2 @game-state)]
-    (q/image head2 hx2 hy2 grid-size grid-size)
-    (doseq [[x y] sbody]
-      (q/image body2 x y grid-size grid-size))))
+  (draw-snake (q/state :head1) (q/state :body1) (:snake1 @game-state) grid-size)
+  (draw-snake (q/state :head2) (q/state :body2) (:snake2 @game-state) grid-size))
 
 ;stop drawing
 (defn stop-drawing []
