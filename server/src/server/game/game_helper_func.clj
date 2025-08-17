@@ -65,7 +65,7 @@
               :score [0])))
 
 ;init main game-state
-(defn init-game-cake-state [field-size grid-size]
+(defn init-game-cake-state []
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
         snake2 [[405 486] [432 486] [459 486] [486 486]]]
     (hash-map :snake1 snake1

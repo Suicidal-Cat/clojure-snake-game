@@ -65,9 +65,9 @@
         body-im (q/state :body)
         [head & body] (:snake1 @game-state)]
     (let [[x y] head]
-      (q/image head-im x y 33 33))
+      (q/image head-im x y grid-size grid-size))
     (doseq [[x y] body]
-      (q/image body-im x y 33 33))))
+      (q/image body-im x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []

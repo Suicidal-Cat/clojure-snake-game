@@ -66,7 +66,6 @@
 
 ;check if players have collected all parts
 (defn check-if-snake-have-eaten-cake [game-state player1 player2 stop-game final-score]
-  (println @game-state)
   (if (every? #(and (> (:current %) 0) (>= (:current %) (:amount %))) (get-in @game-state [:cake1 :parts]))
     (end-game-loop stop-game final-score {:winner {:id (:id player1) :head ((:snake1 @game-state) 0)}
                                           :loser {:id (:id player2) :head ((:snake2 @game-state) 0)}})
@@ -138,7 +137,7 @@
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [game-state (atom (assoc (init-game-cake-state field-size grid-size)
+    (let [game-state (atom (assoc (init-game-cake-state)
                                   :cake1 (get-random-cake-with-parts)
                                   :cake2 (get-random-cake-with-parts)
                                   :parts []))

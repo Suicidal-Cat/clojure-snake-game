@@ -37,7 +37,8 @@
    :strawberry.png (q/load-image "/images/parts/strawberry.png")})
 
 (defn setup []
-  (q/set-state! :image  (q/load-image "/images/bgreen.png")
+  (q/set-state! :body2  (q/load-image "/images/bgreen.png")
+                :head2 (q/load-image "images/hgreen.png")
                 :radius 0)
   (doseq [[k v] (load-cake-images)]
     (swap! (q/state-atom) assoc k v))
@@ -74,9 +75,12 @@
   (doseq [[x y] (:snake1 @game-state)]
     (q/rect x y grid-size grid-size))
   (q/fill 255 0 0)
-  (let [im (q/state :image)]
-    (doseq [[x y] (:snake2 @game-state)]
-      (q/image im x y grid-size grid-size))))
+  (let [head2 (q/state :head2)
+        body2 (q/state :body2) 
+        [[hx2 hy2] & sbody] (:snake2 @game-state)]
+    (q/image head2 hx2 hy2 grid-size grid-size)
+    (doseq [[x y] sbody]
+      (q/image body2 x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []

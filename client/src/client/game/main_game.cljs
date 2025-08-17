@@ -29,12 +29,12 @@
 
 ;canvas setup
 (defn setup []
-  (let [url "/images/bgreen.png"
-        bomb  "/images/bomb.png"
+  (let [bomb  "/images/bomb.png"
         add3  "/images/+3.png"
         minus3  "/images/-3.png"]
     (q/set-state!
-     :image (q/load-image url)
+     :body2  (q/load-image "/images/bgreen.png")
+     :head2 (q/load-image "images/hgreen.png")
      :radius 0
      :bomb (q/load-image bomb)
      :add3 (q/load-image add3)
@@ -93,9 +93,12 @@
   (doseq [[x y] (:snake1 @game-state)]
     (q/rect x y grid-size grid-size))
   (q/fill 255 0 0)
-  (let [im (q/state :image)]
-    (doseq [[x y] (:snake2 @game-state)]
-      (q/image im x y grid-size grid-size))))
+  (let [head2 (q/state :head2)
+        body2 (q/state :body2) 
+        [[hx2 hy2] & sbody] (:snake2 @game-state)]
+    (q/image head2 hx2 hy2 grid-size grid-size)
+    (doseq [[x y] sbody]
+      (q/image body2 x y grid-size grid-size))))
 
 ;stop drawing
 (defn stop-drawing []
