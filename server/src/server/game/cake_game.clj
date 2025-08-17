@@ -30,13 +30,13 @@
     (if (or
          (vector-contains? snake2 (snake1 0))
          (vector-contains? (subvec snake1 1) (snake1 0)))
-      (end-game-loop stop-game final-score {:winner {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}
-                                            :loser {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}})
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head (snake2 0)}
+                                            :loser {:id (:id player1) :head (snake1 0)}})
       (when (or
              (vector-contains? snake1 (snake2 0))
              (vector-contains? (subvec snake2 1) (snake2 0)))
-        (end-game-loop stop-game final-score {:winner {:id (:id player1) :score ((:score @game-state) 0) :head (snake1 0)}
-                                              :loser {:id (:id player2) :score ((:score @game-state) 1) :head (snake2 0)}})))))
+        (end-game-loop stop-game final-score {:winner {:id (:id player1) :head (snake1 0)}
+                                              :loser {:id (:id player2) :head (snake2 0)}})))))
 
 ;generate random cake part
 (defn generate-random-part [game-state]
@@ -64,6 +64,16 @@
 (defn get-eaten-part [head parts]
   (some #(when (= head (:coordinate %)) %) parts))
 
+;check if players have collected all parts
+(defn check-if-snake-have-eaten-cake [game-state player1 player2 stop-game final-score]
+  (println @game-state)
+  (if (every? #(and (> (:current %) 0) (>= (:current %) (:amount %))) (get-in @game-state [:cake1 :parts]))
+    (end-game-loop stop-game final-score {:winner {:id (:id player1) :head ((:snake1 @game-state) 0)}
+                                          :loser {:id (:id player2) :head ((:snake2 @game-state) 0)}})
+    (when (every? #(and (> (:current %) 0) (>= (:current %) (:amount %))) (get-in @game-state [:cake2 :parts]))
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head ((:snake1 @game-state) 0)}
+                                            :loser {:id (:id player1) :head ((:snake2 @game-state) 0)}}))))
+
 ;update current amount of the part in the cake
 (defn update-part-current [parts part-id]
   (loop [remaining parts
@@ -78,7 +88,7 @@
                 (recur (subvec remaining 1) (conj acc p) false))))))
 
 ;update game when snake eat a cake part
-(defn update-game-on-eat [game-state]
+(defn update-game-on-eat [game-state player1 player2 stop-game final-score]
   (let [[head-s1 & _] (:snake1 @game-state)
         [head-s2 & _] (:snake2 @game-state)
         part1 (get-eaten-part head-s1 (:parts @game-state))
@@ -89,8 +99,8 @@
              (fn [state]
                (let [state (cond-> state
                              true (update :parts #(remove (fn [p]
-                                                            (or (and part1 (= (:part-id p) (:part-id part1)))
-                                                                (and part2 (= (:part-id p) (:part-id part2)))))
+                                                            (or (and part1 (= (:coordinate p) (:coordinate part1)))
+                                                                (and part2 (= (:coordinate p) (:coordinate part2)))))
                                                           %))
 
                              part1 (-> (update :snake1 conj [-1 -1])
@@ -102,7 +112,8 @@
                                        (update :cake2
                                                #(update-in % [:parts]
                                                            (fn [parts] (update-part-current parts (:part-id part2)))))))]
-                 state))))))
+                 state)))
+      (check-if-snake-have-eaten-cake game-state player1 player2 stop-game final-score))))
 
 ;update snakes positions
 (defn update-snakes-positions [game-state snake-directions]
@@ -115,12 +126,13 @@
   (ws/send (:socket player1) (pr-str game-state))
   (ws/send (:socket player2) (pr-str game-state)))
 
+;; update initial game state
 (defn init-parts [game-state]
   (swap! game-state
          (fn [state]
            (let [part1 (generate-random-part state)
                  state' (update state :parts conj part1)
-                 part2 (generate-random-part state')] 
+                 part2 (generate-random-part state')]
              (assoc state :parts [part1 part2])))))
 
 ;game loop
@@ -133,14 +145,14 @@
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
-      (init-parts game-state) 
+      (init-parts game-state)
       (send-snake-data player1 player2 @game-state)
       (Thread/sleep 3000)
       (generate-cake-parts game-state stop-game)
       (while (not @stop-game)
         (Thread/sleep tick-duration)
         (send-snake-data player1 player2 @game-state)
-        (update-game-on-eat game-state)
+        (update-game-on-eat game-state player1 player2 stop-game final-score)
         (swap! game-state update-snakes-positions snake-directions)
         (snake-collisions game-state stop-game final-score player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
