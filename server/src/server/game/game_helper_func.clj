@@ -101,3 +101,18 @@
                    :left  [(mod (- x speed) field-size) y]
                    :right [(mod (+ x speed) field-size) y])]
     (into [new-head] (subvec snake 0 (dec (count snake))))))
+
+;update player direction
+(defn update-player-direction [player-socket dir online-games]
+  (let [snakes-direction (find-players-by-socket player-socket @online-games)
+        [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
+                         [:snake1 (:snake1 @snakes-direction)]
+                         [:snake2 (:snake2 @snakes-direction)])
+        past-dir (:direction player)
+        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
+    (when (and (:change-dir (snake @snakes-direction)) (not= past-dir dir))
+      (cond
+        (and (= past-dir :up) (not= dir :down)) (update-dir)
+        (and (= past-dir :down) (not= dir :up)) (update-dir)
+        (and (= past-dir :left) (not= dir :right)) (update-dir)
+        (and (= past-dir :right) (not= dir :left)) (update-dir)))))

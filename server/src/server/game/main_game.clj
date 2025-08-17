@@ -2,10 +2,10 @@
   (:require
    [ring.websocket :as ws]
    [server.db.dbBroker :as db]
-   [server.game.game-helper-func :refer [find-players-by-socket
-                                         generate-valid-coordinate-pair-ball
+   [server.game.game-helper-func :refer [generate-valid-coordinate-pair-ball
                                          in-bounds? init-game-state inside?
-                                         move-snake vector-contains?]]))
+                                         move-snake update-player-direction
+                                         vector-contains?]]))
 
 (def field-size 594) ;field size in px
 (def grid-size 27) ;grid size in px
@@ -181,15 +181,4 @@
 
 ;update snake direction
 (defn change-direction [player-socket dir]
-  (let [snakes-direction (find-players-by-socket player-socket @online-games)
-        [snake player] (if (= player-socket (:socket (:snake1 @snakes-direction)))
-                         [:snake1 (:snake1 @snakes-direction)]
-                         [:snake2 (:snake2 @snakes-direction)])
-        past-dir (:direction player)
-        update-dir (fn [] (swap! snakes-direction update snake (fn [_] (assoc player :direction dir :change-dir false))))]
-    (when (and (:change-dir (snake @snakes-direction)) (not= past-dir dir))
-        (cond
-          (and (= past-dir :up) (not= dir :down)) (update-dir)
-          (and (= past-dir :down) (not= dir :up)) (update-dir)
-          (and (= past-dir :left) (not= dir :right)) (update-dir)
-          (and (= past-dir :right) (not= dir :left)) (update-dir)))))
+  (update-player-direction player-socket dir online-games))
