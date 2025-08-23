@@ -1,7 +1,7 @@
 (ns client.game.singleplayer-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid draw-snake
-                                         random-snake-image]]
+   [client.game.game-helper-func :refer [draw-grid-main draw-snake
+                                         get-food-image random-snake-image]]
    [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
@@ -15,13 +15,51 @@
 (def stop-game-flag (atom false))
 (def player-id (atom 0))
 
-
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
         [hx hy] (mapv #(* % 2) (:head winner))]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
     (reset! stop-game-flag true)))
+
+;canvas setup
+(defn setup []
+  (let [head "/images/hgreen.png"
+        body "/images/bgreen.png"
+        food-image (get-food-image)]
+    (q/set-state! :head (q/load-image head) 
+                  :body (q/load-image body)
+                  :food-img (q/load-image (str "/images/parts/" food-image))))
+  (doseq [[k v] (random-snake-image)]
+    (swap! (q/state-atom) assoc k v))
+  (q/frame-rate 30)
+  (q/background 0))
+
+;draw food
+(defn draw-food []
+  (when (:ball @game-state)
+    (q/image (q/state :food-img) ((:ball @game-state) 0) ((:ball @game-state) 1) grid-size grid-size)))
+
+;stop drawing
+(defn stop-drawing []
+  (when @stop-game-flag (q/no-loop)))
+
+;main draw
+(defn draw []
+  (q/background 0)
+  (draw-grid-main grid-size)
+  (draw-food)
+  (draw-snake (q/state :head) (q/state :body) (:snake1 @game-state) grid-size)
+  (stop-drawing))
+
+;start the game
+(defn start_game []
+  (q/sketch
+   :host "game-canvas"
+   :settings #(q/smooth 2)
+   :setup setup
+   :draw draw
+   :size [field-size field-size]))
 
 ;websocket communication
 (defn connect_socket []
@@ -46,39 +84,3 @@
                                         (when (:winner data) (stop-game data)))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))
-
-;canvas setup
-(defn setup []
-  (let [head "/images/hgreen.png"
-        body "/images/bgreen.png"]
-    (q/set-state! :head (q/load-image head) :body (q/load-image body)))
-  (doseq [[k v] (random-snake-image)]
-    (swap! (q/state-atom) assoc k v))
-  (q/frame-rate 30)
-  (q/background 0))
-
-;draw food
-(defn draw-food []
-  (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) 27 27))
-
-;stop drawing
-(defn stop-drawing []
-  (when @stop-game-flag (q/no-loop)))
-
-;main draw
-(defn draw []
-  (q/background 0)
-  (draw-grid grid-size)
-  (draw-food)
-  (draw-snake (q/state :head) (q/state :body) (:snake1 @game-state) grid-size)
-  (stop-drawing))
-
-;start the game
-(defn start_game []
-  (q/sketch
-   :host "game-canvas"
-   :settings #(q/smooth 2)
-   :setup setup
-   :draw draw
-   :size [field-size field-size]))

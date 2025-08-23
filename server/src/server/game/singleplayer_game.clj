@@ -31,11 +31,11 @@
 ;grow snake when it eats the ball and generate new ball
 (defn update-game-on-eat [game-state]
   (let [[head-s1 & _] (:snake1 @game-state)
-        fixed-ball (mapv #(- % (/ grid-size 2)) (:ball @game-state))]
-    (when (= fixed-ball head-s1)
+        ball (:ball @game-state)]
+    (when (= ball head-s1)
       (swap! game-state (fn [game-state] (assoc game-state
                                                 :snake1 (conj (:snake1 game-state) [-1 -1])
-                                                :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) (:snake2 game-state))
+                                                :ball (generate-valid-coordinate-pair-ball field-size grid-size (:snake1 game-state) nil :offset 0)
                                                 :score [(inc ((:score game-state) 0))]))))))
 
 (defn broadcast-game-state [player1 game-id]

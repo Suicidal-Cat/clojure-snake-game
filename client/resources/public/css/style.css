@@ -332,6 +332,8 @@
 
 .grass-terrain-single {
     position: absolute;
+    width: 653.4px;
+    height: 653.4px;
 }
 
 @keyframes dot-flash {

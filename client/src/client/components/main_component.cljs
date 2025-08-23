@@ -36,7 +36,7 @@
   (when (:show-game @app-state)
     (let [mode (:game-mode @app-state)]
       (cond
-        (= mode "single") [:img {:src "/images/grass-terrain-single.png"
+        (= mode "single") [:img {:src "/images/grass-terrain.png"
                                  :class "grass-terrain-single"}]))))
 ;; loading screen
 (defn loading []

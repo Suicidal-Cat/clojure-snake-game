@@ -59,7 +59,8 @@
   (let [snake [[198 99] [165 99] [132 99] [99 99]]
         ball (generate-valid-coordinate-pair-ball field-size grid-size
                                                   snake
-                                                  nil)]
+                                                  nil
+                                                  :offset 0)]
     (hash-map :snake1 snake
               :ball ball
               :score [0])))

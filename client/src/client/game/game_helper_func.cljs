@@ -1,12 +1,14 @@
 (ns client.game.game-helper-func
-   (:require [quil.core :as q]))
+  (:require [quil.core :as q]))
 
 (def dark-purple [110 0 123])
 (def light-purple [182 127 189])
+(def dark-brown [196 164 132])
+(def light-brown [226 210 194])
 (def white [237 239 239])
 (def colors [:red :green :yellow])
 
-(defn draw-grid [cell-size] 
+(defn draw-grid [cell-size]
   (q/stroke 0)
   (q/stroke-weight 0)
   (let [w (/ (q/width) cell-size)
@@ -43,3 +45,23 @@
   (let [c (rand-nth colors)]
     {:body (q/load-image (str "/images/b" (name c) ".png"))
      :head (q/load-image (str "/images/h" (name c) ".png"))}))
+
+(defn get-food-image []
+  (rand-nth ["strawberryCake.png","cherryCake.png","appleCake.png",
+             "apple.png","banana.png","cherry.png",
+             "grape.png","honey.png","lemon.png",
+             "strawberry.png"]))
+
+
+(defn draw-grid-main [cell-size]
+  (q/stroke 0)
+  (q/stroke-weight 0)
+  (let [w (/ (q/width) cell-size)
+        h (/ (q/height) cell-size)]
+    (doseq [y (range h)
+            x (range w)]
+      (let [color (if (even? (+ x y))
+                    light-brown
+                    dark-brown)]
+        (q/fill (apply q/color color))
+        (q/rect (* x cell-size) (* y cell-size) cell-size cell-size)))))
