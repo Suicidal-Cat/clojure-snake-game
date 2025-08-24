@@ -43,6 +43,7 @@
   (q/frame-rate 30)
   (q/background 0))
 
+;; pulse animation
 (defn pulse [min max]
   (let [min-radius min
         max-radius max

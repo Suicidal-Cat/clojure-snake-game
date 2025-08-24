@@ -1,18 +1,22 @@
 (ns client.game.singleplayer-game
   (:require
    [client.game.game-helper-func :refer [draw-grid-main draw-snake
-                                         get-food-image random-snake-image]]
-   [client.helper-func :as hf :refer [get-player-id save-region-screenshot!]]
+                                         get-food-image pulse-normal
+                                         random-snake-image]]
+   [client.helper-func :as hf :refer [get-player-id save-region-screenshot!
+                                      show-end-dialog]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
 
 
-(def score (r/atom [0 0]))
+(def score (r/atom [0]))
+(def end-score-data (r/atom [0]))
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 33) ;grid size in px
 (def stop-game-flag (atom false))
+(def loading-flag (atom false))
 (def player-id (atom 0))
 
 ;stoping game
@@ -20,7 +24,9 @@
   (let [winner (:winner data)
         [hx hy] (mapv #(* % 2) (:head winner))]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
-    (reset! stop-game-flag true)))
+    (reset! end-score-data data)
+    (reset! stop-game-flag true)
+    (reset! show-end-dialog true)))
 
 ;canvas setup
 (defn setup []
@@ -29,7 +35,8 @@
         food-image (get-food-image)]
     (q/set-state! :head (q/load-image head) 
                   :body (q/load-image body)
-                  :food-img (q/load-image (str "/images/parts/" food-image))))
+                  :food-img (q/load-image (str "/images/parts/" food-image))
+                  :radius grid-size))
   (doseq [[k v] (random-snake-image)]
     (swap! (q/state-atom) assoc k v))
   (q/frame-rate 30)
@@ -37,8 +44,11 @@
 
 ;draw food
 (defn draw-food []
-  (when (:ball @game-state)
-    (q/image (q/state :food-img) ((:ball @game-state) 0) ((:ball @game-state) 1) grid-size grid-size)))
+  (when-let [[x y] (:ball @game-state)]
+    (let [r (q/state :radius)]
+      (q/image-mode :center)
+      (q/image (q/state :food-img) (+ x (/ grid-size 2)) (+ y (/ grid-size 2)) r r)
+      (q/image-mode :corner))))
 
 ;stop drawing
 (defn stop-drawing []
@@ -46,7 +56,8 @@
 
 ;main draw
 (defn draw []
-  (q/background 0)
+  (q/background 0) 
+  (swap! (q/state-atom) assoc :radius (pulse-normal 32 37))
   (draw-grid-main grid-size)
   (draw-food)
   (draw-snake (q/state :head) (q/state :body) (:snake1 @game-state) grid-size)
@@ -62,7 +73,7 @@
    :size [field-size field-size]))
 
 ;websocket communication
-(defn connect_socket []
+(defn connect_socket [disable-loading]
   (let [ws (js/WebSocket. "ws://localhost:8085/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
@@ -78,6 +89,11 @@
                                      (reset! player-id id)
                                      (.send ws {:id id :single true}))))
     (.addEventListener ws "message" (fn [e]
+                                      (when (not @loading-flag)
+                                        (disable-loading)
+                                        (reset! loading-flag true)
+                                        (start_game))
+
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
                                         (reset! score (:score data))

@@ -12,7 +12,7 @@
    [client.game.main-game :as main]
    [client.game.singleplayer-game :as single]
    [client.helper-func :as h :refer [clear-local-storage game-mode-enum
-                                     get-user-info img-atom]]
+                                     get-user-info img-atom show-end-dialog]]
    [reagent.core :as r]))
 
 (defonce app-state (r/atom {:show-game false
@@ -29,7 +29,8 @@
 (update-user-state)
 
 (defn canvas []
-  [:div {:id "game-canvas"}])
+  (when (:show-game @app-state)
+    [:div {:id "game-canvas"}]))
 
 ;; terrain around canvas based on mode
 (defn border-terrain []
@@ -119,7 +120,18 @@
 
 ;; dialog that shows at the end of the game
 (defn end-game-pop-up []
-  [:div {:class "end-game-dialog"}])
+  (when @show-end-dialog
+    (let [mode (:game-mode @app-state)]
+    [:div {:class "end-game-dialog"}
+     [screenshoot-canvas]
+     [:div {:class "end-score"} 
+      (when (= mode "single") (str "Score: " (get-in @single/end-score-data [:winner :score])))]
+     [:button {:class "end-button"
+               :on-click
+               (fn []
+                 (swap! app-state assoc :show-game false)
+                 (reset! show-end-dialog false))}
+      "CONTINUE"]])))
 
 ;; header tab
 (defn tab-header [label index]
@@ -181,7 +193,9 @@
             "CAKE GAME"]
            [:button {:class "start-game-btn"
                      :on-click
-                     (fn [] (single/connect_socket) (single/start_game) (swap! app-state assoc :show-game true :game-mode "single"))}
+                     (fn [] 
+                       (single/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                       (swap! app-state assoc :show-game true :game-mode "single"))}
             "SINGLEPLAYER"]]])
        
        (when (:show-loading @app-state) [loading])

@@ -4,6 +4,7 @@
 
 ;; screenshot
 (def img-atom (r/atom nil))
+(def show-end-dialog (r/atom false))
 
 ;; user info from local-storage
 (def user-info (r/atom nil))

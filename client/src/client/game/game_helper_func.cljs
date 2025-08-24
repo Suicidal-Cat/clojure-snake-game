@@ -65,3 +65,8 @@
                     dark-brown)]
         (q/fill (apply q/color color))
         (q/rect (* x cell-size) (* y cell-size) cell-size cell-size)))))
+
+;; pulse animation
+(defn pulse-normal [min max]
+  (let [t (/ (+ 1 (Math/sin (/ (q/frame-count) 13))) 2)]
+    (+ min (* t (- max min)))))

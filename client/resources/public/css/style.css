@@ -159,22 +159,36 @@
 }
 
 .screenshot-img {
-    width: 250px;
-    height: 250px;
+    width: 100%;
+    height: 300px;
 }
 
 .end-game-dialog {
-    width: 300px;
-    height: 300px;
+    width: 340px;
+    min-height: 380px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: rgb(186, 77, 200);
+    align-items: center;
+    background-color: rgb(22, 0, 147);
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 20;
+    padding: 1.5rem;
+    /* top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); */
+
+    .end-score {
+        font-size: 2rem;
+        color: white;
+        margin-top: 1rem;
+    }
+
+    .end-button {
+        margin-top: 2.5rem;
+        width: 60%;
+        height: 48px;
+    }
 }
 
 .user-dialog {
