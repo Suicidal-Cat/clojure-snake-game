@@ -40,7 +40,7 @@
 
 (defn broadcast-game-state [player1 game-id]
   (future
-    (let [game-state (atom (game-state-single field-size grid-size))
+    (let [game-state (atom (game-state-single field-size grid-size game-id))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)]
@@ -57,6 +57,7 @@
         (swap! snake-directions (fn [state] (assoc-in state [:snake1 :change-dir] true)))) 
       (Thread/sleep 50)
       (ws/send (:socket player1) (pr-str @final-score))
+      (swap! online-games dissoc (keyword game-id))
       (ws/close (:socket player1)))))
 
 ;start the game

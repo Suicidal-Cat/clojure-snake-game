@@ -1,10 +1,11 @@
 (ns server.game.main-game
   (:require
-   [ring.websocket :as ws]
    [server.db.dbBroker :as db]
-   [server.game.game-helper-func :refer [generate-valid-coordinate-pair-ball
+   [server.game.game-helper-func :refer [close-sockets
+                                         generate-valid-coordinate-pair-ball
                                          in-bounds? init-game-state inside?
-                                         move-snake update-player-direction
+                                         move-snake send-snake-data
+                                         update-player-direction
                                          vector-contains?]]))
 
 (def field-size 594) ;field size in px
@@ -139,26 +140,20 @@
                                                                 :loser {:id (:id player1) :score ((:score @game-state) 0) :head head-s2}
  
                                                                 :draw true})))))
-;; send snake data
-(defn send-snake-data [player game-state]
-  (ws/send (:socket player) (pr-str game-state)))
-
 ;game loop
 (defn broadcast-game-state [player1 player2 game-id]
   (future
-    (let [game-state (atom (assoc (init-game-state field-size grid-size)
+    (let [game-state (atom (assoc (init-game-state field-size grid-size game-id)
                                   :time-left (* 2 60 1000)))
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)] 
-      (send-snake-data player1 @game-state)
-      (send-snake-data player2 @game-state)
+      (send-snake-data player1 player2 @game-state)
       (Thread/sleep 3000)
       (generate-random-power game-state stop-game power-ups)
       (while (not @stop-game)
         (Thread/sleep tick-duration)
-        (send-snake-data player1 @game-state)
-        (send-snake-data player2 @game-state)
+        (send-snake-data player1 player2 @game-state)
         (update-game-on-eat game-state)
         (update-game-on-power game-state final-score stop-game player1 player2)
         (swap! game-state update-snakes-positions snake-directions)
@@ -166,10 +161,8 @@
         (update-clock-time game-state final-score stop-game player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
-      (send-snake-data player1 @final-score)
-      (send-snake-data player2 @final-score)
-      (ws/close (:socket player1))
-      (ws/close (:socket player2)))))
+      (send-snake-data player1 player2 @final-score)
+      (close-sockets player1 player2))))
 
 ;start the game
 (defn start-main-game [player1 player2]

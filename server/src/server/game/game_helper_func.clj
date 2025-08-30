@@ -1,4 +1,5 @@
-(ns server.game.game-helper-func)
+(ns server.game.game-helper-func
+  (:require [ring.websocket :as ws]))
 
 ;helper functions
 
@@ -43,7 +44,7 @@
           (mapv #(+ offset %) coordinate))))))
 
 ;init main game-state
-(defn init-game-state [field-size grid-size]
+(defn init-game-state [field-size grid-size game-id]
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
         snake2 [[405 486] [432 486] [459 486] [486 486]]
         ball (generate-valid-coordinate-pair-ball field-size grid-size
@@ -52,10 +53,11 @@
     (hash-map :snake1 snake1
               :snake2 snake2
               :ball ball
-              :score [0 0])))
+              :score [0 0]
+              :game-id game-id)))
 
 ;init singleplayer game state
-(defn game-state-single [field-size grid-size]
+(defn game-state-single [field-size grid-size game-id]
   (let [snake [[198 99] [165 99] [132 99] [99 99]]
         ball (generate-valid-coordinate-pair-ball field-size grid-size
                                                   snake
@@ -63,14 +65,16 @@
                                                   :offset 0)]
     (hash-map :snake1 snake
               :ball ball
-              :score [0])))
+              :score [0]
+              :game-id game-id)))
 
 ;init main game-state
-(defn init-game-cake-state []
+(defn init-game-cake-state [game-id]
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
         snake2 [[405 486] [432 486] [459 486] [486 486]]]
     (hash-map :snake1 snake1
-              :snake2 snake2)))
+              :snake2 snake2
+              :game-id game-id)))
 
 ;check if vector contains element
 (defn vector-contains? [v el]
@@ -117,3 +121,13 @@
         (and (= past-dir :down) (not= dir :up)) (update-dir)
         (and (= past-dir :left) (not= dir :right)) (update-dir)
         (and (= past-dir :right) (not= dir :left)) (update-dir)))))
+
+;; send snake data
+(defn send-snake-data [player1 player2 game-state]
+  (ws/send (:socket player1) (pr-str game-state))
+  (ws/send (:socket player2) (pr-str game-state)))
+
+;; send snake data
+(defn close-sockets [player1 player2]
+  (ws/close (:socket player1))
+  (ws/close (:socket player2)))

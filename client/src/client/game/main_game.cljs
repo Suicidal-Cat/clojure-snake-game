@@ -33,12 +33,14 @@
 (defn setup []
   (let [bomb  "/images/bomb.png"
         add3  "/images/+3.png"
-        minus3  "/images/-3.png"]
+        minus3  "/images/-3.png"
+        random-img "/images/question.png"]
     (q/set-state!
      :radius 0
      :bomb (q/load-image bomb)
      :add3 (q/load-image add3)
-     :minus3 (q/load-image minus3)))
+     :minus3 (q/load-image minus3)
+     :random-img (q/load-image random-img)))
   (doseq [[k v] (random-snake-images)]
     (swap! (q/state-atom) assoc k v))
   (q/frame-rate 30)
@@ -79,7 +81,7 @@
           x (first (:cord power))
           y (last (:cord power))]
       (if (:random power)
-        (do (q/fill 255 255 0) (q/ellipse x y circle-radius circle-radius))
+        (q/image (q/state :random-img) (- x (/ grid-size 2)) (- y (/ grid-size 2)) grid-size grid-size)
         (do
           (pulse 27 45)
           (case (:value power)

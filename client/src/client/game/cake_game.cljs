@@ -1,6 +1,7 @@
 (ns client.game.cake-game
   (:require
-   [client.game.game-helper-func :refer [draw-snake random-snake-images]]
+   [client.game.game-helper-func :refer [draw-grid-main draw-snake
+                                         random-snake-images]]
    [client.helper-func :as hf :refer [game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
@@ -49,22 +50,6 @@
   (q/frame-rate 30)
   (q/background 0))
 
-
-;draw edges and grid
-(defn draw-grid-border [grid-size]
-  (q/fill 148 148 148)
-  (q/rect 0 0 (q/width) grid-size)
-  (q/rect 0 0 grid-size (q/height))
-  (q/rect 0 (- (q/height) grid-size) (q/width) grid-size)
-  (q/rect (- (q/width) grid-size) 0 grid-size (q/height))
-  (q/stroke 50)
-  (q/stroke-weight 1)
-  (q/fill 0 0 0)
-  (doseq [x (range grid-size (- (q/width) grid-size) grid-size)]
-    (q/line x 0 x (q/height)))
-  (doseq [y (range grid-size (- (q/height) grid-size) grid-size)]
-    (q/line 0 y (q/width) y)))
-
 ;draw food
 (defn draw-parts []
   (doseq [part (:parts @game-state)]
@@ -83,7 +68,7 @@
 ;main draw
 (defn draw []
   (q/background 0)
-  (draw-grid-border grid-size)
+  (draw-grid-main grid-size)
   (draw-parts)
   (draw-snakes)
   (stop-drawing))
