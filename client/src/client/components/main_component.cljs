@@ -29,8 +29,26 @@
 (update-user-state)
 
 (defn canvas []
-  (when (:show-game @app-state)
-    [:div {:id "game-canvas"}]))
+  (r/create-class
+   {:reagent-render
+    (fn []
+      [:div {:id "game-canvas"}])
+
+    :component-did-mount
+    (fn []
+      (let [mode (:game-mode @app-state)]
+        (cond
+          (= mode "single") (single/start-game)
+          (= mode (:time game-mode-enum)) (main/start-game)
+          (= mode (:cake game-mode-enum)) (cake/start-game))))
+
+    :component-did-update
+    (fn [this old-argv]
+      (let [mode (:game-mode @app-state)]
+        (cond
+          (= mode "single") (single/start-game)
+          (= mode (:time game-mode-enum)) (main/start-game)
+          (= mode (:cake game-mode-enum)) (cake/start-game))))}))
 
 ;; terrain around canvas based on mode
 (defn border-terrain []
@@ -124,13 +142,38 @@
     (let [mode (:game-mode @app-state)]
     [:div {:class "end-game-dialog"}
      [screenshoot-canvas]
-     [:div {:class "end-score"} 
-      (when (= mode "single") (str "Score: " (get-in @single/end-score-data [:winner :score])))]
+     [:div {:class "end-score"}
+      (cond
+        (= mode "single") (str "Score: " (get-in @single/end-score-data [:winner :score]))
+        (= mode (:time game-mode-enum)) (if (some? (:draw @main/end-score-data))
+                                          "DRAW"
+                                          [:<>
+                                           [:div (if (= @main/player-id (get-in @main/end-score-data [:winner :id]))
+                                                   "Victory" "Defeat")]
+                                           [:div (str (get-in @main/end-score-data [:winner :score]) " - " (get-in @main/end-score-data [:loser :score]))]])
+        (= mode (:cake game-mode-enum))
+        (let [cake (if (= @cake/player-id (get-in @cake/end-score-data [:winner :id]))
+                     (get-in @cake/end-score-data [:winner :cake]) (get-in @cake/end-score-data [:loser :cake]))]
+          [:<>
+           [:div (if (= @cake/player-id (get-in @cake/end-score-data [:winner :id]))
+                   "Victory" "Defeat")]
+           [:div {:class "end-cake-score-cont"} 
+            [:div {:class "end-cake-score"}
+             (for [part (cake :parts)]
+               ^{:key (:part-id part)}
+               [:div {:class "end-part"}
+                [:img {:src (str "/images/parts/" (:part-image part))
+                       :alt (:part-image part)
+                       :class "end-part-image"}]
+                [:div {:class "end-part-text"}
+                 (str (:current part) "/" (:amount part))]])]]]))] 
+     
      [:button {:class "end-button"
                :on-click
                (fn []
                  (swap! app-state assoc :show-game false)
-                 (reset! show-end-dialog false))}
+                 (reset! show-end-dialog false)
+                 (reset! img-atom nil))}
       "CONTINUE"]])))
 
 ;; header tab

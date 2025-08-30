@@ -11,7 +11,7 @@
 
 
 (def score (r/atom [0]))
-(def end-score-data (r/atom [0]))
+(def end-score-data (r/atom nil))
 (def game-state (r/atom nil))
 (def field-size 594) ;field size in px
 (def grid-size 33) ;grid size in px
@@ -25,7 +25,7 @@
         [hx hy] (mapv #(* % 2) (:head winner))]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
     (reset! end-score-data data)
-    (reset! stop-game-flag true)
+    (reset! stop-game-flag true) 
     (reset! show-end-dialog true)))
 
 ;canvas setup
@@ -64,7 +64,7 @@
   (stop-drawing))
 
 ;start the game
-(defn start_game []
+(defn start-game []
   (q/sketch
    :host "game-canvas"
    :settings #(q/smooth 2)
@@ -74,6 +74,7 @@
 
 ;websocket communication
 (defn connect_socket [disable-loading]
+  (reset! loading-flag false)
   (let [ws (js/WebSocket. "ws://localhost:8085/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
@@ -89,14 +90,14 @@
                                      (reset! player-id id)
                                      (.send ws {:id id :single true}))))
     (.addEventListener ws "message" (fn [e]
-                                      (when (not @loading-flag)
-                                        (disable-loading)
-                                        (reset! loading-flag true)
-                                        (start_game))
-
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
                                         (reset! score (:score data))
-                                        (when (:winner data) (stop-game data)))))
+                                        (when (:winner data) (stop-game data)))
+
+                                      (when (not @loading-flag)
+                                        (disable-loading)
+                                        (reset! end-score-data nil)
+                                        (reset! loading-flag true))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))

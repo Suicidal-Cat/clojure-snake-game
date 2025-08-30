@@ -1,6 +1,6 @@
 (ns client.core
   (:require
-   [client.components.main-component :refer [border-terrain canvas
+   [client.components.main-component :refer [app-state border-terrain canvas
                                              end-game-pop-up game-score
                                              home-layout]]
    [reagent.dom :as rdom]))
@@ -12,7 +12,8 @@
 (defn app []
   [:div {:class "game"}
    [home-layout]
-   [canvas]
+   (when (:show-game @app-state)
+    [canvas])
    [border-terrain]
    [game-score]
    [end-game-pop-up]])

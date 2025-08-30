@@ -166,8 +166,8 @@
         (update-clock-time game-state final-score stop-game player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
-      (send-snake-data player1 @game-state)
-      (send-snake-data player2 @game-state)
+      (send-snake-data player1 @final-score)
+      (send-snake-data player2 @final-score)
       (ws/close (:socket player1))
       (ws/close (:socket player2)))))
 

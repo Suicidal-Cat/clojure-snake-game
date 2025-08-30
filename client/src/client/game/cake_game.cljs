@@ -2,7 +2,7 @@
   (:require
    [client.game.game-helper-func :refer [draw-snake random-snake-images]]
    [client.helper-func :as hf :refer [game-mode-enum get-player-id
-                                      save-region-screenshot!]]
+                                      save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
@@ -13,17 +13,18 @@
 (def circle-radius 24); radius for draw generation
 (def loading-flag (atom false))
 (def stop-game-flag (atom false))
+(def end-score-data (r/atom nil))
 (def player-id (atom 0))
 
 
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
-        [hx hy] (mapv #(* % 2) (:head winner))
-        loser (:loser data)]
+        [hx hy] (mapv #(* % 2) (:head winner))]
     (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
+    (reset! end-score-data data)
     (reset! stop-game-flag true)
-    (reset! loading-flag false)))
+    (reset! show-end-dialog true)))
 
 (defn load-cake-images []
   {:apple.png     (q/load-image "/images/parts/apple.png")
@@ -88,7 +89,7 @@
   (stop-drawing))
 
 ;start the game
-(defn start_game []
+(defn start-game []
   (q/sketch
    :host "game-canvas"
    :settings #(q/smooth 2)
@@ -97,7 +98,8 @@
    :size [field-size field-size]))
 
 ;websocket communication
-(defn connect_socket [disable-loading]
+(defn connect_socket [disable-loading] 
+  (reset! loading-flag false)
   (let [ws (js/WebSocket. "ws://localhost:8085/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
@@ -113,14 +115,14 @@
                                      (reset! player-id id)
                                      (.send ws {:id id :game-mode (:cake game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
-                                      (when (not @loading-flag)
-                                        (disable-loading)
-                                        (reset! loading-flag true)
-                                        (start_game))
-
                                       (let [data (edn/read-string (.-data e))]
                                         (reset! game-state data)
-                                        (when (:winner data) (stop-game data)))))
+                                        (when (:winner data) (stop-game data)))
+
+                                      (when (not @loading-flag)
+                                        (disable-loading)
+                                        (reset! end-score-data nil)
+                                        (reset! loading-flag true))))
     (.addEventListener ws "close" (fn [_] (println "WebSocket closed")
                                     (.removeEventListener js/document "keydown" handle-keypress)))))
 

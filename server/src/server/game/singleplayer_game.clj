@@ -45,7 +45,7 @@
           stop-game (atom false)
           final-score (atom nil)]
       (ws/send (:socket player1) (pr-str @game-state))
-      (Thread/sleep 500)
+      (Thread/sleep 1000)
       (while (not @stop-game)
         (Thread/sleep 110)
         (ws/send (:socket player1) (pr-str @game-state))

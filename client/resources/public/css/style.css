@@ -179,9 +179,15 @@
     transform: translate(-50%, -50%); */
 
     .end-score {
-        font-size: 2rem;
+        font-size: 1.7rem;
         color: white;
         margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+
     }
 
     .end-button {
@@ -408,6 +414,34 @@
             .part-text {
                 color: black;
                 font-size: 1.5rem;
+                margin-top: 0.2rem;
+            }
+        }
+    }
+}
+
+.end-cake-score-cont {
+    width: 150px;
+
+    .end-cake-score {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        .end-part {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            .end-part-image {
+                width: 23px;
+                height: 23px;
+            }
+
+            .end-part-text {
+                color: white;
+                font-size: 1.2rem;
                 margin-top: 0.2rem;
             }
         }

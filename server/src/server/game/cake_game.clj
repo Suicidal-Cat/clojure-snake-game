@@ -30,13 +30,13 @@
     (if (or
          (vector-contains? snake2 (snake1 0))
          (vector-contains? (subvec snake1 1) (snake1 0)))
-      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head (snake2 0)}
-                                            :loser {:id (:id player1) :head (snake1 0)}})
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head ((:snake1 @game-state) 0) :cake (:cake2 @game-state)}
+                                            :loser {:id (:id player1) :head ((:snake2 @game-state) 0) :cake (:cake1 @game-state)}})
       (when (or
              (vector-contains? snake1 (snake2 0))
              (vector-contains? (subvec snake2 1) (snake2 0)))
-        (end-game-loop stop-game final-score {:winner {:id (:id player1) :head (snake1 0)}
-                                              :loser {:id (:id player2) :head (snake2 0)}})))))
+        (end-game-loop stop-game final-score {:winner {:id (:id player1) :head ((:snake1 @game-state) 0) :cake (:cake1 @game-state)}
+                                              :loser {:id (:id player2) :head ((:snake2 @game-state) 0) :cake (:cake2 @game-state)}})))))
 
 ;generate random cake part
 (defn generate-random-part [game-state]
@@ -67,11 +67,11 @@
 ;check if players have collected all parts
 (defn check-if-snake-have-eaten-cake [game-state player1 player2 stop-game final-score]
   (if (every? #(and (> (:current %) 0) (>= (:current %) (:amount %))) (get-in @game-state [:cake1 :parts]))
-    (end-game-loop stop-game final-score {:winner {:id (:id player1) :head ((:snake1 @game-state) 0)}
-                                          :loser {:id (:id player2) :head ((:snake2 @game-state) 0)}})
+    (end-game-loop stop-game final-score {:winner {:id (:id player1) :head ((:snake1 @game-state) 0) :cake (:cake1 @game-state)}
+                                          :loser {:id (:id player2) :head ((:snake2 @game-state) 0) :cake (:cake2 @game-state)}})
     (when (every? #(and (> (:current %) 0) (>= (:current %) (:amount %))) (get-in @game-state [:cake2 :parts]))
-      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head ((:snake1 @game-state) 0)}
-                                            :loser {:id (:id player1) :head ((:snake2 @game-state) 0)}}))))
+      (end-game-loop stop-game final-score {:winner {:id (:id player2) :head ((:snake1 @game-state) 0) :cake (:cake2 @game-state)}
+                                            :loser {:id (:id player1) :head ((:snake2 @game-state) 0) :cake (:cake1 @game-state)}}))))
 
 ;update current amount of the part in the cake
 (defn update-part-current [parts part-id]
@@ -156,7 +156,7 @@
         (snake-collisions game-state stop-game final-score player1 player2)
         (swap! snake-directions (fn [state] (assoc-in (assoc-in state [:snake1 :change-dir] true) [:snake2 :change-dir] true))))
       (Thread/sleep 50)
-      (send-snake-data player1 player2 @game-state)
+      (send-snake-data player1 player2 @final-score)
       (ws/close (:socket player1))
       (ws/close (:socket player2)))))
 
