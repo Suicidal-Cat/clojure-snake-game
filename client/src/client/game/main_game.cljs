@@ -1,6 +1,7 @@
 (ns client.game.main-game
   (:require
-   [client.game.game-helper-func :refer [draw-snake random-snake-images]]
+   [client.game.game-helper-func :refer [draw-player-indicator draw-snake
+                                         random-snake-images]]
    [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
@@ -34,19 +35,22 @@
   (let [bomb  "/images/bomb.png"
         add3  "/images/+3.png"
         minus3  "/images/-3.png"
-        random-img "/images/question.png"]
+        random-img "/images/question.png"
+        indicator "/images/indicator.png"]
     (q/set-state!
      :radius 0
      :bomb (q/load-image bomb)
      :add3 (q/load-image add3)
      :minus3 (q/load-image minus3)
-     :random-img (q/load-image random-img)))
+     :random-img (q/load-image random-img)
+     :indicator (q/load-image indicator)
+     :ind-y 0))
   (doseq [[k v] (random-snake-images)]
     (swap! (q/state-atom) assoc k v))
   (q/frame-rate 30)
   (q/background 0))
 
-;; pulse animation
+;; pulse animation for the bomb
 (defn pulse [min max]
   (let [min-radius min
         max-radius max
@@ -105,7 +109,8 @@
   (draw-grid-border grid-size)
   (draw-food)
   (draw-power)
-  (draw-snakes)
+  (draw-snakes) 
+  (draw-player-indicator "indicator" game-state player-id)
   (stop-drawing))
 
 ;start the game

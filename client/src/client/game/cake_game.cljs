@@ -1,7 +1,8 @@
 (ns client.game.cake-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid-main draw-snake
-                                         random-snake-images]]
+   [client.game.game-helper-func :refer [draw-grid-main draw-indicator
+                                         draw-player-indicator draw-snake
+                                         move-y random-snake-images]]
    [client.helper-func :as hf :refer [game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
@@ -47,6 +48,7 @@
     (swap! (q/state-atom) assoc k v))
   (doseq [[k v] (random-snake-images)]
     (swap! (q/state-atom) assoc k v))
+  (swap! (q/state-atom) assoc :indicator (q/load-image "/images/indicator.png") :ind-y 0)
   (q/frame-rate 30)
   (q/background 0))
 
@@ -71,6 +73,7 @@
   (draw-grid-main grid-size)
   (draw-parts)
   (draw-snakes)
+  (draw-player-indicator "indicator" game-state player-id)
   (stop-drawing))
 
 ;start the game

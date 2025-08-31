@@ -148,7 +148,7 @@
           snake-directions ((keyword game-id) @online-games)
           stop-game (atom false)
           final-score (atom nil)] 
-      (send-snake-data player1 player2 @game-state)
+      (send-snake-data player1 player2 (assoc @game-state :snake1-id (:id player1)))
       (Thread/sleep 3000)
       (generate-random-power game-state stop-game power-ups)
       (while (not @stop-game)

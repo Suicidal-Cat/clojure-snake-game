@@ -70,3 +70,20 @@
 (defn pulse-normal [min max]
   (let [t (/ (+ 1 (Math/sin (/ (q/frame-count) 13))) 2)]
     (+ min (* t (- max min)))))
+
+(defn move-y [range base-y]
+  (let [t (/ (q/frame-count) 10.0)]
+    (+ base-y (* (q/sin t) range))))
+
+;; draw player indicaator
+(defn draw-indicator [image-key [x y]]
+  (q/image (q/state (keyword image-key)) x y 30 40))
+
+; draw indicator
+(defn draw-player-indicator[indicator-img game-state player-id]
+  (when (:snake1-id @game-state)
+    (let [[head _] (if (= @player-id (:snake1-id @game-state))
+                     (:snake1 @game-state)
+                     (:snake2 @game-state))] 
+      (swap! (q/state-atom) assoc :ind-y (move-y 5 (- (head 1) 45)))
+      (draw-indicator indicator-img [(head 0) (q/state :ind-y)]))))

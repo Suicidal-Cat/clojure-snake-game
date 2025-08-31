@@ -140,7 +140,7 @@
           stop-game (atom false)
           final-score (atom nil)]
       (init-parts game-state)
-      (send-snake-data player1 player2 @game-state)
+      (send-snake-data player1 player2 (assoc @game-state :snake1-id (:id player1)))
       (Thread/sleep 3000)
       (generate-cake-parts game-state stop-game)
       (while (not @stop-game)
