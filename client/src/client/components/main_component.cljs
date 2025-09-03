@@ -55,7 +55,7 @@
   (when (:show-game @app-state)
     (let [mode (:game-mode @app-state)]
       (cond
-        (= mode "single") [:img {:src "/images/grass-terrain.png"
+        (= mode (:time game-mode-enum)) [:img {:src "/images/grass-terrain.png"
                                  :class "grass-terrain-single"}]))))
 ;; loading screen
 (defn loading []
@@ -177,11 +177,10 @@
       "CONTINUE"]])))
 
 ;; header tab
-(defn tab-header [label index]
-  [:div {:class "tab"
-         :style {:border-bottom (when (= @(:active-tab @app-state) index) "2px solid blue")}
+(defn tab-header [tab-image index class]
+  [:div {:class "tab" 
          :on-click #(swap! (:active-tab @app-state) (fn [_] index))}
-   label])
+   [:img {:src tab-image :class (str "tab-image" class (if (= @(:active-tab @app-state) index) " hovered" ""))}]])
 
 ;; show content based on clicked tab
 (defn tab-content []
@@ -202,11 +201,11 @@
 (defn user-dialog []
   [:div {:class "user-dialog"}
    (if (:logged @app-state)
-     [:<>
-      [tab-header "Leaderboard" 1]
-      [tab-header "Match History" 2]
-      [tab-header "Friend requests" 3]]
-     [:<>
+     [:div {:class "tabs"}
+      [tab-header "images/leaderboard.png" 1 ""]
+      [tab-header "images/history.png" 2 " hs-img"]
+      [tab-header "images/add_friend.png" 3 ""]]
+     [:div {:class "tabs"}
       [tab-header "Login" 1]
       [tab-header "Register" 2]])
    [tab-content]])
