@@ -56,7 +56,11 @@
     (let [mode (:game-mode @app-state)]
       (cond
         (= mode (:time game-mode-enum)) [:img {:src "/images/grass-terrain.png"
-                                 :class "grass-terrain-single"}]))))
+                                 :class "grass-terrain-single"}]
+        (= mode (:cake game-mode-enum)) [:img {:src "/images/grass-terrain.png"
+                                               :class "grass-terrain-single"}]
+        (= mode "single") [:img {:src "/images/grass-terrain.png"
+                                               :class "grass-terrain-single"}]))))
 ;; loading screen
 (defn loading []
   [:div {:class "load-cont"}
@@ -221,24 +225,26 @@
                  :alt "snake logo"
                  :class "snake-logo"}]
           [:div {:class "menu-buttons"}
-           [:button {:class "start-game-btn"
-                     :on-click
-                     (fn []
-                       (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                       (swap! app-state assoc :show-game false :show-loading true :game-mode (:time game-mode-enum)))}
-            "TIME GAME"]
-           [:button {:class "start-game-btn"
-                     :on-click
-                     (fn []
-                       (cake/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                       (swap! app-state assoc :show-game false :show-loading true :game-mode (:cake game-mode-enum)))}
-            "CAKE GAME"]
-           [:button {:class "start-game-btn"
-                     :on-click
-                     (fn [] 
-                       (single/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
-                       (swap! app-state assoc :show-game true :game-mode "single"))}
-            "SINGLEPLAYER"]]])
+           [:div {:class "button-wrapper"
+                  :on-click (fn []
+                              (main/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                              (swap! app-state assoc :show-game false :show-loading true :game-mode (:time game-mode-enum)))}
+            [:img {:class "start-game-img" :src "/images/buttonBack.png"}]
+            [:span {:class "button-text"} "VENOM TIME"]]
+          
+           [:div {:class "button-wrapper"
+                  :on-click (fn []
+                              (cake/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                              (swap! app-state assoc :show-game false :show-loading true :game-mode (:cake game-mode-enum)))}
+            [:img {:class "start-game-img" :src "/images/buttonBack.png"}]
+            [:span {:class "button-text"} "BAKE & BITE"]]
+          
+           [:div {:class "button-wrapper"
+                  :on-click (fn []
+                              (single/connect_socket #(swap! app-state assoc :show-game true :show-loading false))
+                              (swap! app-state assoc :show-game true :game-mode "single"))}
+            [:img {:class "start-game-img" :src "/images/buttonBack.png"}]
+            [:span {:class "button-text"} "SINGLEPLAYER"]]]])
        
        (when (:show-loading @app-state) [loading])
        [profile]

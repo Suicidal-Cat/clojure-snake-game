@@ -1,8 +1,8 @@
 (ns client.game.cake-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid-main draw-indicator
+   [client.game.game-helper-func :refer [draw-grid-standard
                                          draw-player-indicator draw-snake
-                                         move-y random-snake-images]]
+                                         random-snake-images]]
    [client.helper-func :as hf :refer [game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
@@ -70,7 +70,7 @@
 ;main draw
 (defn draw []
   (q/background 0)
-  (draw-grid-main grid-size)
+  (draw-grid-standard grid-size)
   (draw-parts)
   (draw-snakes)
   (draw-player-indicator "indicator" game-state player-id)

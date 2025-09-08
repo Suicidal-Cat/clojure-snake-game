@@ -1,8 +1,8 @@
 (ns client.game.singleplayer-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid-main draw-snake
-                                         get-food-image pulse-normal
-                                         random-snake-image]]
+   [client.game.game-helper-func :refer [draw-grid-standard
+                                         draw-snake get-food-image
+                                         pulse-normal random-snake-image]]
    [client.helper-func :as hf :refer [get-player-id save-region-screenshot!
                                       show-end-dialog]]
    [clojure.edn :as edn]
@@ -58,7 +58,7 @@
 (defn draw []
   (q/background 0) 
   (swap! (q/state-atom) assoc :radius (pulse-normal 32 37))
-  (draw-grid-main grid-size)
+  (draw-grid-standard grid-size)
   (draw-food)
   (draw-snake (q/state :head) (q/state :body) (:snake1 @game-state) grid-size)
   (stop-drawing))

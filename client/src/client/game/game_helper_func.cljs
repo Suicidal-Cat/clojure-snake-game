@@ -1,11 +1,13 @@
 (ns client.game.game-helper-func
   (:require [quil.core :as q]))
 
-(def dark-purple [110 0 123])
-(def light-purple [182 127 189])
-(def dark-brown [196 164 132])
-(def light-brown [226 210 194])
+(def dark-red [183 73 73])
+(def light-red [217 149 149])
 (def white [237 239 239])
+(def light-brown [247 213 161])
+(def dark-brown [201 176 103])
+(def light-purple [197 154 252])
+(def dark-purple [146 84 227])
 (def colors [:red :green :yellow])
 
 (defn draw-grid [cell-size]
@@ -16,8 +18,8 @@
     (doseq [y (range h)
             x (range w)]
       (let [color (cond
-                    (even? y) (if (even? x) dark-purple light-purple)
-                    :else     (if (even? x) light-purple white))]
+                    (even? y) (if (even? x) dark-red light-red)
+                    :else     (if (even? x) light-red white))]
         (q/fill (apply q/color color))
         (q/rect (* x cell-size) (* y cell-size) cell-size cell-size)))))
 
@@ -52,19 +54,21 @@
              "grape.png","honey.png","lemon.png",
              "strawberry.png"]))
 
-
-(defn draw-grid-main [cell-size]
-  (q/stroke 0)
-  (q/stroke-weight 0)
-  (let [w (/ (q/width) cell-size)
-        h (/ (q/height) cell-size)]
-    (doseq [y (range h)
-            x (range w)]
-      (let [color (if (even? (+ x y))
-                    light-brown
-                    dark-brown)]
-        (q/fill (apply q/color color))
-        (q/rect (* x cell-size) (* y cell-size) cell-size cell-size)))))
+(defn draw-grid-standard [cell-size]
+   (q/background (apply q/color light-purple))
+   (q/no-stroke)
+   (let [w (/ (q/width) cell-size)
+         h (/ (q/height) cell-size)
+         square-size (- cell-size 3)
+         radius 8]
+     (doseq [y (range h)
+             x (range w)]
+       (q/fill (apply q/color dark-purple))
+       (q/rect (+ (* x cell-size) (/ (- cell-size square-size) 2))
+               (+ (* y cell-size) (/ (- cell-size square-size) 2))
+               square-size
+               square-size
+               radius))))
 
 ;; pulse animation
 (defn pulse-normal [min max]

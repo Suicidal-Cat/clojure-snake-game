@@ -13,7 +13,7 @@
   [:div {:class "game"}
    [home-layout]
    (when (:show-game @app-state)
-    [canvas])
+     [canvas])
    [border-terrain]
    [game-score]
    [end-game-pop-up]])
