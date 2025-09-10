@@ -148,7 +148,7 @@
      [screenshoot-canvas]
      [:div {:class "end-score"}
       (cond
-        (= mode "single") (str "Score: " (get-in @single/end-score-data [:winner :score]))
+        (= mode "single") (str "Score:" (get-in @single/end-score-data [:winner :score]))
         (= mode (:time game-mode-enum)) (if (some? (:draw @main/end-score-data))
                                           "DRAW"
                                           [:<>

@@ -169,7 +169,7 @@
 
 .screenshot-img {
     width: 100%;
-    height: 300px;
+    height: 280px;
 }
 
 .end-game-dialog {
@@ -179,13 +179,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: rgb(22, 0, 147);
+    background-color: #191970;
     position: absolute;
     z-index: 20;
     padding: 1.5rem;
-    /* top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); */
+    border-radius: 10px;
+    font-family: 'Arcade Rounded', sans-serif;
 
     .end-score {
         font-size: 1.7rem;
@@ -203,6 +202,11 @@
         margin-top: 2.5rem;
         width: 60%;
         height: 48px;
+        font-family: 'Arcade Rounded', sans-serif;
+    }
+
+    .end-button:hover {
+        scale: 1.05;
     }
 }
 
@@ -505,13 +509,13 @@
 }
 
 .end-cake-score-cont {
-    width: 150px;
+    width: 300px;
 
     .end-cake-score {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 1.4rem;
 
         .end-part {
             display: flex;
