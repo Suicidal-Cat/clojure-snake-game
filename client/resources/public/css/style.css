@@ -250,21 +250,34 @@
     height: 85%;
     overflow: auto;
     white-space: nowrap;
-    padding: 0rem 1rem 1rem 1rem;
+    padding: 0 1rem;
+    margin-top: 1rem;
     display: flex;
     flex-direction: column;
 
     .friends-search {
         margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
 
         input {
-            height: 2rem;
+            height: 2.1rem;
+            font-family: 'Arcade Rounded', sans-serif;
+            font-size: 0.5rem;
+            padding-left: 0.5rem;
+            width: 200px;
+            border: none;
+            outline: none;
         }
 
         button {
-            height: 2.3rem;
+            height: 36px;
             font-weight: bold;
             padding: 0.5rem 1rem 0.5rem 1rem;
+            font-family: 'Arcade Rounded', sans-serif;
+            background-color: #F0E27B;
+            cursor: pointer;
+            border: none;
         }
     }
 
@@ -272,6 +285,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
+        margin-bottom: 1rem;
     }
 
     .friends-send-card {
@@ -280,20 +294,28 @@
         justify-content: space-between;
         width: 26%;
         padding: 0.8rem;
-        border: 1px solid yellowgreen;
-        color: white;
+        background-color: #F0E27B;
+        font-family: 'Arcade Rounded', sans-serif;
+        font-size: 0.6rem;
+        border-radius: 10px;
+        height: 25px;
     }
 
     .friends-button {
         border: none;
-        padding: 0.5rem 1rem 0.5rem 1rem;
-        background-color: chocolate;
+        background-color: #F0E27B;
+        font-family: 'Arcade Rounded', sans-serif;
+        font-size: 2rem;
         font-weight: bold;
+        cursor: pointer;
+    }
+
+    .friends-button:hover {
+        scale: 1.05;
     }
 
     .friends-username {
         font-weight: bold;
-        color: white;
     }
 
     .friend-requests {
@@ -302,10 +324,11 @@
         gap: 1rem;
 
         .friend-req-card {
+            font-family: 'Arcade Rounded', sans-serif;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 2px solid orange;
+            background-color: #F0E27B;
             border-radius: 10px;
             padding: 0.8rem 2rem 0.8rem 2rem;
 
@@ -316,6 +339,13 @@
                 button {
                     font-weight: bold;
                     padding: 0.5rem 1rem 0.5rem 1rem;
+                    font-family: 'Arcade Rounded', sans-serif;
+                    border: 2px solid black;
+                    cursor: pointer;
+                }
+
+                button:hover{
+                    scale: 1.05;
                 }
             }
         }
@@ -395,11 +425,13 @@
 }
 
 .divider {
-    font-size: 1.3rem;
-    color: orangered;
-    border-bottom: 1px solid orange;
+    font-size: 1.4rem;
+    color: #F0E27B;
+    border-bottom: 3px solid #F0E27B;
     margin-top: 1rem;
     margin-bottom: 1rem;
+    font-family: 'Arcade Rounded', sans-serif;
+    text-shadow: 1px -2px black;
 }
 
 .grass-terrain-single {

@@ -40,7 +40,7 @@
                               (get-available-requests username)))}
         [:input {:type "text"
                  :name "username"
-                 :placeholder "Search by username..."}]
+                 :placeholder "Enter a username..."}]
         [:button {:type "submit"} "Search"]]
 
        [:div {:class "friends-list"}
@@ -54,7 +54,7 @@
                                  (:id @user-info)
                                  (:id friend)
                                  (fn [_] (get-available-requests nil)))}
-            "Add"]])]
+            "+"]])]
 
        [divider "Friend requests"]
        [:div {:class "friend-requests"}
