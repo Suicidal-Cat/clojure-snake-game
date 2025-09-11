@@ -23,21 +23,26 @@
           rows (if target
                  (concat top10 [target])
                  top10)]
-      [:table {:class "leaderboard-table"}
-       [:thead
-        [:tr
-         [:th "Rank & Username"]
-         [:th "Games Played"]
-         [:th "Games Won"]
-         [:th "Win %"]]]
-       [:tbody
-        (for [entry rows]
-          (let [highlight? (= (:userid entry) current-user-id)
-                row-class (if highlight? "highlight-target" "")]
-            ^{:key (str (:userid entry) "-" (:resulttype entry))}
-            [:tr {:class row-class}
-             [:td (str (:rankpos entry) ". " (:username entry))]
-             [:td (:gamesplayed entry)]
-             [:td (:gameswon entry)]
-             [:td (str (:winpercentage entry) "%")]]))]])
+      [:<>
+       [:table {:class "leaderboard-table"}
+        [:thead
+         [:tr
+          [:th "Rank"]
+          [:th "Games Played"]
+          [:th "Games Won"]
+          [:th "Win %"]]]
+        [:tbody
+         (for [entry rows]
+           (let [highlight? (= (:userid entry) current-user-id)
+                 row-class (if highlight? "highlight-target" "")]
+             ^{:key (str (:userid entry) "-" (:resulttype entry))}
+             [:tr {:class row-class}
+              [:td (str (:rankpos entry) ". " (:username entry))]
+              [:td (:gamesplayed entry)]
+              [:td (:gameswon entry)]
+              [:td (str (:winpercentage entry) "%")]]))]]
+       [:div {:class "ldb-buttons"}
+        [:button "GLOBAL"]
+        [:button "LOCAL"]]]
+      )
     [spinner]))
