@@ -118,6 +118,10 @@
     cursor: pointer;
 }
 
+.snake-profile:hover {
+    scale:1.1;
+}
+
 .logout {
     width: 35px;
     height: 35px;
@@ -143,6 +147,10 @@
   position: relative;
   display: inline-block;
   cursor: pointer;
+}
+
+.button-wrapper:hover {
+    scale: 1.05;
 }
 
 .start-game-img {
@@ -357,14 +365,15 @@
 }
 
 .match-container {
-    height: 76%;
+    height: 81%;
     overflow: auto;
     white-space: nowrap;
     display: flex;
     flex-direction: column;
     margin-top: 1rem;
     margin-left: 1px;
-    border-radius: 40px 20px 20px 40px;
+    border-radius: 4px 20px 42px 40px;
+    clip-path: inset(0 0 0 0 round 0 0 40px 40px);
 }
 
 .match-card {
@@ -386,20 +395,19 @@
         display: flex;
         align-items: center;
     
-        .match-score {
-            /* font-size: 1.3rem; */
-        }
-
         .match-img {
             height: 36px;
             width: 36px;
         }
     }
+}
 
-
-    .match-time {
-        /* font-size: 0.8rem; */
-    }
+.match-container > .match-card:first-child {
+    border-top: none;
+}
+    
+.match-container > .match-card:last-child {
+    border-bottom: none;
 }
 
 .leaderboard-table {
@@ -538,31 +546,24 @@
 
 
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f0e5d2;
-  border-radius: 6px;
+  border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #dfa70b; /* scrollbar “thumb” (the draggable part) */
-  border-radius: 6px;        /* rounded corners */
-  border: 3px solid #f0e5d2; /* optional padding around thumb */
+  background-color: #dfa70b; 
+  border-radius: 6px;        
+  border: 3px solid #f0e5d2; 
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #8c752f;  /* darker on hover */
+  background-color: #8c752f;
 }
 
-/* Optional: scrollbar corner for 2D scrollbars */
 ::-webkit-scrollbar-corner {
   background: #f0e5d2;
 }
-
-
-
-/* font-family: 'Arcade Interlaced', sans-serif;
-font-family: 'Arcade Normal', sans-serif;
-font-family: 'Arcade Rounded', sans-serif; */
