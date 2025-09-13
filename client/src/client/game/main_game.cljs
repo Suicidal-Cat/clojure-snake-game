@@ -1,6 +1,7 @@
 (ns client.game.main-game
   (:require
    [client.game.game-helper-func :refer [draw-player-indicator draw-snake
+                                         get-food-image pulse-normal
                                          random-snake-images]]
    [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
@@ -36,14 +37,17 @@
         add3  "/images/+3.png"
         minus3  "/images/-3.png"
         random-img "/images/question.png"
-        indicator "/images/indicator.png"]
+        indicator "/images/indicator.png"
+        food-image (get-food-image)]
     (q/set-state!
      :radius 0
+     :radius-norm 0
      :bomb (q/load-image bomb)
      :add3 (q/load-image add3)
      :minus3 (q/load-image minus3)
      :random-img (q/load-image random-img)
      :indicator (q/load-image indicator)
+     :food-img (q/load-image (str "/images/parts/" food-image))
      :ind-y 0))
   (doseq [[k v] (random-snake-images)]
     (swap! (q/state-atom) assoc k v))
@@ -75,8 +79,11 @@
 
 ;draw food
 (defn draw-food []
-  (q/fill 0 0 255)
-  (q/ellipse (first (:ball @game-state)) (last (:ball @game-state)) circle-radius circle-radius))
+  (when-let [[x y] (:ball @game-state)]
+    (let [r (q/state :radius-norm)]
+      (q/image-mode :center)
+      (q/image (q/state :food-img) x y r r)
+      (q/image-mode :corner))))
 
 ;draw power
 (defn draw-power []
@@ -107,6 +114,7 @@
 (defn draw []
   (q/background 0)
   (draw-grid-border grid-size)
+  (swap! (q/state-atom) assoc :radius-norm (pulse-normal 27 32))
   (draw-food)
   (draw-power)
   (draw-snakes) 

@@ -2,7 +2,7 @@
   (:require
    [client.game.game-helper-func :refer [draw-grid-standard
                                          draw-player-indicator draw-snake
-                                         random-snake-images]]
+                                         pulse-normal random-snake-images]]
    [client.helper-func :as hf :refer [game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
@@ -48,15 +48,18 @@
     (swap! (q/state-atom) assoc k v))
   (doseq [[k v] (random-snake-images)]
     (swap! (q/state-atom) assoc k v))
-  (swap! (q/state-atom) assoc :indicator (q/load-image "/images/indicator.png") :ind-y 0)
+  (swap! (q/state-atom) assoc :indicator (q/load-image "/images/indicator.png") :ind-y 0 :radius-norm 0)
   (q/frame-rate 30)
   (q/background 0))
 
 ;draw food
 (defn draw-parts []
   (doseq [part (:parts @game-state)]
-    (let [[x y] (:coordinate part)]
-      (q/image (q/state (keyword (:image part))) x y grid-size grid-size))))
+    (let [[x y] (:coordinate part)
+          r (q/state :radius-norm)]
+      (q/image-mode :center)
+      (q/image (q/state (keyword (:image part))) (+ x (/ grid-size 2)) (+ y (/ grid-size 2)) r r)
+      (q/image-mode :corner))))
 
 ;draw snakes
 (defn draw-snakes []
@@ -70,7 +73,8 @@
 ;main draw
 (defn draw []
   (q/background 0)
-  (draw-grid-standard grid-size)
+  (draw-grid-standard grid-size) 
+  (swap! (q/state-atom) assoc :radius-norm (pulse-normal 27 32))
   (draw-parts)
   (draw-snakes)
   (draw-player-indicator "indicator" game-state player-id)
