@@ -31,11 +31,11 @@
                (callback (:value (edn/read-string data)))))))
 
 ;; get latest leaderboard data
-(defn get-leaderboard [userId callback]
+(defn get-leaderboard [userId isFriends callback]
   (-> (js/fetch "http://localhost:8085/leaderboard"
                 (clj->js {:method "POST"
                           :headers (auth-headers)
-                          :body (pr-str {:userId userId})}))
+                          :body (pr-str {:userId userId :friends isFriends})}))
       (.then (fn [response] (.text response)))
       (.then (fn [data]
                (callback (:value (edn/read-string data)))))))

@@ -79,9 +79,9 @@
                         winnerId loserId score winnerId game-typeId game-mode (current-datetime)]))))))
 
 ;; get leaderboard for user
-(defn get-leaderboard [userId]
+(defn get-leaderboard [userId isFriends]
   (when ds
-    (normalize-db-result (sql/query ds ["CALL GetPlayerStats(?)" userId]))))
+    (normalize-db-result (sql/query ds ["CALL GetPlayerStats(?,?)" userId isFriends]))))
 
 ;; get match-history for user
 (defn get-match-history [userId]
@@ -98,7 +98,7 @@
 ;; update friend request status
 (defn update-friend-request [userId1 userId2 accepted]
   (when ds
-    (let [data (jdbc/execute! ds ["UPDATE Friendships SET Status=? WHERE (UserId1=? AND UserId2=?) OR ((UserId1=? AND UserId2=?))" 
+    (let [data (jdbc/execute! ds ["UPDATE Friendships SET Status=? WHERE (UserId1=? AND UserId2=?) OR (UserId1=? AND UserId2=?)" 
                                   (if accepted (:accepted friendship-status) (:declined friendship-status)) 
                                   userId1 userId2 userId2 userId1])]
       (if data true nil))))

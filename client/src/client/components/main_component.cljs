@@ -181,16 +181,19 @@
       "CONTINUE"]])))
 
 ;; header tab
-(defn tab-header [tab-image index class]
+(defn tab-header [tab-image index class showImage]
   [:div {:class "tab" 
          :on-click #(swap! (:active-tab @app-state) (fn [_] index))}
-   [:img {:src tab-image :class (str "tab-image" class (if (= @(:active-tab @app-state) index) " hovered" ""))}]])
+   (if showImage
+     [:img {:src tab-image :class (str "tab-image" class (if (= @(:active-tab @app-state) index) " hovered" ""))}]
+     [:p {:class "tab-text"} tab-image])
+   ])
 
 ;; show content based on clicked tab
 (defn tab-content []
   (case @(:active-tab @app-state)
     1 (if (:logged @app-state)
-        (do (get-leaderboard-table)
+        (do (get-leaderboard-table 0)
             [leaderboard])
         [login-form #(swap! app-state assoc :logged true)])
     2 (if (:logged @app-state)  
@@ -206,12 +209,12 @@
   [:div {:class "user-dialog"}
    (if (:logged @app-state)
      [:div {:class "tabs"}
-      [tab-header "images/leaderboard.png" 1 ""]
-      [tab-header "images/history.png" 2 " hs-img"]
-      [tab-header "images/add_friend.png" 3 ""]]
+      [tab-header "images/leaderboard.png" 1 "" 1]
+      [tab-header "images/history.png" 2 " hs-img" 1]
+      [tab-header "images/add_friend.png" 3 "" 1]]
      [:div {:class "tabs"}
-      [tab-header "Login" 1]
-      [tab-header "Register" 2]])
+      [tab-header "Login" 1 nil nil]
+      [tab-header "Register" 2] nil nil])
    [tab-content]])
 
 ;; main screen

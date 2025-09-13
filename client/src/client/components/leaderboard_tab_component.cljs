@@ -7,8 +7,8 @@
 
 (defonce leaderboard-tab-state {:leaderboard (r/atom nil)})
 
-(defn get-leaderboard-table []
-  (get-leaderboard (:id @user-info) #(reset! (:leaderboard leaderboard-tab-state) %)))
+(defn get-leaderboard-table [isFriends]
+  (get-leaderboard (:id @user-info) isFriends #(reset! (:leaderboard leaderboard-tab-state) %)))
 
 (defn leaderboard []
   (if (:leaderboard leaderboard-tab-state)
@@ -42,7 +42,7 @@
               [:td (:gameswon entry)]
               [:td (str (:winpercentage entry) "%")]]))]]
        [:div {:class "ldb-buttons"}
-        [:button "GLOBAL"]
-        [:button "LOCAL"]]]
+        [:button {:on-click #(get-leaderboard-table 0)} "GLOBAL"]
+        [:button {:on-click #(get-leaderboard-table 1)} "LOCAL"]]]
       )
     [spinner]))

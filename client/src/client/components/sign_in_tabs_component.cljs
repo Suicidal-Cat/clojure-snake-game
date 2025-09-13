@@ -13,34 +13,34 @@
 (defn login-form [callback]
   (update-user-state) 
   (when (not @(:logged sign-in-tabs-state)) (let [message (r/atom "")]
-                                             [:div
-                                              [:h2 "Login"]
-                                              [:form {:on-submit (fn [e]
-                                                                   (.preventDefault e)
-                                                                   (let [form-data (js/FormData. (.-target e))
-                                                                         email (.get form-data "email")
-                                                                         password (.get form-data "password")]
-                                                                     (login email password (fn [result] (when (:user result)
-                                                                                                          (set-local-storage "user" (:user result))
-                                                                                                          (set-local-storage "token" (:token result))
-                                                                                                          (reset! (:logged sign-in-tabs-state) true)
-                                                                                                          (callback))
-                                                                                             (update-user-state)))))}
-                                               [:div
-                                                [:label "Email: "]
-                                                [:input {:type "email" :name "email" :required true}]]
-                                               [:div
-                                                [:label "Password: "]
-                                                [:input {:type "password" :name "password" :required true :min-length 8}]]
-                                               [:button {:type "submit"} "Login"]]
-                                              [:p @message]])))
+                                              [:div
+                                               [:form {:class "login-form"
+                                                       :on-submit (fn [e]
+                                                                    (.preventDefault e)
+                                                                    (let [form-data (js/FormData. (.-target e))
+                                                                          email (.get form-data "email")
+                                                                          password (.get form-data "password")]
+                                                                      (login email password (fn [result] (when (:user result)
+                                                                                                           (set-local-storage "user" (:user result))
+                                                                                                           (set-local-storage "token" (:token result))
+                                                                                                           (reset! (:logged sign-in-tabs-state) true)
+                                                                                                           (callback))
+                                                                                              (update-user-state)))))}
+                                                [:div
+                                                 [:label {:for "email"} "Email: "]
+                                                 [:input {:type "email" :name "email" :required true}]]
+                                                [:div
+                                                 [:label {:for "password"} "Password: "]
+                                                 [:input {:type "password" :name "password" :required true :min-length 8}]]
+                                                [:button {:type "submit"} "Login"]]
+                                               [:p @message]])))
 
 (defn register-form [switch-callback]
   (when (not @(:logged sign-in-tabs-state))
     (let [message (r/atom "")]
       [:div
-       [:h2 "Register"]
-       [:form {:on-submit (fn [e]
+       [:form {:class "register-form"
+               :on-submit (fn [e]
                             (.preventDefault e)
                             (let [form-data (js/FormData. (.-target e))
                                   email (.get form-data "email")

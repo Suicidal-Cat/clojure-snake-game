@@ -38,7 +38,8 @@
   (POST "/leaderboard" req
     (let [body (-> req :body slurp edn/read-string)
           userId (:userId body)
-          result (get-leaderboard userId)]
+          isFriends (:friends body)
+          result (get-leaderboard userId isFriends)] 
       (response-data (if result result false))))
 
   (POST "/match-history" req
