@@ -65,8 +65,13 @@
 
 (def app
   (-> all-routes
-      (wrap-cors :access-control-allow-origin [#"^http://localhost:3449$"]
+      (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-methods [:get :post :put :delete])))
 
-(defn -main []
-  (run-jetty app {:port (:server-port config) :join? false}))
+(defn -main [& args]
+  (let [port (Integer/parseInt
+              (or (System/getenv "PORT")       ; Render sets this
+                  (str (:server-port config))  ; fallback to config.edn
+                  "3000"))]                    ; safe default
+    (println "Starting server on port" port)
+    (run-jetty app {:port port :join? false})))
