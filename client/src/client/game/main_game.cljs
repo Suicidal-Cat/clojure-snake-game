@@ -1,6 +1,7 @@
 (ns client.game.main-game
   (:require
-   [client.game.game-helper-func :refer [draw-player-indicator draw-snake
+   [client.game.game-helper-func :refer [draw-grid-standard
+                                         draw-player-indicator draw-snake
                                          get-food-image pulse-normal
                                          random-snake-images]]
    [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
@@ -47,6 +48,7 @@
      :minus3 (q/load-image minus3)
      :random-img (q/load-image random-img)
      :indicator (q/load-image indicator)
+     :cactus (q/load-image "/images/cactus.png")
      :food-img (q/load-image (str "/images/parts/" food-image))
      :ind-y 0))
   (doseq [[k v] (random-snake-images)]
@@ -113,7 +115,7 @@
 ;main draw
 (defn draw []
   (q/background 0)
-  (draw-grid-border grid-size)
+  (draw-grid-standard grid-size (q/state :cactus))
   (swap! (q/state-atom) assoc :radius-norm (pulse-normal 27 32))
   (draw-food)
   (draw-power)

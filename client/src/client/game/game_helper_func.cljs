@@ -54,21 +54,28 @@
              "grape.png","honey.png","lemon.png",
              "strawberry.png"]))
 
-(defn draw-grid-standard [cell-size]
+(defn draw-grid-standard
+  ([cell-size] (draw-grid-standard cell-size nil))
+  ([cell-size border-img]
    (q/background (apply q/color light-purple))
-   (q/no-stroke)
    (let [w (/ (q/width) cell-size)
          h (/ (q/height) cell-size)
          square-size (- cell-size 3)
          radius 8]
      (doseq [y (range h)
              x (range w)]
-       (q/fill (apply q/color dark-purple))
-       (q/rect (+ (* x cell-size) (/ (- cell-size square-size) 2))
-               (+ (* y cell-size) (/ (- cell-size square-size) 2))
-               square-size
-               square-size
-               radius))))
+       (let [px (+ (* x cell-size) (/ (- cell-size square-size) 2))
+             py (+ (* y cell-size) (/ (- cell-size square-size) 2))
+             border-cell? (or (= y 0) (= y (dec h)) (= x 0) (= x (dec w)))]
+         (cond
+           (and border-cell? border-img)
+           (q/image border-img px py square-size square-size)
+
+           :else
+           (do
+             (q/fill (apply q/color dark-purple))
+             (q/no-stroke)
+             (q/rect px py square-size square-size radius))))))))
 
 ;; pulse animation
 (defn pulse-normal [min max]

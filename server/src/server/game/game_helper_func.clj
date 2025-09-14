@@ -46,7 +46,7 @@
 ;init main game-state
 (defn init-game-state [field-size grid-size game-id]
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
-        snake2 [[405 486] [432 486] [459 486] [486 486]]
+        snake2 [[405 459] [432 459] [459 459] [486 459]]
         ball (generate-valid-coordinate-pair-ball field-size grid-size
                                                   snake1
                                                   snake2)]
@@ -71,7 +71,7 @@
 ;init main game-state
 (defn init-game-cake-state [game-id]
   (let [snake1 [[162 108] [135 108] [108 108] [81 108]]
-        snake2 [[405 486] [432 486] [459 486] [486 486]]]
+        snake2 [[405 459] [432 459] [459 459] [486 459]]]
     (hash-map :snake1 snake1
               :snake2 snake2
               :game-id game-id)))

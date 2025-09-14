@@ -14,7 +14,7 @@
    [home-layout]
    (when (:show-game @app-state)
      [canvas])
-   [border-terrain]
+  ;;  [border-terrain]
    [game-score]
    [end-game-pop-up]])
 

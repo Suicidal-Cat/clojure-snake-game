@@ -44,12 +44,6 @@ body {
     justify-content: center;
 }
 
-.score {
-    display: flex;
-    justify-content: space-between;
-    font-size: 32px;
-    width: 530px;
-}
 
 .game-cont {
     position: relative;
@@ -526,18 +520,88 @@ body {
     }
 }
 
+.single-score-cont {
+    position: absolute;
+    font-family: 'Arcade Rounded', sans-serif;
+    font-size: 1.5rem;
+    padding: 1rem 0 1rem 1rem;
+    border: 3px solid #FFEE00;
+    border-right: none;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    top:229px;
+    left:556px;
+    background-color: rgb(197, 154, 252);
+    width: 80px;
+}
+
+.main-score-cont {
+    width: 772px;
+    height: 704px;
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Arcade Rounded', sans-serif;
+
+    .game-time {
+        padding: 1rem;
+        border: 3px solid #FFEE00;
+        border-bottom: none;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        font-size: 1.2rem;
+        height: 20px;
+        background-color: rgb(197, 154, 252);
+    }
+
+    .main-score1 {
+        margin-top: 8.4rem;
+        font-family: 'Arcade Rounded', sans-serif;
+        font-size: 1.5rem;
+        padding: 1rem 0 1rem 1rem;
+        border: 3px solid #FFEE00;
+        border-right: none;
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+        background-color: rgb(197, 154, 252);
+        width: 70px;
+        height: 30px;
+        text-align: center;
+    }
+
+    .main-score2 {
+        margin-top: 8.4rem;
+        font-family: 'Arcade Rounded', sans-serif;
+        font-size: 1.5rem;
+        padding: 1rem 1rem 1rem 0rem;
+        border: 3px solid #FFEE00;
+        border-left: none;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+        background-color: rgb(197, 154, 252);
+        width: 70px;
+        height: 30px;
+        text-align: center;
+    }
+}
+
 .cake-score-cont {
     margin-top: 3.3rem;
-    width: 770px;
-    height: 600px;
+    width: 816px;
+    height: 545px;
     position: absolute;
     display: flex;
     justify-content: space-between;
 
     .cake-score {
+        width: 108px;
         display: flex;
         flex-direction: column;
-        gap: 0.8rem;
+        gap: 0.9rem;
+        background-color: rgb(197, 154, 252);
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        height: 210px;
 
         .part {
             display: flex;
@@ -555,6 +619,27 @@ body {
                 margin-top: 0.2rem;
             }
         }
+    }
+}
+
+.cake-score-cont .cake-score:first-child {
+    border: 3px solid #FFEE00;
+    border-right: none;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    align-items: end;
+    .part {
+        padding-right: 1rem;
+    }
+}
+
+.cake-score-cont .cake-score:last-child {
+    border: 3px solid #FFEE00;
+    border-left: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    .part {
+        padding-left: 1rem;
     }
 }
 

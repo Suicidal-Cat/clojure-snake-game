@@ -104,15 +104,17 @@
       (cond
         (and (= mode (:cake game-mode-enum)) (not= nil @cake/game-state) (= false @cake/stop-game-flag))
         (game-score-cake)
-        
+
         (= mode (:time game-mode-enum))
         (let [score main/score]
-          [:div {:class "score"}
-           [:div {:class "score1"} (first @score)]
-           [:div @main/game-time]
-           [:div {:class "score2"} (last @score)]])
-        
-        (= mode "single") ""))))
+          [:div {:class "main-score-cont"}
+           [:div {:class "main-score1"} (first @score)]
+           [:div {:class "game-time"} @main/game-time]
+           [:div {:class "main-score2"} (last @score)]])
+
+        (and (= mode "single") (not= nil @single/game-state) (= false @single/stop-game-flag))
+        (let [score single/score]
+          [:div {:class "single-score-cont"} (@score 0)])))))
 
 ;; profile icon
 (defn profile []

@@ -125,7 +125,7 @@
           (fact (:score @game-state) => [1 1])
           (single/update-game-on-eat game-state)
           (fact (count (:snake1 @game-state)) => 5)
-          (swap! game-state (fn [game-state] (assoc game-state :ball [357/2 249/2])))
+          (swap! game-state (fn [game-state] (assoc game-state :ball [162 108])))
           (single/update-game-on-eat game-state)
           (fact (count (:snake1 @game-state)) => 6)))
 
