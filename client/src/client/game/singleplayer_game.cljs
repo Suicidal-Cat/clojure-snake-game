@@ -75,7 +75,7 @@
 ;websocket communication
 (defn connect_socket [disable-loading]
   (reset! loading-flag false)
-  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
+  (let [ws (js/WebSocket. "ws://server-snake-game-kpx7.onrender.com/ws")
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key
