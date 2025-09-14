@@ -70,8 +70,8 @@
 
 (defn -main [& args]
   (let [port (Integer/parseInt
-              (or (System/getenv "PORT")       ; Render sets this
-                  (str (:server-port config))  ; fallback to config.edn
-                  "3000"))]                    ; safe default
+              (or (System/getenv "PORT")
+                  (str (:server-port config))
+                  "3000"))]
     (println "Starting server on port" port)
     (run-jetty app {:port port :join? false})))
