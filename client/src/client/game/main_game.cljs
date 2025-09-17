@@ -4,8 +4,9 @@
                                          draw-player-indicator draw-snake
                                          get-food-image pulse-normal
                                          random-snake-images]]
-   [client.helper-func :as hf :refer [format-time game-mode-enum get-player-id
-                                      save-region-screenshot! show-end-dialog]]
+   [client.helper-func :as hf :refer [api-domain format-time game-mode-enum
+                                      get-player-id save-region-screenshot!
+                                      show-end-dialog]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
@@ -135,7 +136,7 @@
 ;websocket communication
 (defn connect_socket [disable-loading] 
   (reset! loading-flag false)
-  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
+  (let [ws (js/WebSocket. (str "ws://" api-domain "/ws"))
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key

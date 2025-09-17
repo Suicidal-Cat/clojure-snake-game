@@ -40,8 +40,10 @@ body {
 }
 
 #game-canvas {
-    display: flex;
-    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 
@@ -521,7 +523,7 @@ body {
 }
 
 .single-score-cont {
-    position: absolute;
+    position: relative;
     font-family: 'Arcade Rounded', sans-serif;
     font-size: 1.5rem;
     padding: 1rem 0 1rem 1rem;
@@ -529,19 +531,20 @@ body {
     border-right: none;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
-    top:229px;
-    left:556px;
+    top: -200px;
+    right: 347px;
     background-color: rgb(197, 154, 252);
     width: 80px;
 }
 
 .main-score-cont {
     width: 772px;
-    height: 704px;
-    position: absolute;
+    position: relative;
     display: flex;
     justify-content: space-between;
     font-family: 'Arcade Rounded', sans-serif;
+    top: -253px;
+    left: 0px;
 
     .game-time {
         padding: 1rem;

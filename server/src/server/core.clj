@@ -23,7 +23,7 @@
     (if (:single data) (single/start-game-single new-player)
         (if (empty? @players-queue)
           (swap! players-queue conj new-player)
-          (let [player (some #(when (= game-mode (:game-mode %)) %) @players-queue)]
+          (let [player (some #(when (and (= game-mode (:game-mode %)) (not= (:id %) (:id new-player))) %) @players-queue)] 
             (if player
               (do
                 (swap! players-queue (fn [players] (filterv #(not= (:id %) (:id player)) players)))

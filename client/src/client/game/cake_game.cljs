@@ -3,7 +3,7 @@
    [client.game.game-helper-func :refer [draw-grid-standard
                                          draw-player-indicator draw-snake
                                          pulse-normal random-snake-images]]
-   [client.helper-func :as hf :refer [game-mode-enum get-player-id
+   [client.helper-func :as hf :refer [api-domain game-mode-enum get-player-id
                                       save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
    [quil.core :as q]
@@ -92,7 +92,7 @@
 ;websocket communication
 (defn connect_socket [disable-loading] 
   (reset! loading-flag false)
-  (let [ws (js/WebSocket. "ws://localhost:8085/ws")
+  (let [ws (js/WebSocket. (str "ws://" api-domain "/ws"))
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key

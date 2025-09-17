@@ -1,10 +1,10 @@
 (ns client.game.singleplayer-game
   (:require
-   [client.game.game-helper-func :refer [draw-grid-standard
-                                         draw-snake get-food-image
-                                         pulse-normal random-snake-image]]
-   [client.helper-func :as hf :refer [get-player-id save-region-screenshot!
-                                      show-end-dialog]]
+   [client.game.game-helper-func :refer [draw-grid-standard draw-snake
+                                         get-food-image pulse-normal
+                                         random-snake-image]]
+   [client.helper-func :as hf :refer [api-domain get-player-id
+                                      save-region-screenshot! show-end-dialog]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
@@ -75,7 +75,7 @@
 ;websocket communication
 (defn connect_socket [disable-loading]
   (reset! loading-flag false)
-  (let [ws (js/WebSocket. "ws://server-snake-game-kpx7.onrender.com/ws")
+  (let [ws (js/WebSocket. (str "ws://" api-domain "/ws"))
         handle-keypress (fn handle-keypress [e]
                           (let [key (.-key e)]
                             (case key
@@ -90,10 +90,10 @@
                                      (reset! player-id id)
                                      (.send ws {:id id :single true}))))
     (.addEventListener ws "message" (fn [e]
-                                      (let [data (edn/read-string (.-data e))]
-                                        (reset! game-state data)
-                                        (reset! score (:score data))
-                                        (when (:winner data) (stop-game data)))
+                                      (when-let [data (edn/read-string (.-data e))]
+                                        (if (:winner data) (stop-game data)
+                                            (do (reset! game-state data)
+                                                (reset! score (:score data)))))
 
                                       (when (not @loading-flag)
                                         (disable-loading)

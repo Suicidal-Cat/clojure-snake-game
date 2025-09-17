@@ -12,6 +12,9 @@
 ;; game mode enum
 (def game-mode-enum {:time "Time" :cake "Cake"})
 
+;;api domain
+(def api-domain "localhost:8085")
+
 ;take a screenshoot of the canvas
 (defn save-region-screenshot! [x y width height]
   (let [canvas (.getElementById js/document "defaultCanvas0")
