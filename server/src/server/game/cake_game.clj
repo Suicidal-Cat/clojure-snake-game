@@ -117,7 +117,7 @@
 ;update snakes positions
 (defn update-snakes-positions [game-state snake-directions]
   (assoc game-state
-         :snake1 (:snake1 game-state)
+         :snake1 (move-snake-borderless (:snake1 game-state) (:direction (:snake1 @snake-directions)) grid-size field-size)
          :snake2 (move-snake-borderless (:snake2 game-state) (:direction (:snake2 @snake-directions)) grid-size field-size)))
 
 ;; update initial game state
