@@ -4,7 +4,7 @@
                                          draw-player-indicator draw-snake
                                          pulse-normal random-snake-images]]
    [client.helper-func :as hf :refer [api-domain game-mode-enum get-player-id
-                                      save-region-screenshot! show-end-dialog]]
+                                      save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
@@ -22,11 +22,10 @@
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
-        [hx hy] (mapv #(* % 2) (:head winner))]
-    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
+        [hx hy] (:head winner)]
+    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) (min 360 (- field-size (- hx 180))) (min 360 (- field-size (- hy 180))))
     (reset! end-score-data data)
-    (reset! stop-game-flag true)
-    (reset! show-end-dialog true)))
+    (reset! stop-game-flag true)))
 
 (defn load-cake-images []
   {:apple.png     (q/load-image "/images/parts/apple.png")
@@ -82,6 +81,7 @@
 
 ;start the game
 (defn start-game []
+  (reset! stop-game-flag false)
   (q/sketch
    :host "game-canvas"
    :settings #(q/smooth 2)
@@ -102,14 +102,15 @@
                               "ArrowRight" (.send ws {:direction :right :cake true}))))]
     (.addEventListener js/document "keydown" handle-keypress)
     (.addEventListener ws "open" (fn [_]
-                                   (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
                                      (reset! player-id id)
                                      (.send ws {:id id :game-mode (:cake game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
-                                      (let [data (edn/read-string (.-data e))]
-                                        (reset! game-state data)
-                                        (when (:winner data) (stop-game data)))
+                                      (let [data (edn/read-string (.-data e))] 
+                                        (if (:winner data)
+                                          (do (reset! stop-game-flag true)
+                                              (js/setTimeout #(stop-game data) 250))
+                                          (reset! game-state data)))
 
                                       (when (not @loading-flag)
                                         (disable-loading)

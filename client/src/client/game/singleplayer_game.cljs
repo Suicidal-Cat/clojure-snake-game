@@ -22,11 +22,9 @@
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
-        [hx hy] (mapv #(* % 2) (:head winner))]
-    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
-    (reset! end-score-data data)
-    (reset! stop-game-flag true) 
-    (reset! show-end-dialog true)))
+        [hx hy] (:head winner)]
+    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) (min 360 (- field-size (- hx 180))) (min 360 (- field-size (- hy 180))))
+    (reset! end-score-data data)))
 
 ;canvas setup
 (defn setup []
@@ -65,6 +63,8 @@
 
 ;start the game
 (defn start-game []
+  (reset! stop-game-flag false)
+  (reset! game-state nil)
   (q/sketch
    :host "game-canvas"
    :settings #(q/smooth 2)
@@ -85,15 +85,17 @@
                               "ArrowRight" (.send ws {:direction :right :single true}))))]
     (.addEventListener js/document "keydown" handle-keypress)
     (.addEventListener ws "open" (fn [_]
-                                   (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
                                      (reset! player-id id)
                                      (.send ws {:id id :single true}))))
     (.addEventListener ws "message" (fn [e]
                                       (when-let [data (edn/read-string (.-data e))]
-                                        (if (:winner data) (stop-game data)
-                                            (do (reset! game-state data)
-                                                (reset! score (:score data)))))
+                                        (if (:winner data)
+                                          (do
+                                            (reset! stop-game-flag true)
+                                            (js/setTimeout #(stop-game data) 250))
+                                          (do (reset! game-state data)
+                                              (reset! score (:score data)))))
 
                                       (when (not @loading-flag)
                                         (disable-loading)

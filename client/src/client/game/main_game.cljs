@@ -5,8 +5,7 @@
                                          get-food-image pulse-normal
                                          random-snake-images]]
    [client.helper-func :as hf :refer [api-domain format-time game-mode-enum
-                                      get-player-id save-region-screenshot!
-                                      show-end-dialog]]
+                                      get-player-id save-region-screenshot!]]
    [clojure.edn :as edn]
    [quil.core :as q]
    [reagent.core :as r]))
@@ -27,11 +26,10 @@
 ;stoping game
 (defn stop-game [data]
   (let [winner (:winner data)
-        [hx hy] (mapv #(* % 2) (:head winner))]
+        [hx hy] (:head winner)]
     (reset! end-score-data data)
-    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) 400 400)
-    (reset! stop-game-flag true)
-    (reset! show-end-dialog true)))
+    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) (min 360 (- field-size (- hx 180))) (min 360 (- field-size (- hy 180))))
+    (reset! stop-game-flag true)))
 
 ;canvas setup
 (defn setup []
@@ -64,21 +62,6 @@
         t         (/ (+ 1 (Math/sin (/ (q/frame-count) 15.0))) 2)
         radius    (+ min-radius (* t (- max-radius min-radius)))]
     (swap! (q/state-atom) assoc :radius radius)))
-
-;draw edges and grid
-(defn draw-grid-border [grid-size]
-  (q/fill 148 148 148)
-  (q/rect 0 0 (q/width) grid-size)
-  (q/rect 0 0 grid-size (q/height))
-  (q/rect 0 (- (q/height) grid-size) (q/width) grid-size)
-  (q/rect (- (q/width) grid-size) 0 grid-size (q/height))
-  (q/stroke 50)
-  (q/stroke-weight 1)
-  (q/fill 0 0 0)
-  (doseq [x (range grid-size (- (q/width) grid-size) grid-size)]
-    (q/line x 0 x (q/height)))
-  (doseq [y (range grid-size (- (q/height) grid-size) grid-size)]
-    (q/line 0 y (q/width) y)))
 
 ;draw food
 (defn draw-food []
@@ -125,7 +108,8 @@
   (stop-drawing))
 
 ;start the game
-(defn start-game []
+(defn start-game [] 
+  (reset! stop-game-flag false)
   (q/sketch
    :host "game-canvas"
    :settings #(q/smooth 2)
@@ -146,16 +130,19 @@
                               "ArrowRight" (.send ws {:direction :right :time true}))))]
     (.addEventListener js/document "keydown" handle-keypress)
     (.addEventListener ws "open" (fn [_]
-                                   (reset! stop-game-flag false)
                                    (let [id (get-player-id)]
                                      (reset! player-id id)
                                      (.send ws {:id id :game-mode (:time game-mode-enum)}))))
     (.addEventListener ws "message" (fn [e]
-                                      (let [data (edn/read-string (.-data e))]
-                                        (reset! game-state data)
-                                        (reset! score (:score data))
-                                        (reset! game-time (format-time (:time-left data))) 
-                                        (when (:winner data) (stop-game data)))
+                                      (let [data (edn/read-string (.-data e))] 
+                                        (if (:winner data)
+                                          (do
+                                            (reset! stop-game-flag true)
+                                            (js/setTimeout #(stop-game data) 250))
+                                          (do
+                                            (reset! game-state data)
+                                            (reset! score (:score data))
+                                            (reset! game-time (format-time (:time-left data))))))
 
                                       (when (not @loading-flag)
                                         (disable-loading)

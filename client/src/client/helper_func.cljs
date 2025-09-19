@@ -26,7 +26,8 @@
     (set! (.-height temp-canvas) height)
     (.putImageData temp-ctx image-data 0 0)
     (let [base64 (.toDataURL temp-canvas)]
-      (reset! img-atom base64))))
+      (reset! img-atom base64) 
+      (reset! show-end-dialog true))))
 
 (defn set-local-storage [key value]
   (.setItem js/localStorage key value))

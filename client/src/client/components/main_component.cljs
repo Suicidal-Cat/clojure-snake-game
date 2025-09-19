@@ -43,7 +43,7 @@
           (= mode (:cake game-mode-enum)) (cake/start-game))))
 
     :component-did-update
-    (fn [this old-argv]
+    (fn [_ _]
       (let [mode (:game-mode @app-state)]
         (cond
           (= mode "single") (single/start-game)
