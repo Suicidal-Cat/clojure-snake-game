@@ -27,8 +27,8 @@
 (defn stop-game [data]
   (let [winner (:winner data)
         [hx hy] (:head winner)]
-    (reset! end-score-data data)
-    (save-region-screenshot! (max 0 (- hx 180)) (max 0 (- hy 180)) (min 360 (- field-size (- hx 180))) (min 360 (- field-size (- hy 180))))
+    (reset! end-score-data data) 
+    (save-region-screenshot! (max 0 (- hx 100)) (max 0 (- hy 100)) (* 2 (min 340 (- field-size (- hx 340)))) (* 2 (min 340 (- field-size (- hx 340)))))
     (reset! stop-game-flag true)))
 
 ;canvas setup
