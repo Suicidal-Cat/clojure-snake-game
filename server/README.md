@@ -10,8 +10,8 @@ The project was built and developed with help of **[Leiningen](https://leiningen
     ```bash
     {:server-port "8080" ;; port number
       :disableDB false ;; disable database 
-      :jwt-secret "testtest" ;;jwt key:db-config 
-      ;; database connection config 
+      :jwt-secret "testtest" ;;jwt key
+      :db-config ;; database connection config 
       {
         :dbtype "mysql" ;; type of database
         :dbname "test-database" ;; name

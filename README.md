@@ -29,4 +29,6 @@ The controls are as simple as they should be. Use the **arrow keys** on your key
 ![alt text](readme_img/matches.png)
 
 **Friends** - allows user to add new friends
+
+
 ![alt text](readme_img/friend.png)
