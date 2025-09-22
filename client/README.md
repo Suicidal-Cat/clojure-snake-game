@@ -1,40 +1,38 @@
-# client
+# Client
 
-FIXME: Write a one-line description of your library/project.
+The Client side of this project is created using ClojureScript in combination with **[Reagent](https://github.com/reagent-project/reagent)** (React like interface) and **[Figwheel](https://github.com/bhauman/lein-figwheel)** for fast build times and fast development.
 
-## Overview
+## Local setup
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+The project was built and developed with help of **[Leiningen](https://leiningen.org/)** for build automation and dependecy managment.
 
-## Setup
+Build and run:
+```
+lein deps
+lein figwheel
+```
 
-To get an interactive development environment run:
+## Game
+The game combines real-time communication through default JavaScript **WebSockets** with the graphics capabilities of **[Quil](https://github.com/quil/quil)**, delivering both smooth data flow and visual content.
 
+Quil is a great option for building a simple multiplayer games, that doesn't require strong engines to support it. In Quil, a sketch is defined mainly by two functions:
 
-    lein figwheel
+1. **Setup** – This function runs once at the beginning of the sketch. It’s used to define settings such as canvas size, background color, frame rate, or to initialize any state you need (for example, the starting position of a snake).
 
-and open your browser at [localhost:3449](http://localhost:3449/).
-This will auto compile and send all changes to the browser without the
-need to reload. After the compilation process is complete, you will
-get a Browser Connected REPL. An easy way to try it is:
+2. **Draw** – This function runs repeatedly, once per frame. It’s responsible for rendering graphics on the screen. Anything you want to see shapes, colors, text, animations gets drawn here. By reading and updating your state inside draw, you can create smooth animations and interactive elements.
 
-    (js/alert "Am I connected?")
+## Server communication
+The game communicates with the server using the JavaScript fetch API, which provides a promise-based way to send HTTP requests.
 
-and you should see an alert in the browser window.
+For authentication and security, the client uses **[JSON Web Tokens](https://datatracker.ietf.org/doc/html/rfc7519)**. When a user logs in, the server issues a signed JWT, which the client stores in local storage. For each request, the client includes this token in the HTTP headers under the **Authorization: Bearer 'token'**.
 
-To clean all compiled files:
+This approach ensures that:
 
-    lein clean
+1. The server can validate the identity of the user with every request.
 
-To create a production build run:
+2. Communication remains stateless, since the server doesn’t need to store session data.
 
-    lein do clean, cljsbuild once min
+## Reagent
+**[Reagent](https://github.com/reagent-project/reagent)** is a minimalistic ClojureScript interface to React, allowing you to build dynamic user interfaces using ClojureScript’s functional programming style.
 
-And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+The reason why i choose Reagent it was because i already knew the basics of React and there were many tutorials about it :).

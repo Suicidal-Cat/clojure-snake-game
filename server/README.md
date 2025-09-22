@@ -1,44 +1,88 @@
-# server
+# Server
 
-FIXME: description
+The Server side of this project is web api mainly based on Clojure web library **[Ring](https://github.com/ring-clojure/ring)** and **[MySQL](https://www.mysql.com/)** for the database. 
 
-## Installation
+## Local Setup
 
-Download from http://example.com/FIXME.
+The project was built and developed with help of **[Leiningen](https://leiningen.org/)** for build automation and dependecy managment.
 
-## Usage
+1. Rename 'config-copy.end' file to 'config.end' and populate the fieds base on your local setup (database scripts can be found inside db folder):
+    ```bash
+    {:server-port "8080" ;; port number
+      :disableDB false ;; disable database 
+      :jwt-secret "testtest" ;;jwt key:db-config 
+      ;; database connection config 
+      {
+        :dbtype "mysql" ;; type of database
+        :dbname "test-database" ;; name
+        :user "" ;; username
+        :password "" ;; passowrd
+        :host "localhost" ;; host
+        :port 3000  ;; hosted port number 
+      }
+    }  
+    ```
 
-FIXME: explanation
+2. Build and run:
+    ```
+    lein deps
+    lein run
+    ```
+3. Run tests
+    ```
+    lein midje
+    ```
 
-    $ java -jar server-0.1.0-standalone.jar [args]
+## API
+A lightweight API built with **[Ring](https://github.com/ring-clojure/ring)** and **[Compojure](https://github.com/ring-clojure/ring)**.
 
-## Options
+Compojure is used to define and compose routes into a single handler for Ring.
 
-FIXME: listing of options this app accepts.
+``` clojure
+(def all-routes
+  (routes
+   (GET "/ws" [] echo-handler)
+   public-routes
+   wrapped-protected-routes))
 
-## Examples
+(def app
+  (-> all-routes
+      (wrap-cors :access-control-allow-origin [#".*"]
+                 :access-control-allow-methods [:get :post :put :delete])))
+```
 
-...
+Ring is the core of this API, handling all HTTP requests and responses. The application runs on the Ring Jetty adapter, which uses the Jetty web server to serve the API.
+``` clojure
+(defn -main [& args]
+  (let [port (Integer/parseInt
+              (or (System/getenv "PORT")
+                  (str (:server-port config))
+                  "3000"))]
+    (println "Starting server on port" port)
+    (run-jetty app {:port port :join? false})))
+```
+All requests and responses use the **[application/edn](https://github.com/edn-format/edn)**
+ format instead of JSON. This decision is based on EDN’s natural compatibility with Clojure data structures. Unlike JSON, EDN can be parsed and emitted directly by Clojure without requiring additional transformation layers or third-party libraries.
 
-### Bugs
+Using EDN offers several advantages:
 
-...
+1. Native compatibility: EDN is a subset of Clojure syntax, which means data can be read and written using built-in tools.
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+2. Richer data representation: EDN supports keywords, sets, ratios, symbols, tagged literals (e.g. #inst, #uuid), and other constructs that JSON cannot represent natively.
 
-## License
+3. Consistency: By removing the impedance mismatch between JSON and Clojure, systems remain simpler, more predictable, and less error-prone.
 
-Copyright © 2024 FIXME
+For authentication and security of the endpoint, server uses **[JSON Web Tokens](https://datatracker.ietf.org/doc/html/rfc7519)**. When a user logs in, the server issues a signed JWT, which the client stores in local storage. For each request, the client includes this token in the HTTP headers under the **Authorization: Bearer 'token'** which server validates. The JWT is implemented using **[Buddy Sign](https://github.com/funcool/buddy-sign)**.
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
+## Database
+The application database is implemented using MySQL and hosted locally through XAMPP, which provides the MySQL server environment. For connectivity, the project uses the official **[MySQL Connector/J JDBC driver](https://mvnrepository.com/artifact/com.mysql/mysql-connector-j)** together with **[next.jdbc](https://github.com/seancorfield/next-jdbc)**.
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+Inside /db folder you can find the .sql script for creating the database locally.
+
+## Testing
+Server code is covered by unit tests supported by **[Midje](https://github.com/marick/Midje)**.
+
+Run tests:
+```
+lein midje
+```
